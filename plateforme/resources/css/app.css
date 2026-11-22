@@ -1,0 +1,11 @@
+/* Site public, espace client et espace propriétaire.
+   L'administration (/admin) a ses propres styles Filament. */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.min.css';
+@import '@fontsource-variable/outfit';
+@import '@fontsource-variable/dm-sans';
+
+/* Charte VIVI, reprise de la maquette validée */
+@import './vivi.css';
+@import './vivi-pro.css';
+@import './vivi-espaces.css';

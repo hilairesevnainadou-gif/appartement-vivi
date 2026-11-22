@@ -1,0 +1,326 @@
+/* ==========================================================================
+   Appartement VIVI : compléments des espaces connectés (client et propriétaire).
+   Reprend les jetons de vivi.css ; corrige l'affichage sur mobile et tablette.
+   ========================================================================== */
+
+/* ---------- Menu profil (en-tête du site et barre haute pro) ---------- */
+.avatar--sm { width: 36px; height: 36px; font-size: .85rem; }
+.profil__bouton {
+  display: inline-flex; align-items: center; gap: .6rem;
+  min-height: 44px; padding: 4px; border: 1px solid transparent; border-radius: 999px;
+  background: transparent; color: var(--vivi-ink); text-align: left;
+  transition: background-color .16s ease, border-color .16s ease;
+}
+.profil__bouton .avatar { background: var(--vivi-orange-400); color: var(--vivi-ink); }
+.profil__bouton:hover, .profil__bouton[aria-expanded="true"] { background: #fff; border-color: var(--vivi-line-strong); }
+.profil__bouton:focus-visible { outline: 3px solid var(--vivi-teal-300, #5eead4); outline-offset: 2px; }
+.profil__nom { flex-direction: column; line-height: 1.15; padding-right: .1rem; }
+.profil__nom strong { font-size: .92rem; font-weight: 600; }
+.profil__nom small { font-size: .75rem; color: var(--vivi-muted); }
+.profil__fleche { font-size: .8rem; color: var(--vivi-muted); padding-right: .5rem; transition: transform .16s ease; }
+.profil__bouton[aria-expanded="true"] .profil__fleche { transform: rotate(180deg); }
+
+.profil__menu {
+  width: min(300px, calc(100vw - 24px)); padding: 8px;
+  border: 1px solid var(--vivi-line); border-radius: 16px; box-shadow: var(--vivi-shadow-lg);
+}
+.profil__tete { display: flex; align-items: center; gap: .75rem; padding: 10px 10px 14px; margin-bottom: 6px; border-bottom: 1px solid var(--vivi-line); }
+.profil__tete .avatar { background: var(--vivi-orange-400); color: var(--vivi-ink); }
+.profil__identite { min-width: 0; }
+.profil__identite strong { display: block; color: var(--vivi-ink); line-height: 1.2; }
+.profil__identite small { display: block; color: var(--vivi-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profil__liens { list-style: none; margin: 0; padding: 0; }
+.profil__menu .dropdown-item {
+  display: flex; align-items: center; gap: .7rem; min-height: 44px; padding: 0 10px;
+  border-radius: 10px; font-weight: 500; color: var(--vivi-ink);
+}
+.profil__menu .dropdown-item .bi { font-size: 1.05rem; width: 1.2rem; text-align: center; color: var(--vivi-teal-700); }
+.profil__menu .dropdown-item:hover, .profil__menu .dropdown-item:focus { background: var(--vivi-teal-50); color: var(--vivi-teal-800); }
+.profil__sortie { margin: 6px 0 0; padding-top: 6px; border-top: 1px solid var(--vivi-line); }
+.profil__sortie .dropdown-item, .profil__sortie .dropdown-item .bi { color: var(--vivi-danger); }
+.profil__sortie .dropdown-item:hover, .profil__sortie .dropdown-item:focus { background: #fdecec; color: var(--vivi-danger); }
+
+/* Sans pied de page (personne connectée) : un peu d'air sous le contenu */
+.est-connecte main { min-height: calc(100vh - var(--vivi-header-h)); padding-bottom: 32px; }
+
+/* ---------- Tableau de bord : listes (arrivées, réservations, retraits) ---------- */
+.rows .montant { font-weight: 700; color: var(--vivi-ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rows .action .btn { white-space: nowrap; }
+@media (max-width: 575.98px) {
+  /* Montant et bouton sous le texte, alignés sur lui (et non sous l'heure) */
+  .rows > li { grid-template-columns: 3.4rem minmax(0, 1fr); column-gap: 12px; }
+  .rows .quand { min-width: 0; }
+  .rows .action { grid-column: 2; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
+  .rows .action:only-child { grid-column: 1 / -1; }
+  .rows .action .btn { min-height: 40px; padding-inline: 1rem; }
+}
+
+/* ---------- Boutons sur mobile : pleine largeur, même hauteur ---------- */
+@media (max-width: 575.98px) {
+  .pro-head { align-items: stretch; }
+  .pro-head > .btn { width: 100%; justify-content: center; }
+  .panel .btn-ghost, .panel .btn-primary { width: 100%; justify-content: center; }
+  .panel .rows .btn { width: auto; }
+  .panel__head a { font-size: .9rem; }
+  .kpi { padding: 14px; }
+  .kpi__delta { font-size: .75rem; }
+}
+
+/* Tablette : indicateurs sur 4 colonnes dès 768 px quand la place le permet (pas de menu latéral) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .kpi-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .kpi__value { font-size: 1.5rem; }
+}
+
+/* ---------- Tableau « Voir les chiffres » ---------- */
+.chart details[open] summary { margin-bottom: 4px; }
+.chart table { border-collapse: separate; border-spacing: 0; border: 1px solid var(--vivi-line); border-radius: 12px; overflow: hidden; }
+.chart th, .chart td { padding: 9px 14px; }
+.chart tr:nth-child(even) th, .chart tr:nth-child(even) td { background: var(--vivi-sand, #f8f5f0); }
+.chart tr:last-child th, .chart tr:last-child td { border-bottom: 0; }
+.chart th { color: var(--vivi-body); }
+
+/* ---------- Mes réservations (client) ---------- */
+@media (max-width: 575.98px) {
+  .resa-card__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .resa-card__actions .btn:only-child { grid-column: 1 / -1; }
+  .segmented label { font-size: .875rem; padding-inline: .4rem; }
+}
+
+/* ---------- Billet : QR Code pas encore (ou plus) valable ---------- */
+.ticket__qr .qr--inactif { display: grid; place-items: center; background: var(--vivi-sand); color: var(--vivi-line-strong); font-size: 4rem; }
+
+/* ---------- Calendrier (Laravel) : jours et flèches en liens, sans JavaScript ---------- */
+a.cal__day { text-decoration: none; color: var(--vivi-ink); }
+a.cal__day[aria-current="date"] { border-color: var(--vivi-teal-700); box-shadow: inset 0 0 0 1px var(--vivi-teal-700); background: var(--vivi-teal-50); }
+.cal__day.is-passe { color: #a8b5b6; background: transparent; border-color: transparent; pointer-events: none; }
+.cal__nav a { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--vivi-line-strong); background: #fff; color: var(--vivi-ink); display: inline-flex; align-items: center; justify-content: center; }
+.cal__nav a:hover { background: var(--vivi-teal-50); border-color: var(--vivi-teal-200); }
+.cal__nav .is-off { opacity: .35; pointer-events: none; }
+.agenda .deplacer { grid-column: 1 / -1; }
+@media (max-width: 575.98px) { .agenda li { grid-template-columns: 4.6rem minmax(0, 1fr); } .agenda li > div:last-child:not(.deplacer) { grid-column: 2; } }
+
+/* ---------- Onglets en liens (pages sans JavaScript) : même rendu que .segmented ---------- */
+.segmented .segmented__lien { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; padding: .35rem .45rem; border-radius: 9px; font-weight: 600; font-size: .9rem; color: var(--vivi-body); text-decoration: none; white-space: nowrap; }
+.segmented .segmented__lien:hover { color: var(--vivi-ink); }
+.segmented .segmented__lien.is-actif { background: #fff; color: var(--vivi-teal-800); box-shadow: var(--vivi-shadow-sm); }
+
+/* ---------- Écrans de connexion : carte + panneau de marque ---------- */
+.auth-split { display: grid; gap: 20px; max-width: 460px; margin: 0 auto; }
+.auth-split .auth-card { margin: 0; width: 100%; max-width: none; }
+.auth-visuel { position: relative; border-radius: var(--vivi-radius-lg); overflow: hidden; background: var(--vivi-teal-900); color: #fff; }
+.auth-visuel__photo, .auth-visuel__logo, .auth-visuel__titre { display: none; }
+.auth-visuel__contenu { position: relative; padding: 18px 20px; }
+.auth-atouts { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.auth-atouts li { display: flex; gap: 12px; align-items: flex-start; font-size: .875rem; line-height: 1.4; color: rgba(255, 255, 255, .78); }
+.auth-atouts i { flex: 0 0 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: rgba(255, 255, 255, .1); color: var(--vivi-orange-400); font-size: 1.05rem; }
+.auth-atouts strong { display: block; color: #fff; font-weight: 600; font-size: .9375rem; }
+
+@media (min-width: 992px) {
+  .auth-wrap { align-items: center; padding: 48px 0 64px; }
+  .auth-split { max-width: 1040px; grid-template-columns: minmax(0, 1fr) 460px; gap: 0; align-items: stretch;
+    background: #fff; border: 1px solid var(--vivi-line); border-radius: 28px; box-shadow: var(--vivi-shadow-lg); overflow: hidden; }
+  .auth-split .auth-card { order: 2; border: 0; border-radius: 0; box-shadow: none; padding: 48px 44px; align-self: center; }
+  .auth-visuel { order: 1; border-radius: 0; min-height: 560px; display: flex; }
+  .auth-visuel__photo { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .auth-visuel::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10, 61, 62, .35) 0%, rgba(10, 61, 62, .55) 40%, rgba(10, 61, 62, .94) 100%); }
+  .auth-visuel__contenu { z-index: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; padding: 40px; width: 100%; }
+  .auth-visuel__logo { display: block; height: 40px; width: auto; align-self: flex-start; }
+  .auth-visuel__titre { display: block; margin: auto 0 0; font-family: var(--vivi-font-title); font-size: 1.75rem; font-weight: 700; line-height: 1.2; color: #fff; max-width: 26ch; }
+}
+
+/* Barre d'enregistrement (fiche logement pro) : bouton jamais coupé sur mobile */
+.savebar .btn { white-space: nowrap; flex-shrink: 0; }
+.savebar p { min-width: 0; }
+@media (max-width: 575.98px) {
+  .savebar p { font-size: .8125rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
+
+/* Billet : boutons d'action pleine largeur sur mobile */
+@media (max-width: 575.98px) {
+  .actions-billet .btn { flex: 1 1 100%; justify-content: center; }
+}
+
+/* ---------- Pages d'aide (annulation et report, conditions générales) ---------- */
+.aide .panel + .panel { margin-top: 16px; }
+.aide .panel h2 { font-size: 1.15rem; }
+.aide-onglets { max-width: max-content; overflow-x: auto; }
+.aide-bareme { font-size: .9rem; min-width: 520px; }
+.aide-bareme th, .aide-bareme td { padding: .7rem .6rem; vertical-align: middle; }
+.aide-bareme thead th { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--vivi-muted); font-weight: 600; }
+.aide-bareme tbody th { font-weight: 600; color: var(--vivi-ink); }
+.aide-bareme .ok { color: var(--vivi-success); font-weight: 600; }
+.aide-bareme .non { color: var(--vivi-danger); font-weight: 600; }
+.aide-bareme .partiel { color: var(--vivi-orange-ink); font-weight: 600; }
+.aide-liste { margin: 0; padding-left: 1.1rem; display: grid; gap: .55rem; }
+.aide-liste li::marker { color: var(--vivi-teal-600); }
+.aide-texte h2 { margin-top: 1.75rem; scroll-margin-top: calc(var(--vivi-header-h) + 16px); }
+.aide-sommaire { background: var(--vivi-teal-50); border-radius: var(--vivi-radius-sm); padding: 14px 18px; }
+.aide-sommaire ol { margin: 0; padding-left: 1.1rem; columns: 2; column-gap: 24px; font-size: .9rem; }
+.aide-sommaire li { padding: 2px 0; break-inside: avoid; }
+@media (max-width: 575.98px) { .aide-sommaire ol { columns: 1; } }
+.aide-contact { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; }
+.btn-whatsapp { --bs-btn-bg: #1f9d55; --bs-btn-border-color: #1f9d55; --bs-btn-color: #fff;
+  --bs-btn-hover-bg: #18884a; --bs-btn-hover-border-color: #18884a; --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #147a41; --bs-btn-active-border-color: #147a41; --bs-btn-active-color: #fff; }
+
+/* ---------- Page publique « Propriétaires » ---------- */
+.owner-band__prix { color: #d5e7e5; font-size: .95rem; }
+.owner-band__prix strong { color: #fff; font-family: var(--vivi-font-title); font-size: 1.15rem; }
+.plans--public .plan { padding: 24px; box-shadow: var(--vivi-shadow-sm); }
+.plans--public .plan__prix { font-size: 2rem; }
+.plan__badge { position: absolute; top: 16px; right: 16px; }
+.inclus { background: var(--vivi-teal-50); border-radius: var(--vivi-radius); padding: 20px; }
+.inclus h3 { font-size: 1.05rem; margin: 0 0 12px; }
+.inclus ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px 24px; }
+@media (min-width: 768px) { .inclus ul { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1200px) { .inclus ul { grid-template-columns: repeat(3, 1fr); } }
+.inclus li { display: flex; gap: 10px; align-items: center; font-size: .95rem; color: var(--vivi-ink); }
+.inclus li .bi { color: var(--vivi-teal-700); font-size: 1.1rem; }
+.faq { display: grid; gap: 10px; }
+.faq details { background: #fff; border: 1px solid var(--vivi-line); border-radius: var(--vivi-radius-sm); padding: 0 18px; }
+.faq summary { cursor: pointer; list-style: none; padding: 16px 28px 16px 0; position: relative; font-weight: 600; color: var(--vivi-ink); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "\F282"; font-family: "bootstrap-icons"; position: absolute; right: 0; top: 50%; transform: translateY(-50%); transition: transform .2s; color: var(--vivi-teal-700); }
+.faq details[open] summary::after { transform: translateY(-50%) rotate(180deg); }
+.faq details p { margin: 0 0 16px; color: var(--vivi-body); }
+
+.owner-band h1 { color: #fff; }
+
+/* ---------- Parrainage et bonus ---------- */
+.bonus-solde { display: flex; flex-direction: column; background: linear-gradient(160deg, var(--vivi-teal-50), #fff 60%); }
+.bonus-solde__montant { font-family: var(--vivi-font-title); font-size: 2.2rem; font-weight: 700; color: var(--vivi-teal-800); line-height: 1.1; }
+.code-parrain { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 2px dashed var(--vivi-teal-200); border-radius: var(--vivi-radius-sm); background: var(--vivi-teal-50); }
+.code-parrain__code { font-family: var(--vivi-font-title); font-size: 1.6rem; font-weight: 700; letter-spacing: .08em; color: var(--vivi-teal-900); }
+.etapes-parrain { padding-left: 1.2rem; display: grid; gap: .35rem; font-size: .9rem; color: var(--vivi-body); }
+.etapes-parrain li::marker { color: var(--vivi-teal-700); font-weight: 700; }
+.liste-filleuls { list-style: none; margin: 0; padding: 0; }
+.liste-filleuls li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--vivi-line); flex-wrap: wrap; }
+.liste-filleuls li:last-child { border-bottom: 0; }
+.avatar-initiales { flex: 0 0 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--vivi-teal-100); color: var(--vivi-teal-800); font-weight: 700; font-size: .875rem; }
+.bonus-choix { border-color: var(--vivi-teal-200); background: var(--vivi-teal-50); }
+.price-lines .bonus dd { color: var(--vivi-success); font-weight: 600; }
+.plan__barre { text-decoration: line-through; color: var(--vivi-muted); font-size: .95rem; font-weight: 500; }
+.promo-bandeau { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: var(--vivi-radius); background: var(--vivi-orange-50); border: 1px solid var(--vivi-orange-100); color: var(--vivi-orange-ink); }
+.promo-bandeau .bi { font-size: 1.4rem; color: var(--vivi-orange-600); flex-shrink: 0; }
+.code-parrain { flex-wrap: wrap; }
+.code-parrain__code { white-space: nowrap; }
+@media (max-width: 575.98px) { .code-parrain__code { font-size: 1.35rem; } }
+.lien-parrain .form-control { flex: 1 1 auto; min-width: 0; width: auto; }
+.lien-parrain .btn { flex: 0 0 auto; }
+.table-simple td.num, .table-simple th.num { padding-left: 12px; }
+.panel .lien-parrain .btn { width: auto; }
+.panel .code-parrain .btn { width: auto; }
+
+/* En-tête pro avec plusieurs boutons : pleine largeur sur mobile */
+@media (max-width: 575.98px) {
+  .pro-head > .d-flex { width: 100%; }
+  .pro-head > .d-flex .btn { flex: 1 1 100%; justify-content: center; }
+}
+
+/* ---------- État de chargement (resources/js/app.js) ---------- */
+.btn.is-loading { pointer-events: none; opacity: .85; cursor: progress; }
+.btn.is-loading > .bi { display: none; }
+.btn .spinner-border-sm { width: 1em; height: 1em; border-width: .15em; flex-shrink: 0; }
+.is-chargement { opacity: .55; transition: opacity .15s ease; }
+.is-chargement::after { content: ""; }
+
+/* ---------- Modale réservation hors plateforme ---------- */
+.modal-section { font-size: .8125rem; text-transform: uppercase; letter-spacing: .05em; color: var(--vivi-muted); font-weight: 700; margin: 0 0 8px; }
+#modal-manuelle .modal-content { border-radius: var(--vivi-radius-lg); border: 0; }
+@media (max-width: 575.98px) { #modal-manuelle .modal-content { border-radius: 0; } }
+#modal-manuelle .modal-header, #modal-manuelle .modal-footer { border-color: var(--vivi-line); padding: 16px 20px; }
+#modal-manuelle .modal-body { padding: 18px 20px; }
+.recap-encaissement { margin: 6px 0 0; padding: 12px 14px; border-radius: var(--vivi-radius-sm); background: var(--vivi-teal-50); display: grid; gap: 6px; }
+.recap-encaissement > div { display: flex; justify-content: space-between; gap: 12px; margin: 0; }
+.recap-encaissement dt { font-weight: 500; color: var(--vivi-body); }
+.recap-encaissement dd { margin: 0; font-weight: 600; color: var(--vivi-ink); font-variant-numeric: tabular-nums; }
+.recap-encaissement .reste { border-top: 1px solid var(--vivi-teal-200); padding-top: 6px; }
+.recap-encaissement .reste dd { color: var(--vivi-orange-ink); font-size: 1.05rem; }
+.montants-manuels { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .8125rem; color: var(--vivi-muted); margin-top: 4px; }
+.montants-manuels strong { color: var(--vivi-ink); font-weight: 600; }
+.montants-manuels .reste strong { color: var(--vivi-orange-ink); }
+.montants-manuels .solde { color: var(--vivi-success); font-weight: 600; }
+.actions-manuelles { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.actions-manuelles .encaisser { flex: 1 1 260px; max-width: 360px; }
+.panel .actions-manuelles .btn { width: auto; }
+/* Bloc « Réserver » de la fiche logement pendant le recalcul des disponibilités */
+form[aria-busy="true"] { cursor: progress; }
+form[aria-busy="true"] .price-lines, form[aria-busy="true"] .slots, form[aria-busy="true"] .chips-heures { opacity: .55; transition: opacity .15s ease; }
+form[aria-busy="true"] button[type=submit] { pointer-events: none; opacity: .7; }
+
+/* ---------- Barre de progression (resources/js/app.js) ---------- */
+#vivi-barre { position: fixed; top: 0; left: 0; z-index: 2000; height: 3px; width: 0; background: linear-gradient(90deg, var(--vivi-orange-400), var(--vivi-teal-600)); box-shadow: 0 0 8px rgba(244, 173, 76, .6); opacity: 0; pointer-events: none; }
+#vivi-barre.is-active { opacity: 1; animation: vivi-barre 8s cubic-bezier(.1, .7, .2, 1) forwards; }
+@keyframes vivi-barre { 0% { width: 0; } 10% { width: 35%; } 40% { width: 65%; } 100% { width: 92%; } }
+@media (prefers-reduced-motion: reduce) { #vivi-barre.is-active { animation: none; width: 70%; } }
+
+/* ---------- Fenêtre de confirmation ---------- */
+.confirmation { border: 0; border-radius: var(--vivi-radius-lg); text-align: center; }
+.confirmation .modal-body { padding: 28px 24px 12px; }
+.confirmation .modal-footer { border: 0; justify-content: center; gap: 8px; padding: 12px 24px 24px; }
+.confirmation .modal-footer .btn { min-width: 130px; }
+.confirmation__icone { width: 56px; height: 56px; margin: 0 auto 14px; display: grid; place-items: center; border-radius: 50%; background: var(--vivi-teal-50); color: var(--vivi-teal-700); font-size: 1.6rem; }
+.confirmation__icone.is-danger { background: #fdecea; color: var(--vivi-danger); }
+
+/* ---------- Près de moi ---------- */
+.search-card .pres-de-moi { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 0; font-weight: 600; color: var(--vivi-teal-700); text-decoration: none; }
+.search-card .pres-de-moi:hover { text-decoration: underline; }
+.is-actif-geo { border-color: var(--vivi-teal-700); color: var(--vivi-teal-800); background: var(--vivi-teal-50); }
+.listing-card__distance { color: var(--vivi-teal-700); font-weight: 600; }
+
+/* ---------- Cartes (resources/js/carte.js) ---------- */
+.carte { height: 320px; border-radius: var(--vivi-radius); overflow: hidden; border: 1px solid var(--vivi-line); z-index: 0; background: var(--vivi-teal-50); }
+.carte--zone { height: 260px; }
+@media (max-width: 575.98px) { .carte { height: 260px; } }
+.carte-editeur { border: 1px solid var(--vivi-line); border-radius: var(--vivi-radius); padding: 14px; background: #fff; }
+.carte-editeur__barre { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.panel .carte-editeur__barre .btn { width: auto; }
+.leaflet-container { font-family: inherit; }
+/* Repère de la carte : goutte orange à point blanc */
+.vivi-repere { background: none; border: 0; }
+.vivi-repere span { position: absolute; left: 3px; top: 0; width: 24px; height: 24px; border-radius: 50% 50% 50% 0; background: var(--vivi-orange-400); border: 3px solid #fff; transform: rotate(-45deg); box-shadow: 0 3px 8px rgba(20, 40, 42, .35); }
+.vivi-repere span::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--vivi-teal-800); }
+
+/* ---------- Notifications : cloche de l'en-tête et page ---------- */
+.cloche__bouton { position: relative; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--vivi-line); background: #fff; color: var(--vivi-ink); display: grid; place-items: center; font-size: 1.15rem; }
+.cloche__bouton:hover, .cloche__bouton[aria-expanded="true"] { background: var(--vivi-teal-50); color: var(--vivi-teal-800); border-color: var(--vivi-teal-200); }
+.cloche__compteur { position: absolute; top: -4px; right: -4px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 99px; background: var(--vivi-orange-400); color: var(--vivi-ink); font-size: .7rem; font-weight: 700; display: grid; place-items: center; border: 2px solid #fff; }
+.cloche__menu { width: min(360px, calc(100vw - 24px)); padding: 0; border-radius: var(--vivi-radius); border: 1px solid var(--vivi-line); box-shadow: var(--vivi-shadow-lg); overflow: hidden; }
+.cloche__tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--vivi-line); }
+.cloche__item { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--vivi-line); color: var(--vivi-body); text-decoration: none; }
+.cloche__item:hover { background: var(--vivi-sand); }
+.cloche__item.is-nonlue { background: var(--vivi-teal-50); }
+.cloche__icone, .liste-notifications__icone { flex: 0 0 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: var(--vivi-teal-700); border: 1px solid var(--vivi-teal-100); }
+.cloche__texte { display: grid; gap: 2px; min-width: 0; font-size: .85rem; }
+.cloche__texte strong { color: var(--vivi-ink); font-size: .875rem; }
+.cloche__texte small { color: var(--vivi-muted); }
+.cloche__texte time { font-size: .75rem; color: var(--vivi-muted); }
+.cloche__vide { margin: 0; padding: 20px 16px; color: var(--vivi-muted); text-align: center; font-size: .9rem; }
+.cloche__tout { display: block; padding: 11px 16px; text-align: center; font-weight: 600; color: var(--vivi-teal-700); text-decoration: none; }
+.cloche__tout:hover { background: var(--vivi-sand); }
+.pro-top .cloche { margin-left: auto; margin-right: 8px; }
+.liste-notifications { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.liste-notifications li { position: relative; display: flex; gap: 14px; padding: 16px 18px; background: #fff; border: 1px solid var(--vivi-line); border-radius: var(--vivi-radius); }
+.liste-notifications li.is-nonlue { border-color: var(--vivi-teal-200); box-shadow: inset 4px 0 0 var(--vivi-teal-700); }
+.liste-notifications__corps { flex: 1 1 auto; min-width: 0; }
+.liste-notifications__corps p { color: var(--vivi-body); font-size: .925rem; }
+.liste-notifications__point { position: absolute; top: 18px; right: 16px; width: 9px; height: 9px; border-radius: 50%; background: var(--vivi-orange-400); }
+.liste-notifications li.is-nonlue .liste-notifications__corps > div { padding-right: 16px; }
+.pro-side__badge { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; background: var(--vivi-orange-400); color: var(--vivi-ink); font-size: .72rem; font-weight: 700; display: inline-grid; place-items: center; }
+
+/* ---------- Mon profil ---------- */
+.profil-tete { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+.avatar--lg { width: 64px; height: 64px; font-size: 1.35rem; flex-shrink: 0; }
+.profil-changer > summary { list-style: none; display: inline-flex; }
+.profil-changer > summary::-webkit-details-marker { display: none; }
+.panel .profil-changer .btn, .panel .profil-code .btn { width: auto; }
+.profil-code { padding: 14px; border-radius: var(--vivi-radius-sm); background: var(--vivi-teal-50); }
+.profil-liens { list-style: none; margin: 0; padding: 0; display: grid; }
+.profil-liens a { display: flex; align-items: center; gap: 10px; padding: 11px 4px; border-bottom: 1px solid var(--vivi-line); color: var(--vivi-ink); text-decoration: none; font-weight: 500; }
+.profil-liens li:last-child a { border-bottom: 0; }
+.profil-liens a:hover { color: var(--vivi-teal-700); }
+.profil-liens a .bi { color: var(--vivi-teal-700); font-size: 1.1rem; }
+.profil-titre { font-size: 1.15rem; display: flex; align-items: center; }
+.profil-titre .bi { color: var(--vivi-teal-700); font-size: 1.05rem; }
