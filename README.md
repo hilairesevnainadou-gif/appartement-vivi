@@ -159,4 +159,4 @@ Après la phase 1 : applications mobiles Flutter (phase 2), location longue dur�
 - Prix, disponibilités et remboursements sont **toujours calculés côté serveur** ; la maquette les calcule dans le navigateur pour la démonstration seulement.
 - La maquette reste la référence visuelle : un nouvel écran se maquette d'abord dans `maquette/`, puis s'intègre en Blade.
 #   a p p a r t e m e n t - v i v i  
- 
+ "# appartement-vivi" 
