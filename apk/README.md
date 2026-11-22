@@ -46,15 +46,16 @@ Le propriétaire ajoute et modifie ses logements dans l'application (Plus › Me
 Prérequis : Android Studio (JDK fourni), SDK Android 37.
 
 ```bash
-# Version de test, branchée sur le serveur local (émulateur : 10.0.2.2 = le PC)
+# Version de test, branchée sur l’environnement de test en ligne https://novatechbenin.online
+# (viviApiUrl dans gradle.properties)
 ./gradlew assembleDebug
 # → app/build/outputs/apk/debug/app-debug.apk
 
-# Téléphone réel sur le même Wi-Fi : adresse IP du PC
+# Serveur local, téléphone sur le même Wi-Fi : adresse IP du PC (émulateur : 10.0.2.2)
 ./gradlew assembleDebug -PviviApiUrl=http://192.168.1.20:8000/api/v1/
 ```
 
-Côté plateforme, pour un téléphone réel : `php artisan serve --host=0.0.0.0`, et `APP_URL=http://192.168.1.20:8000` dans `.env` pour que les liens de paiement et les photos fonctionnent. En local, le code de connexion est renvoyé dans `code_dev` et rempli automatiquement (bandeau « Mode test »).
+Côté plateforme, avec le serveur local : `php artisan serve --host=0.0.0.0`, et `APP_URL=http://192.168.1.20:8000` dans `.env` pour que les liens de paiement et les photos fonctionnent. En local, le code de connexion est renvoyé dans `code_dev` et rempli automatiquement (bandeau « Mode test »).
 
 Version de production (HTTPS obligatoire ; le trafic en clair n'est autorisé qu'en version de test) :
 

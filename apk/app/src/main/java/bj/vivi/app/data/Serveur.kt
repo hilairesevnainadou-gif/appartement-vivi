@@ -32,13 +32,15 @@ import java.util.concurrent.atomic.AtomicReference
  * ne répond plus à cette adresse (connexion refusée ou impossible : la requête n'est jamais partie), le
  * téléphone interroge les 254 adresses de son réseau Wi-Fi sur le même port, garde la première qui répond
  * comme la plateforme VIVI (GET /configuration), et rejoue la requête. L'adresse trouvée est retenue.
- * En production (HTTPS, nom de domaine), rien de tout cela ne s'applique.
+ * Avec une adresse HTTPS (environnement de test en ligne, production), rien de tout cela ne s’applique.
  */
 object Serveur {
     private const val PREFS = "vivi_serveur"
     private const val CLE_API = "api"
 
     private val origine: HttpUrl = BuildConfig.API_URL.toHttpUrl()
+    /** Recherche sur le Wi-Fi : seulement pour un serveur local (HTTP). */
+    val rechercheActive = BuildConfig.DEBUG && !origine.isHttps
     private val actuelle = AtomicReference(origine)
     private var contexte: Context? = null
     private val verrou = Any()
@@ -50,14 +52,19 @@ object Serveur {
     fun initialiser(context: Context) {
         contexte = context.applicationContext
         if (!BuildConfig.DEBUG) return
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(CLE_API, null)
-            ?.toHttpUrlOrNull()?.let { actuelle.set(it) }
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!rechercheActive) {
+            // Adresse Wi-Fi retenue par une version précédente de l’APK : elle ne vaut plus rien
+            prefs.edit().remove(CLE_API).apply()
+            return
+        }
+        prefs.getString(CLE_API, null)?.toHttpUrlOrNull()?.let { actuelle.set(it) }
     }
 
     /** Intercepteur : redirige vers l'adresse actuelle, et relance la recherche si le serveur est injoignable. */
     val intercepteur = Interceptor { chaine ->
         val requete = chaine.request()
-        if (!BuildConfig.DEBUG || !estApi(requete.url)) return@Interceptor chaine.proceed(requete)
+        if (!rechercheActive || !estApi(requete.url)) return@Interceptor chaine.proceed(requete)
         val base = actuelle.get()
         try {
             chaine.proceed(rediriger(requete, base))

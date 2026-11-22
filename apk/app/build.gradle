@@ -41,7 +41,7 @@ android {
     buildTypes {
         debug {
             buildConfigField "String", "API_URL", "\"${apiDebug}\""
-            manifestPlaceholders += [trafficEnTexteClair: "true", hoteSite: new URI(apiDebug).host]
+            manifestPlaceholders += [trafficEnTexteClair: apiDebug.startsWith("http://").toString(), hoteSite: new URI(apiDebug).host]
         }
         release {
             buildConfigField "String", "API_URL", "\"${apiRelease}\""

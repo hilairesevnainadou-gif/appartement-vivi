@@ -125,7 +125,7 @@ object Reseau {
             reponse
         }
         val client = OkHttpClient.Builder()
-            .connectTimeout(if (BuildConfig.DEBUG) 6L else 15L, TimeUnit.SECONDS)   // test : bascule vite vers la recherche du serveur
+            .connectTimeout(if (Serveur.rechercheActive) 6L else 15L, TimeUnit.SECONDS)   // serveur local : bascule vite vers la recherche du serveur
             .readTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(enTetes)
             .addInterceptor(Serveur.intercepteur)   // test : suit la plateforme si l'IP du PC change
