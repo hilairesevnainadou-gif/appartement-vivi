@@ -113,7 +113,7 @@
                                         @if (! $t)
                                             Le propriétaire ne propose pas cette formule.
                                         @elseif ($f === Formule::Heure)
-                                            De {{ substr($t->heure_ouverture, 0, 5) }} à {{ substr($t->heure_fermeture, 0, 5) }} · minimum {{ $t->duree_minimum_heures }} h
+                                            {{ $t->horairesEnClair() }} · minimum {{ $t->duree_minimum_heures }} h
                                         @elseif ($f === Formule::DemiJournee)
                                             {{ $l->creneaux->sortBy('ordre')->map(fn ($c) => $c->nom.' '.substr($c->heure_debut, 0, 5).'–'.substr($c->heure_fin, 0, 5))->implode(' · ') }}
                                         @else

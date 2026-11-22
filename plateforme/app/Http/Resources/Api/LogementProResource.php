@@ -66,6 +66,7 @@ class LogementProResource extends JsonResource
                 'heure' => ($t = $tarif(Formule::Heure)) ? [
                     'actif' => (bool) $t->actif, 'prix' => (int) $t->prix, 'heure_ouverture' => $heure($t->heure_ouverture),
                     'heure_fermeture' => $heure($t->heure_fermeture), 'duree_minimum_heures' => (int) $t->duree_minimum_heures,
+                    'ouvert_24h' => $t->est24h(),
                 ] : ['actif' => false],
                 'demi_journee' => ($t = $tarif(Formule::DemiJournee)) ? ['actif' => (bool) $t->actif, 'prix' => (int) $t->prix] : ['actif' => false],
                 'journee' => ($t = $tarif(Formule::Journee)) ? [

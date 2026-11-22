@@ -137,6 +137,50 @@ class DisponibilitesTest extends TestCase
         $this->assertArrayNotHasKey('21:00', $heures->all());       // 21:00 + 2 h dépasse la fermeture
     }
 
+    public function test_un_lieu_ouvert_24h_se_reserve_de_nuit(): void
+    {
+        $this->logement->tarifs()->where('formule', Formule::Heure)->update(['heure_ouverture' => '00:00', 'heure_fermeture' => '00:00']);
+        $date = CarbonImmutable::parse('2026-11-13');
+        $heures = collect($this->moteur()->heures($this->logement(), $date))->keyBy('heure');
+        $this->assertCount(24, $heures);
+        $this->assertSame(24, $heures['23:00']['duree_max']);
+
+        // Une réservation le lendemain à 04:00 : avec une heure de préparation, on part à 03:00 au plus tard
+        $this->reserver('2026-11-14 04:00', '2026-11-14 06:00');
+        $this->assertSame(4, collect($this->moteur()->heures($this->logement(), $date))->firstWhere('heure', '23:00')['duree_max']);
+
+        $devis = app(Tarification::class)->devis($this->logement(), Formule::Heure, $date, ['heure' => '23:00', 'duree' => 3]);
+        $this->assertSame('2026-11-14 02:00', $devis->fin->format('Y-m-d H:i'));
+        $this->assertSame(10500, $devis->location);
+
+        $etat = app(\App\Services\SimulationSejour::class)->etat($this->logement(), ['date' => '2026-11-13', 'formule' => 'heure', 'heure' => '23:00', 'duree' => 3]);
+        $this->assertStringContainsString('Départ à 02:00 le lendemain', $etat['aide']);
+        $this->assertTrue($this->moteur()->resume($this->logement(), $date)['heure']);
+        $this->assertStringContainsString('De 23:00 à 02:00 le lendemain', $this->reserver('2026-11-20 23:00', '2026-11-21 02:00')->creneauEnClair());
+
+        $this->get('/logements/studio-test')->assertOk()->assertSee('Ouvert 24 h/24');
+        $this->getJson('/api/v1/logements/studio-test')->assertOk()->assertJsonPath('data.ouvert_24h', true);
+
+        $this->expectException(\InvalidArgumentException::class);
+        app(Tarification::class)->devis($this->logement(), Formule::Heure, $date, ['heure' => '23:00', 'duree' => 25]);
+    }
+
+    public function test_avec_des_horaires_la_nuit_reste_fermee(): void
+    {
+        $this->assertFalse($this->logement()->ouvert24h());
+        try {
+            app(Tarification::class)->devis($this->logement(), Formule::Heure, CarbonImmutable::parse('2026-11-13'), ['heure' => '21:00', 'duree' => 3]);
+            $this->fail('La nuit doit être refusée.');
+        } catch (\InvalidArgumentException $e) {
+            $this->assertStringContainsString('entre 08:00 et 22:00', $e->getMessage());
+        }
+
+        // Fermeture après minuit : on n'arrive que le jour choisi, jusqu'à la fermeture du lendemain
+        $this->logement->tarifs()->where('formule', Formule::Heure)->update(['heure_fermeture' => '02:00', 'duree_minimum_heures' => 1]);
+        $heures = collect($this->moteur()->heures($this->logement(), CarbonImmutable::parse('2026-11-13')));
+        $this->assertSame(['08:00', '23:00', 3], [$heures->first()['heure'], $heures->last()['heure'], $heures->last()['duree_max']]);
+    }
+
     public function test_creneaux_de_demi_journee(): void
     {
         $this->reserver('2026-11-13 14:00', '2026-11-13 19:00');

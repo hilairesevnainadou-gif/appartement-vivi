@@ -109,6 +109,11 @@ VIVI loue deux familles d'espaces. Les deux se réservent de la même façon (he
   - `tarifs.journee.heure_arrivee` et `heure_depart` sont l'heure de début et l'heure de fin. Fin plus tard que début : même jour (08:00 à 22:00). Fin avant début : après minuit (10:00 à 02:00, « après minuit ») ;
   - `jours: 2` réserve deux jours à la suite, jusqu'à l'heure de fin du deuxième jour ;
   - afficher `creneau` et les dates de la réponse, sans recalculer la fin dans l'application.
+- **Ouvert 24 h/24** (appartements et salles) :
+  - `ouvert_24h` (vrai ou faux) sur chaque logement : afficher « 24 h/24 » sur la carte et « Ouvert 24 h/24 » dans la fiche, à la place de « De … à … » ;
+  - disponibilités : `heures` va alors de `00:00` à `23:00`, et `duree_max` peut dépasser minuit (24 au plus). Afficher `aide` et `creneau` de la réponse (« Départ à 02:00 le lendemain »), sans recalculer la fin dans l'application ;
+  - propriétaire : `tarifs.heure.ouvert_24h` est renvoyé par la fiche. `true` dans le POST ou le PUT enregistre 00:00 à 00:00 ; `heure_ouverture` et `heure_fermeture` ne sont alors plus à demander. Une fermeture égale à l'ouverture vaut aussi 24 h/24 ; une fermeture plus tôt que l'ouverture veut dire après minuit ;
+  - si la fiche était à 24 h/24 et que le propriétaire choisit des horaires, envoyer `ouvert_24h: false` ou ne pas l'envoyer.
 - **Menu du visiteur** : « Mes réservations » n'est plus affiché avant la connexion (Accueil, Logements, Salles, Compte). Une fois connecté, le client retrouve ses réservations.
 - **Logo** : nouveau logo dans `public/images/logo/` (`vivi-symbole.svg`, `vivi-icone.svg`, `icone-512.png`…), à reprendre pour l'icône de l'application. Signature : « Appartements & salles. »
 - **Menus** : le site a deux entrées séparées, « Logements » (`categorie=logement`) et « Salles » (`categorie=salle`). L'application doit faire de même.

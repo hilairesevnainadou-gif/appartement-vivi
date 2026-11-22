@@ -17,6 +17,11 @@
 
     $th = $tarif(Formule::Heure);
     $tj = $tarif(Formule::Journee);
+    // À l'heure : ouverture égale à fermeture = 24 h/24 (les listes gardent alors un choix courant)
+    $ouverture = $val('tarifs.heure.heure_ouverture', $hh($th?->heure_ouverture) ?? '08:00');
+    $fermeture = $val('tarifs.heure.heure_fermeture', $hh($th?->heure_fermeture) ?? '22:00');
+    $ouvert24h = $ouverture === $fermeture;
+    [$ouverture, $fermeture] = $ouvert24h ? ['08:00', '22:00'] : [$ouverture, $fermeture];
     $creneaux = old('creneaux', $nouveau || $l->creneaux->isEmpty()
         ? [['id' => null, 'nom' => 'Matin', 'heure_debut' => '08:00', 'heure_fin' => '13:00'], ['id' => null, 'nom' => 'Après-midi', 'heure_debut' => '14:00', 'heure_fin' => '19:00']]
         : $l->creneaux->sortBy('ordre')->map(fn ($c) => ['id' => $c->id, 'nom' => $c->nom, 'heure_debut' => $hh($c->heure_debut), 'heure_fin' => $hh($c->heure_fin)])->values()->all());
@@ -224,13 +229,20 @@
                                     <div class="input-suffix"><input class="form-control @error('tarifs.heure.prix') is-invalid @enderror" type="number" inputmode="numeric" min="500" step="500" id="fh-prix" name="tarifs[heure][prix]" value="{{ $val('tarifs.heure.prix', $th?->prix) }}"><span class="suffix">FCFA</span>
                                         @error('tarifs.heure.prix')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
                                 </div>
-                                <div class="col-6 col-lg-3"><label class="form-label" for="fh-de">Ouverture</label>
-                                    <select class="form-select" id="fh-de" name="tarifs[heure][heure_ouverture]">
-                                        @foreach ($heures(5, 14) as $h)<option @selected($val('tarifs.heure.heure_ouverture', $hh($th?->heure_ouverture) ?? '08:00') === $h)>{{ $h }}</option>@endforeach
+                                <div class="col-12 order-first">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="fh-24" name="tarifs[heure][ouvert_24h]" value="1" aria-describedby="fh-24-aide" @checked($ouvert24h)>
+                                        <label class="form-check-label" for="fh-24">Ouvert 24 h/24</label>
+                                    </div>
+                                    <p class="form-text mb-0" id="fh-24-aide">Le client arrive à l’heure qu’il veut, de jour comme de nuit, et peut passer minuit.</p>
+                                </div>
+                                <div class="col-6 col-lg-3" data-horaires @if ($ouvert24h) hidden @endif><label class="form-label" for="fh-de">Ouverture</label>
+                                    <select class="form-select" id="fh-de" name="tarifs[heure][heure_ouverture]" @disabled($ouvert24h)>
+                                        @foreach ($heures(0, 23) as $h)<option @selected($ouverture === $h)>{{ $h }}</option>@endforeach
                                     </select></div>
-                                <div class="col-6 col-lg-3"><label class="form-label" for="fh-a">Fermeture</label>
-                                    <select class="form-select @error('tarifs.heure.heure_fermeture') is-invalid @enderror" id="fh-a" name="tarifs[heure][heure_fermeture]">
-                                        @foreach ($heures(15, 24) as $h)<option value="{{ $h }}" @selected($val('tarifs.heure.heure_fermeture', $hh($th?->heure_fermeture) ?? '22:00') === $h)>{{ $h === '00:00' ? 'Minuit' : $h }}</option>@endforeach
+                                <div class="col-6 col-lg-3" data-horaires @if ($ouvert24h) hidden @endif><label class="form-label" for="fh-a">Fermeture</label>
+                                    <select class="form-select @error('tarifs.heure.heure_fermeture') is-invalid @enderror" id="fh-a" name="tarifs[heure][heure_fermeture]" @disabled($ouvert24h)>
+                                        @foreach ($heures(6, 29) as $h)<option value="{{ $h }}" @selected($fermeture === $h)>{{ $h === '00:00' ? 'Minuit' : ($h < '06:00' ? $h.' (après minuit)' : $h) }}</option>@endforeach
                                     </select>
                                     @error('tarifs.heure.heure_fermeture')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
                                 <div class="col-sm-6 col-lg-3"><label class="form-label" for="fh-min">Durée minimale</label>
@@ -261,8 +273,8 @@
                                         <input type="hidden" name="creneaux[{{ $i }}][id]" value="{{ $c['id'] ?? '' }}">
                                         <div class="creneau-row__champs">
                                             <div><label class="form-label" for="cn-{{ $i }}">Nom du créneau</label><input class="form-control @error('creneaux.'.$i.'.nom') is-invalid @enderror" type="text" id="cn-{{ $i }}" name="creneaux[{{ $i }}][nom]" value="{{ $c['nom'] }}"></div>
-                                            <div><label class="form-label" for="cd-{{ $i }}">De</label><select class="form-select" id="cd-{{ $i }}" name="creneaux[{{ $i }}][heure_debut]">@foreach ($heures(5, 23) as $h)<option @selected($c['heure_debut'] === $h)>{{ $h }}</option>@endforeach</select></div>
-                                            <div><label class="form-label" for="ca-{{ $i }}">À</label><select class="form-select @error('creneaux.'.$i.'.heure_fin') is-invalid @enderror" id="ca-{{ $i }}" name="creneaux[{{ $i }}][heure_fin]">@foreach ($heures(6, 26) as $h)<option @selected($c['heure_fin'] === $h)>{{ $h }}</option>@endforeach</select>
+                                            <div><label class="form-label" for="cd-{{ $i }}">De</label><select class="form-select" id="cd-{{ $i }}" name="creneaux[{{ $i }}][heure_debut]">@foreach ($heures(0, 23) as $h)<option @selected($c['heure_debut'] === $h)>{{ $h }}</option>@endforeach</select></div>
+                                            <div><label class="form-label" for="ca-{{ $i }}">À</label><select class="form-select @error('creneaux.'.$i.'.heure_fin') is-invalid @enderror" id="ca-{{ $i }}" name="creneaux[{{ $i }}][heure_fin]">@foreach ($heures(6, 29) as $h)<option @selected($c['heure_fin'] === $h)>{{ $h }}</option>@endforeach</select>
                                                 @error('creneaux.'.$i.'.heure_fin')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
                                         </div>
                                         <button type="button" class="btn-icon" aria-label="Supprimer ce créneau"><i class="bi bi-trash" aria-hidden="true"></i></button>
@@ -412,8 +424,8 @@
             <input type="hidden" data-champ="id" value="">
             <div class="creneau-row__champs">
                 <div><label class="form-label">Nom du créneau</label><input class="form-control" type="text" data-champ="nom" value="Soirée"></div>
-                <div><label class="form-label">De</label><select class="form-select" data-champ="heure_debut">@foreach ($heures(5, 23) as $h)<option @selected($h === '20:00')>{{ $h }}</option>@endforeach</select></div>
-                <div><label class="form-label">À</label><select class="form-select" data-champ="heure_fin">@foreach ($heures(6, 26) as $h)<option @selected($h === '00:00')>{{ $h }}</option>@endforeach</select></div>
+                <div><label class="form-label">De</label><select class="form-select" data-champ="heure_debut">@foreach ($heures(0, 23) as $h)<option @selected($h === '20:00')>{{ $h }}</option>@endforeach</select></div>
+                <div><label class="form-label">À</label><select class="form-select" data-champ="heure_fin">@foreach ($heures(6, 29) as $h)<option @selected($h === '00:00')>{{ $h }}</option>@endforeach</select></div>
             </div>
             <button type="button" class="btn-icon" aria-label="Supprimer ce créneau"><i class="bi bi-trash" aria-hidden="true"></i></button>
         </div>
@@ -471,6 +483,12 @@
                     $('ed-etat').textContent = 'Modifications non enregistrées.';
                 });
                 form.addEventListener('input', function () { $('ed-etat').textContent = 'Modifications non enregistrées.'; });
+
+                // Ouvert 24 h/24 : plus d'heures d'ouverture et de fermeture à choisir
+                $('fh-24').addEventListener('change', function (e) {
+                    $('fh-de').disabled = $('fh-a').disabled = e.target.checked;
+                    document.querySelectorAll('[data-horaires]').forEach(function (b) { b.hidden = e.target.checked; });
+                });
 
                 // Créneaux : renumérotés à chaque ajout ou suppression (1 à 4 créneaux)
                 function renumeroter() {

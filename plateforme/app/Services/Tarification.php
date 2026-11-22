@@ -46,7 +46,12 @@ class Tarification
                 [$h, $m] = array_map('intval', explode(':', (string) ($choix['heure'] ?? $ouverture->format('H:i'))) + [1 => 0]);
                 $debut = $jour->setTime($h, $m);
                 $fin = $debut->addHours($duree);
-                if ($duree < $minimum || $debut->lt($ouverture) || $fin->gt($fermeture)) {
+                if ($tarif->est24h()) {
+                    // 24 h/24 : toute heure d'arrivée, le séjour peut finir le lendemain
+                    if ($duree < $minimum || $duree > Disponibilites::HEURES_MAX) {
+                        throw new InvalidArgumentException("Choisissez entre {$minimum} h et ".Disponibilites::HEURES_MAX.' h.');
+                    }
+                } elseif ($duree < $minimum || $debut->lt($ouverture) || $fin->gt($fermeture)) {
                     throw new InvalidArgumentException("Choisissez au moins {$minimum} h entre {$ouverture->format('H:i')} et {$fermeture->format('H:i')}.");
                 }
                 $location = $tarif->prix * $duree;

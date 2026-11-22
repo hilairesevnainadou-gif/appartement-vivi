@@ -19,6 +19,7 @@
         <div class="listing-card__badges">
             <span class="chip">{{ \Illuminate\Support\Str::before($l->type->getLabel(), ' (') }}</span>
             <span class="chip"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Vérifié</span>
+            @if ($l->ouvert24h())<span class="chip"><i class="bi bi-clock" aria-hidden="true"></i>24 h/24</span>@endif
         </div>
     </div>
     <div class="listing-card__body">

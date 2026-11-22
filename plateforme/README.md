@@ -134,7 +134,7 @@ Les droits sont définis dans chaque ressource (`$rolesLecture`, `$rolesEcriture
 
 **Prix** (`App\Services\Tarification`). Le serveur est la seule source de vérité :
 
-- heure : prix × nombre d'heures, entre l'ouverture et la fermeture, au moins la durée minimum ;
+- heure : prix × nombre d'heures, entre l'ouverture et la fermeture, au moins la durée minimum. Fermeture avant l'ouverture = après minuit. **Ouvert 24 h/24** = fermeture égale à l'ouverture (`Tarif::est24h()`, case dans la fiche du propriétaire) : arrivée à toute heure, séjour de 24 h au plus, qui peut passer minuit ;
 - demi-journée : prix du créneau choisi ;
 - journée : prix × nombre de jours (arrivée le jour J, départ le jour J + n) ;
 - services à la carte : seulement ceux proposés dans le logement, au prix du catalogue ;

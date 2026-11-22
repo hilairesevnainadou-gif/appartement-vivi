@@ -58,7 +58,7 @@ class TarifsRelationManager extends RelationManager
                     ->suffix('FCFA')
                     ->required(),
                 TimePicker::make('heure_ouverture')->label('Ouverture')->seconds(false)->visible($est(Formule::Heure))->required($est(Formule::Heure)),
-                TimePicker::make('heure_fermeture')->label('Fermeture')->seconds(false)->visible($est(Formule::Heure))->required($est(Formule::Heure)),
+                TimePicker::make('heure_fermeture')->label('Fermeture')->helperText('Même heure que l’ouverture = ouvert 24 h/24. Avant l’ouverture = après minuit.')->seconds(false)->visible($est(Formule::Heure))->required($est(Formule::Heure)),
                 Select::make('duree_minimum_heures')
                     ->label('Durée minimale')
                     ->options([1 => '1 heure', 2 => '2 heures', 3 => '3 heures', 4 => '4 heures'])
@@ -82,7 +82,7 @@ class TarifsRelationManager extends RelationManager
                 TextColumn::make('horaires')
                     ->label('Horaires')
                     ->state(fn ($record) => match ($record->formule) {
-                        Formule::Heure => 'De '.substr($record->heure_ouverture, 0, 5).' à '.substr($record->heure_fermeture, 0, 5).' · minimum '.$record->duree_minimum_heures.' h',
+                        Formule::Heure => $record->horairesEnClair().' · minimum '.$record->duree_minimum_heures.' h',
                         Formule::Journee => $this->getOwnerRecord()->estSalle()
                             ? 'De '.substr($record->heure_arrivee, 0, 5).' à '.substr($record->heure_depart, 0, 5).' (même jour)'
                             : 'Arrivée '.substr($record->heure_arrivee, 0, 5).' · départ '.substr($record->heure_depart, 0, 5).' le lendemain',

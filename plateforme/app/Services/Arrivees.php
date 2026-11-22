@@ -107,8 +107,9 @@ class Arrivees
             $r->statut === StatutReservation::Consommee => throw new ArriveeRefusee('Réservation consommée', 'Le client ne s’est pas présenté le '.$quand.' : la réservation est consommée.'),
             $r->statut === StatutReservation::Annulee => throw new ArriveeRefusee('Réservation annulée', 'Cette réservation a été annulée. Le client ne peut pas entrer avec ce code.'),
             $r->statut !== StatutReservation::Confirmee => throw new ArriveeRefusee('Paiement non reçu', 'Cette réservation n’est pas encore payée.'),
-            // Accueil possible le jour de l'arrivée, ou pendant le séjour (arrivée tardive)
-            ! $r->debut->isToday() && ! now()->between($r->debut, $r->fin) => throw new ArriveeRefusee(
+            // Accueil possible le jour de l'arrivée, pendant le séjour (arrivée tardive) ou dans l'heure qui
+            // précède (lieu ouvert 24 h/24 : client en avance, avant minuit)
+            ! $r->debut->isToday() && ! now()->between($r->debut->copy()->subHour(), $r->fin) => throw new ArriveeRefusee(
                 'Réservation prévue un autre jour', 'Ce client est attendu le '.$quand.' à '.$r->debut->format('H:i').', pas aujourd’hui.'),
             default => null,
         };

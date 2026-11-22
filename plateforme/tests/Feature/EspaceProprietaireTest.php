@@ -195,6 +195,30 @@ class EspaceProprietaireTest extends TestCase
             ->assertSessionHasErrors('tarifs.heure.heure_fermeture');      // moins que la durée minimale
     }
 
+    public function test_le_proprietaire_ouvre_son_logement_24h_sur_24(): void
+    {
+        $this->actingAs($this->proprio)->post('/pro/logements', $this->fiche(['tarifs' => ['heure' => ['ouvert_24h' => '1']]]))->assertSessionHasNoErrors();
+        $l = Logement::where('titre', 'Résidence Les Cocotiers')->firstOrFail();
+        $this->assertTrue($l->ouvert24h());
+        $this->get('/pro/logements/'.$l->getRouteKey())->assertOk()->assertSee('Ouvert 24 h/24');
+
+        // Retour à des horaires, avec une fermeture après minuit
+        $this->post('/pro/logements/'.$l->getRouteKey(), $this->fiche(['tarifs' => ['heure' => ['heure_fermeture' => '02:00']]]))->assertSessionHasNoErrors();
+        $this->assertFalse($l->fresh()->ouvert24h());
+        $this->assertSame('De 08:00 à 02:00 (après minuit)', $l->fresh()->tarif(Formule::Heure)->horairesEnClair());
+    }
+
+    public function test_un_client_en_avance_avant_minuit_est_accueilli(): void
+    {
+        $r = $this->reservation('2026-11-13 00:00', '2026-11-13 03:00');
+        $this->actingAs($this->proprio);
+        $this->travelTo('2026-11-12 22:30');
+        $this->postJson('/pro/scanner/verifier', ['saisie' => '482913'])->assertStatus(422);
+        $this->travelTo('2026-11-12 23:30');
+        $this->postJson('/pro/scanner/verifier', ['saisie' => '482913'])->assertOk();
+        $this->postJson('/pro/scanner/demarrer', ['reference' => $r->reference])->assertOk();
+    }
+
     public function test_modifier_le_logement_et_ses_creneaux(): void
     {
         $l = $this->logement;

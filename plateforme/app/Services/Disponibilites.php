@@ -31,6 +31,9 @@ class Disponibilites
     /** Nombre maximal de jours pour la formule « journée ». */
     public const JOURS_MAX = 14;
 
+    /** Durée maximale d'un séjour à l'heure dans un lieu ouvert 24 h/24. */
+    public const HEURES_MAX = 24;
+
     /** @var array<string, array{0: Collection<int, array{0: CarbonImmutable, 1: CarbonImmutable}>, 1: Collection<int, array{0: CarbonImmutable, 1: CarbonImmutable}>}> */
     private array $cache = [];
 
@@ -107,18 +110,18 @@ class Disponibilites
         if (! $tarif) {
             return [];
         }
-        [$ouverture, $fermeture] = $this->plageHoraire($tarif, $date);
         $minimum = max(1, (int) $tarif->duree_minimum_heures);
-        $this->charger($logement, $ouverture->subDay(), $fermeture->addDay());
 
         $heures = [];
-        for ($debut = $ouverture; $debut->addHours($minimum)->lte($fermeture); $debut = $debut->addHour()) {
-            $dureeMax = 0;
-            for ($d = $minimum; $debut->addHours($d)->lte($fermeture); $d++) {
-                if (! $this->estLibre($logement, $debut, $debut->addHours($d))) {
-                    break;
+        foreach ($this->arrivees($tarif, $date) as [$debut, $limite]) {
+            // Plus le séjour est long, moins il est libre : on cherche la durée maximale par moitiés
+            $dureeMax = $this->estLibre($logement, $debut, $debut->addHours($minimum)) ? $minimum : 0;
+            if ($dureeMax) {
+                $haut = (int) floor($debut->diffInMinutes($limite) / 60);
+                while ($dureeMax < $haut) {
+                    $milieu = intdiv($dureeMax + $haut + 1, 2);
+                    $this->estLibre($logement, $debut, $debut->addHours($milieu)) ? $dureeMax = $milieu : $haut = $milieu - 1;
                 }
-                $dureeMax = $d;
             }
             $heures[] = ['heure' => $debut->format('H:i'), 'debut' => $debut, 'duree_max' => $dureeMax, 'libre' => $dureeMax >= $minimum];
         }
@@ -126,10 +129,52 @@ class Disponibilites
         return $heures;
     }
 
-    /** @return array{0: CarbonImmutable, 1: CarbonImmutable} ouverture et fermeture du jour (fermeture à 00:00 = minuit) */
+    /** Reste-t-il au moins une heure d'arrivée libre ce jour-là ? (recherche : on s'arrête à la première) */
+    public function uneHeureLibre(Logement $logement, CarbonInterface $date): bool
+    {
+        $tarif = $logement->tarif(Formule::Heure);
+        if (! $tarif) {
+            return false;
+        }
+        $minimum = max(1, (int) $tarif->duree_minimum_heures);
+        foreach ($this->arrivees($tarif, $date) as [$debut]) {
+            if ($this->estLibre($logement, $debut, $debut->addHours($minimum))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Arrivées possibles ce jour-là, heure par heure, chacune avec sa fin au plus tard : la fermeture,
+     * ou 24 heures après l'arrivée si le lieu est ouvert 24 h/24 (le séjour peut alors passer minuit).
+     *
+     * @param  int|null  $minutes  durée à loger (la durée minimale par défaut)
+     * @return list<array{0: CarbonImmutable, 1: CarbonImmutable}>
+     */
+    public function arrivees(Tarif $tarif, CarbonInterface $date, ?int $minutes = null): array
+    {
+        [$ouverture, $fermeture] = $this->plageHoraire($tarif, $date);
+        $minutes ??= max(1, (int) $tarif->duree_minimum_heures) * 60;
+        $arrivees = [];
+        for ($debut = $ouverture; $debut->isSameDay($ouverture); $debut = $debut->addHour()) {
+            $limite = $tarif->est24h() ? $debut->addHours(self::HEURES_MAX) : $fermeture;
+            if ($debut->addMinutes($minutes)->lte($limite)) {
+                $arrivees[] = [$debut, $limite];
+            }
+        }
+
+        return $arrivees;
+    }
+
+    /** @return array{0: CarbonImmutable, 1: CarbonImmutable} ouverture et fermeture du jour (fermeture avant l'ouverture = après minuit ; 24 h/24 = de minuit à minuit) */
     public function plageHoraire(Tarif $tarif, CarbonInterface $date): array
     {
         $jour = CarbonImmutable::instance($date)->startOfDay();
+        if ($tarif->est24h()) {
+            return [$jour, $jour->addDay()];
+        }
         $ouverture = $this->aHeure($jour, $tarif->heure_ouverture ?? '08:00');
         $fermeture = $this->aHeure($jour, $tarif->heure_fermeture ?? '22:00');
         if ($fermeture->lte($ouverture)) {
@@ -229,7 +274,7 @@ class Disponibilites
                 continue;
             }
             $resume[$formule->value] = match ($formule) {
-                Formule::Heure => collect($this->heures($logement, $date))->contains('libre', true),
+                Formule::Heure => $this->uneHeureLibre($logement, $date),
                 Formule::DemiJournee => collect($this->creneaux($logement, $date))->contains('libre', true),
                 Formule::Journee => $this->joursMax($logement, $date) > 0,
             };

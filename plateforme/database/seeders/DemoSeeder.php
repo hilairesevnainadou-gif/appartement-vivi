@@ -110,9 +110,11 @@ class DemoSeeder extends Seeder
 
         // ---------- Réservations ----------
         if (Reservation::count() === 0) {
-            $this->reservation($lagune, $clients[3], Formule::DemiJournee, today()->setTime(8, 0), today()->setTime(13, 0), StatutReservation::EnCours, scanne: true);
+            $this->reservation($lagune, $clients[3], Formule::DemiJournee, today()->setTime(6, 0), today()->setTime(11, 0), StatutReservation::EnCours, scanne: true);
             $this->reservation($lagune, $clients[0], Formule::Heure, today()->setTime(14, 0), today()->setTime(17, 0), StatutReservation::Confirmee, services: ['Pack Boissons' => 1]);
-            $this->reservation($cocotiers, $clients[2], Formule::DemiJournee, today()->setTime(16, 0), today()->setTime(22, 0), StatutReservation::Confirmee, services: ['Décoration romantique' => 1]);
+            $this->reservation($cocotiers, $clients[2], Formule::DemiJournee, today()->setTime(18, 0), today()->setTime(22, 0), StatutReservation::Confirmee, services: ['Décoration romantique' => 1]);
+            // De nuit, dans un appartement ouvert 24 h/24
+            $this->reservation(Logement::where('slug', 'studio-campus')->firstOrFail(), $clients[4], Formule::Heure, today()->setTime(23, 0), today()->addDay()->setTime(2, 0), StatutReservation::Confirmee);
             $this->reservation($cocotiers, $clients[1], Formule::Journee, today()->addDay()->setTime(13, 0), today()->addDays(3)->setTime(11, 0), StatutReservation::Confirmee, services: ['Petit-déjeuner' => 3]);
             $passee = $this->reservation($lagune, $clients[1], Formule::Journee, today()->subDays(2)->setTime(12, 0), today()->subDay()->setTime(11, 0), StatutReservation::Terminee, scanne: true, services: ['Ménage en cours de séjour' => 1]);
             $passee->avis()->create(['client_id' => $passee->client_id, 'logement_id' => $passee->logement_id, 'note' => 5,
@@ -207,19 +209,24 @@ class DemoSeeder extends Seeder
     private function logements(): array
     {
         $heure = fn ($prix, $de, $a, $min) => ['prix' => $prix, 'heure_ouverture' => $de, 'heure_fermeture' => $a, 'duree_minimum_heures' => $min];
+        // Ouvert 24 h/24 : ouverture égale à fermeture (Tarif::est24h)
+        $heure24 = fn ($prix, $min) => $heure($prix, '00:00', '00:00', $min);
         $demi = fn ($prix) => ['prix' => $prix];
         $jour = fn ($prix, $arrivee, $depart) => ['prix' => $prix, 'heure_arrivee' => $arrivee, 'heure_depart' => $depart];
         $base = ['Climatisation', 'Wi-Fi', 'Télévision'];
+        // Créneaux de jour et de nuit : entre deux créneaux, le temps de préparation (une heure, ou deux pour les grandes salles)
+        $jourEtNuit = [['Matin', '06:00', '11:00'], ['Après-midi', '12:00', '17:00'], ['Soirée', '18:00', '22:00'], ['Nuit', '23:00', '05:00']];
+        $salleJourEtNuit = [['Matinée', '06:00', '12:00'], ['Après-midi', '14:00', '20:00'], ['Nuit', '22:00', '04:00']];
 
         return [
             ['titre' => 'Studio Lagune', 'type' => 'studio', 'ville' => 'Cotonou', 'quartier' => 'Fidjrossè', 'capacite' => 2, 'chambres' => 1, 'lits' => 1, 'sdb' => 1,
-                'tarifs' => ['heure' => $heure(3500, '08:00', '22:00', 2), 'demi_journee' => $demi(10000), 'journee' => $jour(18000, '12:00', '11:00')],
-                'creneaux' => [['Matin', '08:00', '13:00'], ['Après-midi', '14:00', '19:00'], ['Soirée', '20:00', '01:00']],
+                'tarifs' => ['heure' => $heure24(3500, 2), 'demi_journee' => $demi(10000), 'journee' => $jour(18000, '12:00', '11:00')],
+                'creneaux' => $jourEtNuit,
                 'equipements' => [...$base, 'Cuisine équipée', 'Groupe électrogène', 'Eau chaude'], 'services' => ['Pack Boissons', 'Ménage en cours de séjour', 'Décoration romantique', 'Chauffeur', 'Petit-déjeuner', 'Wi-Fi haut débit'],
                 'photos' => ['studio-loft', 'chambre-grise', 'cuisine-blanche', 'salle-de-bain', 'coin-lecture']],
             ['titre' => 'Résidence Les Cocotiers', 'type' => 'f2', 'ville' => 'Cotonou', 'quartier' => 'Cadjèhoun', 'capacite' => 3, 'chambres' => 1, 'lits' => 2, 'sdb' => 1,
-                'tarifs' => ['heure' => $heure(5000, '09:00', '21:00', 2), 'demi_journee' => $demi(14000), 'journee' => $jour(25000, '13:00', '11:00')],
-                'creneaux' => [['Journée', '09:00', '15:00'], ['Soirée', '16:00', '22:00']],
+                'tarifs' => ['heure' => $heure24(5000, 2), 'demi_journee' => $demi(14000), 'journee' => $jour(25000, '13:00', '11:00')],
+                'creneaux' => $jourEtNuit,
                 'equipements' => [...$base, 'Cuisine équipée', 'Parking', 'Eau chaude'], 'services' => ['Pack Boissons', 'Ménage en cours de séjour', 'Décoration romantique', 'Petit-déjeuner'],
                 'photos' => ['salon-classique', 'chambre-orange', 'salle-de-bain']],
             ['titre' => 'Chambre meublée Ganhi', 'type' => 'chambre', 'ville' => 'Cotonou', 'quartier' => 'Ganhi', 'capacite' => 2, 'chambres' => 1, 'lits' => 1, 'sdb' => 1,
@@ -229,13 +236,13 @@ class DemoSeeder extends Seeder
                 'equipements' => $base, 'services' => ['Pack Boissons', 'Ménage en cours de séjour'],
                 'photos' => ['chambre-grise', 'coin-lecture', 'salle-de-bain']],
             ['titre' => 'Appartement Haie Vive', 'type' => 'f3', 'ville' => 'Cotonou', 'quartier' => 'Haie Vive', 'capacite' => 4, 'chambres' => 2, 'lits' => 2, 'sdb' => 2,
-                'tarifs' => ['demi_journee' => $demi(20000), 'journee' => $jour(35000, '14:00', '12:00')],
-                'creneaux' => [['Matin', '08:00', '13:00'], ['Après-midi', '14:00', '19:00']],
+                'tarifs' => ['heure' => $heure24(7000, 2), 'demi_journee' => $demi(20000), 'journee' => $jour(35000, '14:00', '12:00')],
+                'creneaux' => $jourEtNuit,
                 'equipements' => [...$base, 'Cuisine équipée', 'Parking', 'Groupe électrogène', 'Gardien 24 h/24', 'Balcon'], 'services' => ['Pack Boissons', 'Ménage en cours de séjour', 'Chauffeur', 'Petit-déjeuner', 'Wi-Fi haut débit'],
                 'photos' => ['salon-cuir', 'chambre-capitonnee', 'cuisine-blanche', 'salle-de-bain-claire', 'salon-canape-clair']],
             ['titre' => 'Studio Campus', 'type' => 'studio', 'ville' => 'Abomey-Calavi', 'quartier' => 'Zogbadjè', 'capacite' => 2, 'chambres' => 1, 'lits' => 1, 'sdb' => 1,
-                'tarifs' => ['heure' => $heure(2500, '07:00', '23:00', 2), 'demi_journee' => $demi(7000), 'journee' => $jour(12000, '12:00', '10:00')],
-                'creneaux' => [['Matin', '07:00', '12:00'], ['Après-midi', '13:00', '18:00'], ['Soirée', '19:00', '00:00']],
+                'tarifs' => ['heure' => $heure24(2500, 1), 'demi_journee' => $demi(7000), 'journee' => $jour(12000, '12:00', '10:00')],
+                'creneaux' => $jourEtNuit,
                 'equipements' => [...$base, 'Eau chaude'], 'services' => ['Pack Boissons', 'Ménage en cours de séjour', 'Wi-Fi haut débit'],
                 'photos' => ['studio-minimal', 'chambre-grise', 'salle-de-bain']],
             ['titre' => 'Villa-appartement Ouidah Plage', 'type' => 'f4', 'ville' => 'Ouidah', 'quartier' => 'Djègbadji', 'capacite' => 6, 'chambres' => 3, 'lits' => 4, 'sdb' => 2,
@@ -243,8 +250,8 @@ class DemoSeeder extends Seeder
                 'equipements' => [...$base, 'Cuisine équipée', 'Parking', 'Groupe électrogène', 'Piscine', 'Gardien 24 h/24'], 'services' => ['Pack Boissons', 'Ménage en cours de séjour', 'Décoration romantique', 'Chauffeur', 'Petit-déjeuner'],
                 'photos' => ['villa-piscine', 'salon-baies', 'chambre-capitonnee', 'cuisine-blanche', 'salle-de-bain-claire']],
             ['titre' => 'F2 Akpakpa Centre', 'type' => 'f2', 'ville' => 'Cotonou', 'quartier' => 'Akpakpa', 'capacite' => 3, 'chambres' => 1, 'lits' => 2, 'sdb' => 1,
-                'tarifs' => ['heure' => $heure(3000, '08:00', '22:00', 3), 'demi_journee' => $demi(9000), 'journee' => $jour(16000, '12:00', '11:00')],
-                'creneaux' => [['Matin', '08:00', '13:00'], ['Après-midi', '14:00', '19:00']],
+                'tarifs' => ['heure' => $heure24(3000, 3), 'demi_journee' => $demi(9000), 'journee' => $jour(16000, '12:00', '11:00')],
+                'creneaux' => $jourEtNuit,
                 'equipements' => [...$base, 'Cuisine équipée', 'Groupe électrogène'], 'services' => ['Pack Boissons', 'Ménage en cours de séjour', 'Chauffeur'],
                 'photos' => ['sejour-rouge', 'chambre-orange', 'cuisine-blanche']],
             ['titre' => 'Loft Les Jacarandas', 'type' => 'f2', 'ville' => 'Porto-Novo', 'quartier' => 'Ouando', 'capacite' => 4, 'chambres' => 1, 'lits' => 2, 'sdb' => 1,
@@ -256,24 +263,24 @@ class DemoSeeder extends Seeder
             ['titre' => 'Salle des fêtes Les Palmiers', 'type' => 'salle_fetes', 'ville' => 'Cotonou', 'quartier' => 'Akpakpa', 'capacite' => 300, 'chambres' => 0, 'lits' => 0, 'sdb' => 4,
                 'description' => 'Grande salle climatisée pour mariages, anniversaires et baptêmes : piste de danse, loge pour les mariés, parking surveillé.',
                 'preparation' => 120, 'gestion' => 'vivi',
-                'tarifs' => ['heure' => $heure(30000, '08:00', '02:00', 4), 'demi_journee' => $demi(120000), 'journee' => $jour(250000, '08:00', '02:00')],
-                'creneaux' => [['Journée', '08:00', '16:00'], ['Soirée', '17:00', '02:00']],
+                'tarifs' => ['heure' => $heure24(30000, 4), 'demi_journee' => $demi(120000), 'journee' => $jour(250000, '08:00', '06:00')],
+                'creneaux' => $salleJourEtNuit,
                 'equipements' => ['Climatisation', 'Sonorisation', 'Micro', 'Tables et chaises', 'Scène ou estrade', 'Parking', 'Groupe électrogène', 'Gardien 24 h/24'],
                 'services' => ['Décoration de salle', 'Traiteur', 'Agent de sécurité', 'Nettoyage après l’événement', 'Pack Boissons'],
                 'photos' => []],
             ['titre' => 'Centre de conférences Haie Vive', 'type' => 'salle_conference', 'ville' => 'Cotonou', 'quartier' => 'Haie Vive', 'capacite' => 120, 'chambres' => 0, 'lits' => 0, 'sdb' => 2,
                 'description' => 'Salle de conférence équipée pour séminaires, formations et assemblées : vidéoprojecteur, sonorisation, Wi-Fi haut débit.',
                 'preparation' => 60,
-                'tarifs' => ['heure' => $heure(25000, '07:00', '22:00', 2), 'demi_journee' => $demi(90000), 'journee' => $jour(160000, '07:00', '22:00')],
-                'creneaux' => [['Matinée', '08:00', '13:00'], ['Après-midi', '14:00', '19:00']],
+                'tarifs' => ['heure' => $heure24(25000, 2), 'demi_journee' => $demi(90000), 'journee' => $jour(160000, '08:00', '07:00')],
+                'creneaux' => [['Matinée', '07:00', '12:00'], ['Après-midi', '13:00', '18:00'], ['Soirée', '19:00', '00:00'], ['Nuit', '01:00', '06:00']],
                 'equipements' => ['Climatisation', 'Wi-Fi', 'Vidéoprojecteur et écran', 'Sonorisation', 'Micro', 'Tables et chaises', 'Parking', 'Groupe électrogène', 'Accès personnes à mobilité réduite'],
                 'services' => ['Traiteur', 'Pack Boissons', 'Nettoyage après l’événement'],
                 'photos' => []],
             ['titre' => 'Salle de réunion Ganhi Business', 'type' => 'salle_reunion', 'ville' => 'Cotonou', 'quartier' => 'Ganhi', 'capacite' => 20, 'chambres' => 0, 'lits' => 0, 'sdb' => 1,
                 'description' => 'Salle de réunion au calme, en plein quartier d’affaires : grande table, écran, Wi-Fi et café.',
                 'preparation' => 30,
-                'tarifs' => ['heure' => $heure(10000, '08:00', '20:00', 1), 'demi_journee' => $demi(35000)],
-                'creneaux' => [['Matinée', '08:00', '13:00'], ['Après-midi', '14:00', '19:00']],
+                'tarifs' => ['heure' => $heure24(10000, 1), 'demi_journee' => $demi(35000)],
+                'creneaux' => [['Matinée', '08:00', '13:00'], ['Après-midi', '14:00', '19:00'], ['Soirée', '20:00', '01:00'], ['Nuit', '02:00', '07:00']],
                 'equipements' => ['Climatisation', 'Wi-Fi', 'Vidéoprojecteur et écran', 'Tables et chaises', 'Groupe électrogène'],
                 'services' => ['Pack Boissons', 'Traiteur'],
                 'photos' => []],
@@ -281,14 +288,14 @@ class DemoSeeder extends Seeder
                 'description' => 'Grand jardin arboré pour réceptions en plein air, mariages et concerts privés, avec électricité et sanitaires.',
                 'preparation' => 120,
                 'tarifs' => ['demi_journee' => $demi(150000), 'journee' => $jour(300000, '08:00', '02:00')],
-                'creneaux' => [['Journée', '08:00', '17:00'], ['Soirée', '17:00', '02:00']],
+                'creneaux' => [['Journée', '08:00', '16:00'], ['Soirée', '18:00', '02:00']],
                 'equipements' => ['Espace extérieur', 'Sonorisation', 'Tables et chaises', 'Parking', 'Groupe électrogène', 'Gardien 24 h/24'],
                 'services' => ['Décoration de salle', 'Traiteur', 'Agent de sécurité', 'Nettoyage après l’événement'],
                 'photos' => []],
             ['titre' => 'Villa événementielle Ouidah', 'type' => 'espace_complet', 'ville' => 'Ouidah', 'quartier' => 'Djègbadji', 'capacite' => 80, 'chambres' => 0, 'lits' => 0, 'sdb' => 3,
                 'description' => 'Villa entière avec piscine et jardin, louée pour votre événement : anniversaires, shootings, séminaires au vert.',
                 'preparation' => 120, 'gestion' => 'vivi',
-                'tarifs' => ['journee' => $jour(200000, '09:00', '23:00')],
+                'tarifs' => ['heure' => $heure24(25000, 4), 'journee' => $jour(200000, '09:00', '07:00')],
                 'equipements' => ['Climatisation', 'Piscine', 'Espace extérieur', 'Sonorisation', 'Tables et chaises', 'Parking', 'Groupe électrogène'],
                 'services' => ['Décoration de salle', 'Traiteur', 'Agent de sécurité', 'Chauffeur'],
                 'photos' => ['villa-piscine', 'salon-baies']],

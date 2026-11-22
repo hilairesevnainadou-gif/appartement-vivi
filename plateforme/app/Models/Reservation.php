@@ -208,7 +208,7 @@ class Reservation extends Model
         $a = $this->fin->format('H:i');
 
         return match ($this->formule) {
-            Formule::Heure => "De {$de} à {$a} (".$this->dureeCourte().')',
+            Formule::Heure => "De {$de} à {$a}".($this->fin->copy()->subMinute()->isSameDay($this->debut) ? '' : ' le lendemain').' ('.$this->dureeCourte().')',
             Formule::DemiJournee => ($this->creneau?->nom ?? 'Demi-journée').", de {$de} à {$a}",
             Formule::Journee => self::journeeEnClair($this->debut, $this->fin, (bool) $this->loadMissing('logement')->logement?->estSalle()),
         };

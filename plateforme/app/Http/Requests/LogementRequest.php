@@ -58,6 +58,7 @@ class LogementRequest extends FormRequest
             'tarifs.heure.heure_ouverture' => ['exclude_unless:tarifs.heure.actif,true', 'required', ...$heure],
             'tarifs.heure.heure_fermeture' => ['exclude_unless:tarifs.heure.actif,true', 'required', ...$heure],
             'tarifs.heure.duree_minimum_heures' => ['exclude_unless:tarifs.heure.actif,true', 'required', 'integer', 'min:1', 'max:6'],
+            'tarifs.heure.ouvert_24h' => ['nullable', 'boolean'],
 
             'tarifs.demi_journee.actif' => ['boolean'],
             'tarifs.demi_journee.prix' => ['exclude_unless:tarifs.demi_journee.actif,true', 'required', 'integer', 'min:500', 'max:1000000'],
@@ -86,9 +87,10 @@ class LogementRequest extends FormRequest
                 $de = $t['heure']['heure_ouverture'] ?? '';
                 $a = $t['heure']['heure_fermeture'] ?? '';
                 $min = (int) ($t['heure']['duree_minimum_heures'] ?? 1);
-                // Fermeture à 00:00 = minuit
-                $minutes = fn ($h) => $h === '00:00' ? 1440 : ((int) substr($h, 0, 2) * 60 + (int) substr($h, 3, 2));
-                if ($de !== '' && $a !== '' && $minutes($a) - $minutes($de) < $min * 60) {
+                // Fermeture avant l'ouverture = après minuit ; fermeture égale à l'ouverture = 24 h/24
+                $minutes = fn ($h) => (int) substr($h, 0, 2) * 60 + (int) substr($h, 3, 2);
+                $plage = $minutes($a) - $minutes($de);
+                if ($de !== '' && $a !== '' && ($plage <= 0 ? $plage + 1440 : $plage) < $min * 60) {
                     $v->errors()->add('tarifs.heure.heure_fermeture', "La fermeture doit laisser au moins {$min} h après l’ouverture.");
                 }
             }
@@ -124,6 +126,10 @@ class LogementRequest extends FormRequest
         $t = (array) $this->input('tarifs', []);
         foreach (['heure', 'demi_journee', 'journee'] as $f) {
             $t[$f]['actif'] = (bool) ($t[$f]['actif'] ?? false);
+        }
+        // « Ouvert 24 h/24 » : enregistré de minuit à minuit
+        if (filter_var($t['heure']['ouvert_24h'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+            $t['heure']['heure_ouverture'] = $t['heure']['heure_fermeture'] = '00:00';
         }
         $this->merge(['tarifs' => $t, 'creneaux' => array_values((array) $this->input('creneaux', []))]);
 

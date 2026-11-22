@@ -289,6 +289,12 @@ class Logement extends Model
         return $this->tarifs->first(fn (Tarif $t) => $t->formule === $formule && $t->actif);
     }
 
+    /** Réservable à l'heure, de jour comme de nuit. */
+    public function ouvert24h(): bool
+    {
+        return (bool) $this->tarif(Formule::Heure)?->est24h();
+    }
+
     /* ---------- Affichage côté client ---------- */
 
     /** Note moyenne et nombre d'avis publiés (colonnes note_moyenne et nombre_avis). */

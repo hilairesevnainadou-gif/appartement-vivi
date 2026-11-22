@@ -37,6 +37,8 @@ class LogementResource extends JsonResource
             'lits' => (int) $this->lits,
             'salles_de_bain' => (int) $this->salles_de_bain,
             'unites' => (int) $this->unites,
+            // Réservable à l'heure, de jour comme de nuit
+            'ouvert_24h' => $this->relationLoaded('tarifs') && $this->ouvert24h(),
             'note' => $this->nombre_avis ? round((float) $this->note_moyenne, 1) : null,
             'nombre_avis' => (int) ($this->nombre_avis ?? 0),
             'photo' => $this->relationLoaded('photos') ? $this->urlPhoto() : null,

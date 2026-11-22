@@ -78,8 +78,7 @@ class ApresVente
         $options = [];
         switch ($r->formule) {
             case Formule::Heure:
-                [$ouverture, $fermeture] = $this->disponibilites->plageHoraire($logement->tarif(Formule::Heure), $jour);
-                for ($d = $ouverture; $d->addMinutes($duree)->lte($fermeture); $d = $d->addHour()) {
+                foreach ($this->disponibilites->arrivees($logement->tarif(Formule::Heure), $jour, $duree) as [$d]) {
                     if ($libre($d, $d->addMinutes($duree))) {
                         $options[] = ['valeur' => $d->format('H:i'), 'libelle' => $d->format('H:i').' → '.$d->addMinutes($duree)->format('H:i'), 'debut' => $d];
                     }

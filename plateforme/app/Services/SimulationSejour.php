@@ -88,7 +88,8 @@ class SimulationSejour
                 $duree = min(max($minimum, (int) ($demande['duree'] ?? max($minimum, 3))), $choisie['duree_max']);
                 $etat = array_merge($etat, ['heure' => $choisie['heure'], 'duree' => $duree, 'duree_min' => $minimum, 'duree_max' => $choisie['duree_max']]);
                 $choix = ['heure' => $choisie['heure'], 'duree' => $duree];
-                $etat['aide'] = ($logement->estSalle() ? 'Fin à ' : 'Départ à ').$choisie['debut']->addHours($duree)->format('H:i').' · minimum '.$minimum.' h pour '.$logement->mot('ce').'.';
+                $fin = $choisie['debut']->addHours($duree);
+                $etat['aide'] = ($logement->estSalle() ? 'Fin à ' : 'Départ à ').$fin->format('H:i').($fin->subMinute()->isSameDay($choisie['debut']) ? '' : ' le lendemain').' · minimum '.$minimum.' h pour '.$logement->mot('ce').'.';
                 break;
 
             case Formule::DemiJournee:
