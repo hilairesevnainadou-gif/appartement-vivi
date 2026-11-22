@@ -524,6 +524,7 @@ fun CarteLogement(l: Logement, modifier: Modifier = Modifier, onClick: () -> Uni
                 PhotoLogement(l.photo, null, Modifier.fillMaxWidth().aspectRatio(4f / 3f))
                 Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     l.type?.let { Puce(it.libelle.substringBefore(" ("), TonPuce.Ligne) }
+                    if (l.ouvert24h) Puce("24 h/24", TonPuce.Orange, Icons.Outlined.Schedule)
                     l.distanceKm?.let { Puce("à ${"%.1f".format(Fmt.locale, it)} km", TonPuce.Ligne) }
                 }
             }

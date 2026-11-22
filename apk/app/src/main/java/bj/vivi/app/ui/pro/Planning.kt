@@ -405,7 +405,7 @@ private fun FeuilleAjoutReservation(
                 "heure" -> {
                     Text(if (salle) "Heure de début" else "Heure d’arrivée", style = MaterialTheme.typography.labelMedium, color = Vivi.Ink)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        (7..22).map { "%02d:00".format(it) }.forEach { h -> CaseChoix(h, choisi = h == heure) { heure = h } }
+                        (0..23).map { "%02d:00".format(it) }.forEach { h -> CaseChoix(h, choisi = h == heure) { heure = h } }
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Durée", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
@@ -654,7 +654,7 @@ private fun FeuilleDeplacer(vm: ReservationProViewModel, onFermer: () -> Unit) {
             BoutonContour(Fmt.jourLong(date), { choixDate = true }, Modifier.fillMaxWidth(), icone = Icons.Outlined.CalendarMonth)
             Text("Heure d’arrivée", style = MaterialTheme.typography.labelMedium, color = Vivi.Ink)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                (7..22).map { "%02d:00".format(it) }.forEach { h -> CaseChoix(h, choisi = h == heure) { heure = h } }
+                (0..23).map { "%02d:00".format(it) }.forEach { h -> CaseChoix(h, choisi = h == heure) { heure = h } }
             }
             BoutonPrincipal("Déplacer au ${Fmt.jourCourt(date)} à $heure", { vm.deplacer(date, heure, onFermer) }, Modifier.fillMaxWidth(), enCours = vm.enCours, icone = Icons.Outlined.EventRepeat)
         }

@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use App\Support\Telephone;
 use FedaPay\FedaPay;
 use FedaPay\Transaction;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -23,8 +24,22 @@ class FedaPayPasserelle implements Passerelle
 
     public function __construct(string $cleSecrete, string $environnement)
     {
-        FedaPay::setApiKey($cleSecrete);
-        FedaPay::setEnvironment($environnement);
+        FedaPay::setApiKey(trim($cleSecrete));
+        FedaPay::setEnvironment(self::environnement($cleSecrete, $environnement));
+    }
+
+    /**
+     * « sandbox » ou « live » : le préfixe de la clé secrète fait foi (sk_live_…, sk_sandbox_…). Avec une autre valeur,
+     * la bibliothèque n'aurait aucune adresse à appeler et chaque paiement échouerait.
+     */
+    public static function environnement(string $cleSecrete, string $environnement): string
+    {
+        return match (true) {
+            str_starts_with(trim($cleSecrete), 'sk_live_') => 'live',
+            str_starts_with(trim($cleSecrete), 'sk_sandbox_') => 'sandbox',
+            in_array($environnement, ['live', 'production'], true) => 'live',
+            default => 'sandbox',
+        };
     }
 
     public function nom(): string
@@ -47,9 +62,9 @@ class FedaPayPasserelle implements Passerelle
             'lastname' => $payeur ? ((string) str($payeur->name)->after(' ') ?: null) : null,
             'email' => $payeur?->email,
         ]);
-        if ($payeur?->telephone) {
+        if ($numero = Telephone::normaliser($payeur?->telephone)) {
             // Numéro béninois à 10 chiffres, sans l'indicatif
-            $client['phone_number'] = ['number' => Telephone::normaliser($payeur->telephone), 'country' => 'bj'];
+            $client['phone_number'] = ['number' => $numero, 'country' => 'bj'];
         }
 
         try {
@@ -63,6 +78,11 @@ class FedaPayPasserelle implements Passerelle
             ]));
             $jeton = $transaction->generateToken();
         } catch (Throwable $e) {
+            // Dans le journal : clé refusée (401) ou demande refusée ne se règlent pas en réessayant
+            Log::error('FedaPay : création du paiement impossible', [
+                'paiement' => $paiement->getKey(), 'environnement' => FedaPay::getEnvironment(),
+                'http' => $e instanceof \FedaPay\Error\Base ? $e->getHttpStatus() : null, 'erreur' => $e->getMessage(),
+            ]);
             report($e);
             throw new EchecPaiement('Le service de paiement ne répond pas. Réessayez dans un instant.', previous: $e);
         }

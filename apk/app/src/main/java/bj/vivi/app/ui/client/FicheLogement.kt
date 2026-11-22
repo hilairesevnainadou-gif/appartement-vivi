@@ -288,7 +288,10 @@ private fun Contenu(f: FicheLogement, avis: List<Avis>, proches: List<Logement>,
                                 Icon(iconeFormule(t.formule.valeur), null, tint = Vivi.Teal700, modifier = Modifier.size(20.dp))
                             }
                             Spacer(Modifier.width(12.dp))
-                            Text(t.formule.libelle, style = MaterialTheme.typography.titleSmall, color = Vivi.Teal800, modifier = Modifier.weight(1f))
+                            Column(Modifier.weight(1f)) {
+                                Text(t.formule.libelle, style = MaterialTheme.typography.titleSmall, color = Vivi.Teal800)
+                                if (l.ouvert24h && t.formule.valeur == "heure") Text("Ouvert 24 h/24", fontSize = 12.sp, color = Vivi.Teal800)
+                            }
                             Text(t.prixTexte, style = MaterialTheme.typography.titleMedium, maxLines = 1)
                             Text(" " + t.unite, fontSize = 12.sp, color = Vivi.Muted, maxLines = 1)
                         }

@@ -156,7 +156,7 @@ En local, `VIVI_PAIEMENT_PILOTE=simulation` : une page VIVI propose « paiement 
 
 ```dotenv
 VIVI_PAIEMENT_PILOTE=fedapay
-FEDAPAY_ENVIRONMENT=sandbox          # live en production
+FEDAPAY_ENVIRONMENT=sandbox          # live en production (jamais une clé ; la clé publique pk_ ne sert pas)
 FEDAPAY_SECRET_KEY=sk_sandbox_...    # Développeurs > Clés API
 FEDAPAY_WEBHOOK_SECRET=wh_sandbox_... # Développeurs > Webhooks, adresse https://<domaine>/webhooks/fedapay
 ```

@@ -279,6 +279,8 @@ data class Logement(
     val lits: Int = 0,
     @SerialName("salles_de_bain") val sallesDeBain: Int = 0,
     val unites: Int = 1,
+    /** Réservable à l'heure de jour comme de nuit (appartement ou salle). */
+    @SerialName("ouvert_24h") val ouvert24h: Boolean = false,
     val note: Double? = null,
     @SerialName("nombre_avis") val nombreAvis: Int = 0,
     val photo: String? = null,
@@ -754,6 +756,7 @@ data class FicheLogementPro(
         val prix: Int? = null,
         @SerialName("heure_ouverture") val heureOuverture: String? = null,
         @SerialName("heure_fermeture") val heureFermeture: String? = null,
+        @SerialName("ouvert_24h") val ouvert24h: Boolean = false,
         @SerialName("duree_minimum_heures") val dureeMinimumHeures: Int? = null,
         @SerialName("heure_arrivee") val heureArrivee: String? = null,
         @SerialName("heure_depart") val heureDepart: String? = null,

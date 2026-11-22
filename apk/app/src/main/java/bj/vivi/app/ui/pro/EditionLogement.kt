@@ -227,6 +227,13 @@ class EditionLogementViewModel(etatNav: SavedStateHandle) : EcranViewModel<Fiche
         })
     }
 
+    /** 24 h/24 : le serveur enregistre de minuit à minuit. En revenant à des horaires, deux heures égales vaudraient encore 24 h/24. */
+    fun ouvert24h(actif: Boolean) = tarif("heure") {
+        if (actif) copy(ouvert24h = true)
+        else if (heureOuverture == heureFermeture) copy(ouvert24h = false, heureOuverture = "08:00", heureFermeture = "22:00")
+        else copy(ouvert24h = false)
+    }
+
     fun activer(formule: String, actif: Boolean) = tarif(formule) {
         when {
             !actif -> copy(actif = false)
@@ -310,7 +317,7 @@ class EditionLogementViewModel(etatNav: SavedStateHandle) : EcranViewModel<Fiche
         "marketing_valeur" to (if (f.marketingType == null) JsonNull else partTexte.replace(',', '.').toDoubleOrNull()?.let { JsonPrimitive(it) }),
         "tarifs" to mapOf(
             "heure" to with(f.tarifs.heure) {
-                mapOf("actif" to actif, "prix" to prix, "heure_ouverture" to heureOuverture, "heure_fermeture" to heureFermeture, "duree_minimum_heures" to dureeMinimumHeures).filterValues { it != null }
+                mapOf("actif" to actif, "prix" to prix, "heure_ouverture" to heureOuverture, "heure_fermeture" to heureFermeture, "ouvert_24h" to ouvert24h, "duree_minimum_heures" to dureeMinimumHeures).filterValues { it != null }
             },
             "demi_journee" to with(f.tarifs.demiJournee) { mapOf("actif" to actif, "prix" to prix).filterValues { it != null } },
             "journee" to with(f.tarifs.journee) {
@@ -679,7 +686,17 @@ private fun EtapeTarifs(vm: EditionLogementViewModel) {
     Bloc {
         Formule("À l’heure", Icons.Outlined.Schedule, f.tarifs.heure.actif, { vm.activer("heure", it) }) {
             ChampPrix(f.tarifs.heure.prix, "Prix par heure", e["tarifs.heure.prix"]) { p -> vm.tarif("heure") { copy(prix = p) } }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 52.dp).toggleable(f.tarifs.heure.ouvert24h, role = Role.Switch) { v -> vm.ouvert24h(v) },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f).padding(end = 12.dp)) {
+                    Text("Ouvert 24 h/24", style = MaterialTheme.typography.bodyLarge, color = Vivi.Ink)
+                    Text("Arrivée à toute heure, de jour comme de nuit.", style = MaterialTheme.typography.bodySmall)
+                }
+                Switch(f.tarifs.heure.ouvert24h, null, colors = SwitchDefaults.colors(checkedTrackColor = Vivi.Teal700))
+            }
+            if (!f.tarifs.heure.ouvert24h) Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ChampHeure("Ouverture", f.tarifs.heure.heureOuverture, Modifier.weight(1f), e["tarifs.heure.heure_ouverture"]) { h -> vm.tarif("heure") { copy(heureOuverture = h) } }
                 ChampHeure("Fermeture", f.tarifs.heure.heureFermeture, Modifier.weight(1f), e["tarifs.heure.heure_fermeture"]) { h -> vm.tarif("heure") { copy(heureFermeture = h) } }
             }
@@ -863,7 +880,7 @@ private fun EtapeRecapitulatif(vm: EditionLogementViewModel) {
             Ligne(2, "Capacité", if (estSalle(f.type)) "${f.capacite} places" else "${f.capacite} voyageurs · ${f.chambres} ch. · ${f.lits} lit${if (f.lits > 1) "s" else ""} · ${f.sallesDeBain} sdb")
             Separateur()
             Ligne(3, "Formules", listOfNotNull(
-                t.heure.prix?.takeIf { t.heure.actif }?.let { "${Fmt.fcfa(it)} / h" },
+                t.heure.prix?.takeIf { t.heure.actif }?.let { "${Fmt.fcfa(it)} / h" + if (t.heure.ouvert24h) " (24 h/24)" else "" },
                 t.demiJournee.prix?.takeIf { t.demiJournee.actif }?.let { "${Fmt.fcfa(it)} / créneau" },
                 t.journee.prix?.takeIf { t.journee.actif }?.let { "${Fmt.fcfa(it)} / jour" },
             ).joinToString(" · ").ifEmpty { "Aucune formule" })
