@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Reporter ma réservation · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="reservations" class="bg-sand">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu">
+    <div class="container py-3 py-lg-4" style="max-width:760px">
+      <a class="back-link" id="retour" href="ma-reservation.html"><i class="bi bi-arrow-left" aria-hidden="true"></i>Ma réservation</a>
+
+      <!-- ===== Choix de la nouvelle date ===== -->
+      <section id="vue-choix" aria-labelledby="t-report">
+        <h1 class="page-title mt-2 mb-1" id="t-report">Reporter ma réservation</h1>
+        <p class="text-soft" id="rp-resume"></p>
+
+        <div class="note-box mb-3">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <span>Le report est gratuit. Vous pouvez choisir une date jusqu’au <strong id="rp-limite"></strong>, selon les disponibilités de ce logement.</span>
+        </div>
+
+        <form id="form-report" novalidate>
+          <div class="panel">
+            <h2 id="t-date">1. Nouvelle date</h2>
+            <div class="day-grid mt-3" id="rp-jours" role="radiogroup" aria-labelledby="t-date"></div>
+            <div class="invalid-feedback" id="rp-jour-erreur">Choisissez une nouvelle date.</div>
+          </div>
+
+          <div class="panel">
+            <h2 id="t-creneau">2. Créneau</h2>
+            <div class="mt-3" id="rp-creneau"></div>
+          </div>
+
+          <div class="panel">
+            <h2>Récapitulatif</h2>
+            <dl class="detail-list mt-3">
+              <div><dt>Nouvelle date</dt><dd id="rp-r-date">À choisir</dd></div>
+              <div><dt>Créneau</dt><dd id="rp-r-creneau"></dd></div>
+              <div><dt>À payer</dt><dd>Rien, le report est gratuit</dd></div>
+            </dl>
+            <div class="form-check align-items-start mt-3">
+              <input class="form-check-input mt-1" type="checkbox" id="rp-accord" aria-describedby="rp-accord-erreur">
+              <label class="form-check-label" for="rp-accord">J’ai compris qu’une réservation reportée n’est plus remboursable : le montant payé reste acquis pour ce logement.</label>
+            </div>
+            <div class="invalid-feedback" id="rp-accord-erreur">Cochez cette case pour confirmer le report.</div>
+            <button class="btn btn-cta btn-lg w-100 mt-3" type="submit">Confirmer le report</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ===== Délai dépassé ===== -->
+      <section id="vue-trop-tard" hidden>
+        <div class="panel done">
+          <div class="check-badge check-badge--neutre"><i class="bi bi-hourglass-bottom" aria-hidden="true"></i></div>
+          <h1>Le report n’est plus possible</h1>
+          <p class="text-soft">Un report doit être demandé au plus tard 3 heures avant l’arrivée. Passé ce délai, ou si vous ne vous êtes pas présenté, la réservation est considérée comme consommée : seuls le propriétaire ou VIVI peuvent encore la déplacer.</p>
+          <a class="btn btn-primary" href="mes-reservations.html">Retour à mes réservations</a>
+        </div>
+      </section>
+
+      <!-- ===== Report confirmé ===== -->
+      <section id="vue-fait" hidden>
+        <div class="panel done" role="status">
+          <div class="check-badge"><i class="bi bi-check-lg" aria-hidden="true"></i></div>
+          <h1>Réservation reportée</h1>
+          <p class="mb-1">Nouvelle date : <strong class="text-ink" id="rp-f-date"></strong></p>
+          <p class="text-soft">Un nouveau QR Code a été généré. L’ancien n’est plus valable.</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a class="btn btn-primary" id="rp-f-lien" href="ma-reservation.html"><i class="bi bi-qr-code" aria-hidden="true"></i>Voir mon nouveau QR Code</a>
+            <a class="btn btn-ghost" href="mes-reservations.html">Mes réservations</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer id="vivi-pied" class="vivi-footer mt-5"></footer>
+  <nav id="vivi-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/reporter.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "295248021227",
+    "project_id": "vivi-71256",
+    "storage_bucket": "vivi-71256.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:295248021227:android:309af6489ac20b3f7f20ae",
+        "android_client_info": {
+          "package_name": "bj.vivi.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUQ6D2QKlW8HBtO-U1QkoWPAobMM0A7tk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

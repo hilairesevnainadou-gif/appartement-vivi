@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mes réservations · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="reservations" class="bg-sand">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu">
+    <div class="container py-4 py-lg-5" style="max-width:980px">
+      <h1 class="page-title mb-3">Mes réservations</h1>
+
+      <div class="segmented mb-4" role="radiogroup" aria-label="Filtrer les réservations" style="max-width:520px">
+        <input type="radio" name="onglet" id="o-avenir" value="avenir" checked><label for="o-avenir">À venir <span class="ms-1 text-soft" id="n-avenir"></span></label>
+        <input type="radio" name="onglet" id="o-passees" value="passees"><label for="o-passees">Passées <span class="ms-1 text-soft" id="n-passees"></span></label>
+        <input type="radio" name="onglet" id="o-annulees" value="annulees"><label for="o-annulees">Annulées <span class="ms-1 text-soft" id="n-annulees"></span></label>
+      </div>
+
+      <div class="resa-list" id="liste" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <footer id="vivi-pied" class="vivi-footer"></footer>
+  <nav id="vivi-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/mes-reservations.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Annuler ma réservation · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="reservations" class="bg-sand">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu">
+    <div class="container py-3 py-lg-4" style="max-width:760px">
+      <a class="back-link" id="retour" href="ma-reservation.html"><i class="bi bi-arrow-left" aria-hidden="true"></i>Ma réservation</a>
+
+      <!-- ===== Avant d'annuler ===== -->
+      <section id="vue-choix" aria-labelledby="t-annuler">
+        <h1 class="page-title mt-2 mb-1" id="t-annuler">Annuler ma réservation</h1>
+        <p class="text-soft" id="an-resume"></p>
+
+        <div class="panel">
+          <h2>Ce que vous récupérez</h2>
+          <p id="an-regle"></p>
+          <dl class="price-lines" id="an-lignes"></dl>
+          <p class="form-text mt-3 mb-1" id="an-delai"></p>
+          <p class="form-text mb-0">Politique d’annulation « <span id="an-politique"></span> ». <a href="#" data-bientot="Conditions d’annulation et de report">Lire les conditions</a></p>
+        </div>
+
+        <div class="panel" id="an-bloc-report">
+          <h2>Plutôt reporter ?</h2>
+          <p>Le report est gratuit jusqu’à 3 h avant l’arrivée : vous gardez votre réservation et choisissez une autre date, jusqu’au <strong id="an-limite"></strong>.</p>
+          <a class="btn btn-outline-primary" id="an-reporter" href="reporter.html"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Reporter ma réservation</a>
+        </div>
+
+        <div class="panel">
+          <label class="form-label" for="an-motif">Motif de l’annulation (facultatif)</label>
+          <select class="form-select" id="an-motif">
+            <option value="">Choisir un motif</option>
+            <option>Changement de programme</option>
+            <option>J’ai trouvé un autre logement</option>
+            <option>Problème de transport</option>
+            <option>Autre raison</option>
+          </select>
+          <button class="btn btn-danger btn-lg w-100 mt-4" type="button" data-bs-toggle="modal" data-bs-target="#confirmer">Annuler la réservation</button>
+          <a class="btn btn-ghost w-100 mt-2" id="an-garder" href="ma-reservation.html">Garder ma réservation</a>
+        </div>
+      </section>
+
+      <!-- ===== Annulation enregistrée ===== -->
+      <section id="vue-fait" hidden>
+        <div class="panel done" role="status">
+          <div class="check-badge check-badge--neutre"><i class="bi bi-check-lg" aria-hidden="true"></i></div>
+          <h1>Réservation annulée</h1>
+          <p id="an-f-texte"></p>
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a class="btn btn-primary" href="mes-reservations.html?onglet=annulees">Mes réservations</a>
+            <a class="btn btn-ghost" href="recherche.html">Chercher un autre logement</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Confirmation avant une action définitive -->
+  <div class="modal fade" id="confirmer" tabindex="-1" aria-labelledby="t-confirmer" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="t-confirmer">Confirmer l’annulation ?</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">Cette action est définitive : le créneau sera remis en ligne pour d’autres clients. <span id="an-m-texte"></span></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Non, garder</button>
+          <button type="button" class="btn btn-danger" id="an-oui">Oui, annuler</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer id="vivi-pied" class="vivi-footer mt-5"></footer>
+  <nav id="vivi-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/annuler.js"></script>
+</body>
+</html>

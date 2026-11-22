@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Réservation confirmée · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="confirmation">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu" class="pb-5">
+
+    <section class="confirm-hero" aria-labelledby="t-confirmation">
+      <div class="container">
+        <div class="check"><i class="bi bi-check-lg" aria-hidden="true"></i></div>
+        <h1 id="t-confirmation">Réservation confirmée</h1>
+        <p class="mb-0">Référence <strong class="text-ink" id="c-reference">VIVI-7K2M9P</strong> · Un SMS de confirmation vous a été envoyé.</p>
+      </div>
+    </section>
+
+    <div class="container" style="max-width:940px">
+
+      <!-- ===== Billet : QR Code + détails ===== -->
+      <article class="ticket" aria-labelledby="c-titre">
+        <div class="ticket__qr">
+          <div class="qr" id="qr" role="img" aria-label="QR Code de votre réservation"></div>
+          <p class="fw-semibold text-ink mb-1">Votre QR Code d’accès</p>
+          <p class="small text-soft mb-1">Si le scan ne passe pas, donnez ce code :</p>
+          <div class="code-secours" id="c-code" aria-label="Code de secours"></div>
+        </div>
+        <div class="ticket__cut" aria-hidden="true"></div>
+        <div class="ticket__body">
+          <h2 class="h4 mb-1" id="c-titre">Studio Lagune</h2>
+          <p class="text-soft"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i><span id="c-lieu">Fidjrossè, Cotonou</span></p>
+          <dl class="detail-list">
+            <div><dt>Date</dt><dd id="c-date"></dd></div>
+            <div><dt>Créneau</dt><dd id="c-creneau"></dd></div>
+            <div><dt>Voyageurs</dt><dd id="c-voyageurs"></dd></div>
+            <div><dt>Services</dt><dd id="c-services"></dd></div>
+            <div><dt>Total payé</dt><dd id="c-total"></dd></div>
+            <div><dt>Paiement</dt><dd id="c-moyen"></dd></div>
+          </dl>
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <button class="btn btn-primary" type="button" id="enregistrer"><i class="bi bi-download" aria-hidden="true"></i>Enregistrer le QR Code</button>
+            <a class="btn btn-ghost" href="mes-reservations.html">Voir mes réservations</a>
+          </div>
+        </div>
+      </article>
+
+      <div class="row g-3 g-lg-4 mt-1">
+        <div class="col-lg-7">
+          <section class="panel h-100" aria-labelledby="t-suite">
+            <h2 id="t-suite" class="mb-3">Et maintenant ?</h2>
+            <ol class="timeline">
+              <li>
+                <span class="ico"><i class="bi bi-chat-dots" aria-hidden="true"></i></span>
+                <h3>Vous recevez l’adresse</h3>
+                <p>L’adresse exacte, l’itinéraire et le contact sur place vous sont envoyés par SMS.</p>
+              </li>
+              <li>
+                <span class="ico"><i class="bi bi-qr-code-scan" aria-hidden="true"></i></span>
+                <h3>Votre QR Code est scanné à l’arrivée</h3>
+                <p>Le propriétaire ou son gestionnaire le scanne : votre séjour commence à ce moment-là.</p>
+              </li>
+              <li>
+                <span class="ico"><i class="bi bi-key" aria-hidden="true"></i></span>
+                <h3>Vous profitez du logement</h3>
+                <p>Les services que vous avez ajoutés sont prêts à votre arrivée.</p>
+              </li>
+              <li>
+                <span class="ico"><i class="bi bi-star" aria-hidden="true"></i></span>
+                <h3>Vous donnez votre avis</h3>
+                <p>Après votre départ, notez le logement en quelques secondes.</p>
+              </li>
+            </ol>
+          </section>
+        </div>
+        <div class="col-lg-5">
+          <section class="panel h-100" aria-labelledby="t-empechement">
+            <h2 id="t-empechement">Un empêchement ?</h2>
+            <p>Vous pouvez reporter votre réservation jusqu’à 3 h avant l’arrivée, selon les disponibilités du logement, ou l’annuler dans les conditions prévues.</p>
+            <div class="d-grid gap-2">
+              <a class="btn btn-outline-primary" id="c-reporter" href="reporter.html"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Reporter ma réservation</a>
+              <a class="btn btn-ghost" id="c-annuler" href="annuler.html">Annuler ma réservation</a>
+            </div>
+            <p class="form-text mt-3 mb-0"><a href="#" data-bientot="Conditions d’annulation et de report">Lire les conditions d’annulation et de report</a></p>
+          </section>
+        </div>
+      </div>
+
+      <p class="text-center mt-4 mb-0"><a class="btn btn-ghost" href="index.html"><i class="bi bi-house-door" aria-hidden="true"></i>Retour à l’accueil</a></p>
+    </div>
+  </main>
+
+  <footer id="vivi-pied" class="vivi-footer"></footer>
+  <nav id="vivi-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/qrcode/qrcode.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/confirmation.js"></script>
+</body>
+</html>

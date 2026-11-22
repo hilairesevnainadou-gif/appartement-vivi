@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Votre réservation · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="reservation" data-entete="tunnel" class="bg-sand">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu">
+    <div class="container py-4 py-lg-5">
+
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <ol class="steps mb-0" aria-label="Étapes de la réservation">
+          <li class="is-done"><span class="dot"><i class="bi bi-check-lg" aria-hidden="true"></i></span><span class="lbl">Créneau</span></li>
+          <li class="is-current" id="etape-services"><span class="dot">2</span><span class="lbl">Services</span></li>
+          <li id="etape-paiement"><span class="dot">3</span><span class="lbl">Paiement</span></li>
+        </ol>
+        <span class="hold"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Créneau bloqué pour vous pendant <b id="compte-a-rebours" role="timer">15:00</b></span>
+      </div>
+
+      <div class="tunnel-grid mt-4">
+
+        <!-- ===== Récapitulatif ===== -->
+        <aside class="tunnel-aside" aria-labelledby="rc-titre">
+          <div class="summary">
+            <div class="summary__head">
+              <img id="rc-photo" src="assets/img/logements/studio-loft-640.webp" alt="" width="640" height="480">
+              <div>
+                <h2 id="rc-titre">Studio Lagune</h2>
+                <p id="rc-lieu">Fidjrossè, Cotonou</p>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm w-100 justify-content-between d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#rc-corps" aria-expanded="false" aria-controls="rc-corps">
+              <span>Total <strong class="text-ink tnum" id="rc-total-court"></strong></span>
+              <span>Voir le détail<i class="bi bi-chevron-down ms-1" aria-hidden="true"></i></span>
+            </button>
+            <div class="collapse d-lg-block" id="rc-corps">
+              <ul class="recap mt-3 mt-lg-0">
+                <li><i class="bi bi-calendar-event" aria-hidden="true"></i><span id="rc-date"></span></li>
+                <li><i class="bi bi-clock" aria-hidden="true"></i><span id="rc-creneau"></span></li>
+                <li><i class="bi bi-people" aria-hidden="true"></i><span id="rc-voyageurs"></span></li>
+              </ul>
+              <dl class="price-lines" id="rc-lignes" aria-live="polite"></dl>
+              <p class="form-text mt-3 mb-0">La commission VIVI est à votre charge. Elle est comprise dans le total : aucun autre montant ne vous sera demandé.</p>
+            </div>
+          </div>
+        </aside>
+
+        <div class="tunnel-main">
+
+          <!-- ===== Étape 2 : services ===== -->
+          <section id="vue-services" aria-labelledby="t-services">
+            <div class="panel">
+              <h1 class="h3" id="t-services">Ajoutez vos services</h1>
+              <p class="text-soft mb-2">Facultatif. Le total se met à jour à chaque ajout.</p>
+              <div id="liste-services"></div>
+            </div>
+            <div class="d-flex flex-column-reverse flex-sm-row justify-content-between gap-2 mt-3">
+              <a class="btn btn-ghost" id="modifier" href="logement.html"><i class="bi bi-arrow-left" aria-hidden="true"></i>Modifier le créneau</a>
+              <button class="btn btn-cta btn-lg" id="vers-paiement" type="button">Continuer vers le paiement<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            </div>
+          </section>
+
+          <!-- ===== Étape 3 : paiement ===== -->
+          <section id="vue-paiement" aria-labelledby="t-paiement" hidden>
+            <form id="form-paiement" novalidate>
+              <div class="panel">
+                <h1 class="h3" id="t-paiement">Vos coordonnées</h1>
+                <p class="text-soft">Votre QR Code et l’adresse du logement sont envoyés à ce numéro.</p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label" for="p-nom">Nom et prénom <span aria-hidden="true">*</span></label>
+                    <input class="form-control" type="text" id="p-nom" autocomplete="name" required aria-describedby="p-nom-erreur">
+                    <div class="invalid-feedback" id="p-nom-erreur">Indiquez votre nom et votre prénom.</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="p-tel">Téléphone <span aria-hidden="true">*</span></label>
+                    <div class="input-prefix">
+                      <span class="prefix" aria-hidden="true">+229</span>
+                      <input class="form-control" type="tel" id="p-tel" inputmode="tel" autocomplete="tel-national" placeholder="01 97 00 00 00" required aria-describedby="p-tel-erreur">
+                      <div class="invalid-feedback" id="p-tel-erreur">Indiquez un numéro béninois à 10 chiffres, par exemple 01 97 00 00 00.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <h2 id="t-moyen">Moyen de paiement</h2>
+                <div class="pay-options mt-3" role="radiogroup" aria-labelledby="t-moyen">
+                  <div class="pay-option">
+                    <input type="radio" name="moyen" id="m-mtn" value="MTN Mobile Money" checked>
+                    <label for="m-mtn"><span class="pay-option__icon"><i class="bi bi-phone" aria-hidden="true"></i></span><span><strong>MTN Mobile Money</strong><small>Sur votre téléphone</small></span><span class="radio" aria-hidden="true"></span></label>
+                  </div>
+                  <div class="pay-option">
+                    <input type="radio" name="moyen" id="m-moov" value="Moov Money">
+                    <label for="m-moov"><span class="pay-option__icon"><i class="bi bi-phone" aria-hidden="true"></i></span><span><strong>Moov Money</strong><small>Sur votre téléphone</small></span><span class="radio" aria-hidden="true"></span></label>
+                  </div>
+                  <div class="pay-option">
+                    <input type="radio" name="moyen" id="m-celtiis" value="Celtiis Cash">
+                    <label for="m-celtiis"><span class="pay-option__icon"><i class="bi bi-phone" aria-hidden="true"></i></span><span><strong>Celtiis Cash</strong><small>Sur votre téléphone</small></span><span class="radio" aria-hidden="true"></span></label>
+                  </div>
+                  <div class="pay-option">
+                    <input type="radio" name="moyen" id="m-carte" value="Carte bancaire">
+                    <label for="m-carte"><span class="pay-option__icon"><i class="bi bi-credit-card" aria-hidden="true"></i></span><span><strong>Carte bancaire</strong><small>Visa ou Mastercard</small></span><span class="radio" aria-hidden="true"></span></label>
+                  </div>
+                </div>
+                <div class="note-box mt-3">
+                  <i class="bi bi-info-circle" aria-hidden="true"></i>
+                  <span id="aide-moyen"></span>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="form-check align-items-start">
+                  <input class="form-check-input mt-1" type="checkbox" id="p-cgv" required aria-describedby="p-cgv-erreur">
+                  <label class="form-check-label" for="p-cgv">J’accepte les <a href="#" data-bientot="Conditions générales">conditions générales</a> et les <a href="#" data-bientot="Conditions d’annulation et de report">conditions d’annulation et de report</a>.</label>
+                </div>
+                <div class="invalid-feedback" id="p-cgv-erreur">Cochez cette case pour continuer.</div>
+
+                <button class="btn btn-cta btn-lg w-100 mt-3" type="submit" id="payer"><i class="bi bi-lock-fill" aria-hidden="true"></i><span id="payer-texte">Payer</span></button>
+                <p class="form-text text-center mt-2 mb-0">Paiement traité par FedaPay. VIVI ne conserve aucune donnée bancaire.</p>
+              </div>
+            </form>
+            <button class="btn btn-ghost mt-3" id="vers-services" type="button"><i class="bi bi-arrow-left" aria-hidden="true"></i>Retour aux services</button>
+          </section>
+
+          <!-- ===== Attente de la confirmation du paiement ===== -->
+          <section id="vue-attente" hidden>
+            <div class="panel waiting" role="status" aria-live="polite">
+              <div class="spinner-border" aria-hidden="true"></div>
+              <h1 class="h3 mt-3" id="attente-titre">Confirmez le paiement sur votre téléphone</h1>
+              <p class="text-soft mb-1" id="attente-texte"></p>
+              <p class="form-text mb-0">Maquette : le paiement est simulé, aucun montant n’est débité.</p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/reservation.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Écran de démarrage : symbole blanc sur le turquoise foncé de l'en-tête d'accueil (pas de flash blanc à l'ouverture) -->
+    <style name="Theme.Vivi.Demarrage" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/vivi_teal_900</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/vivi_demarrage</item>
+        <item name="postSplashScreenTheme">@style/Theme.Vivi</item>
+    </style>
+
+    <!-- Le reste de l'interface est dessiné par Compose (ui/theme/Theme.kt) -->
+    <style name="Theme.Vivi" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+</resources>

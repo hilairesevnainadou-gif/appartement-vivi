@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Modifier un logement · Espace propriétaire · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+  <link rel="stylesheet" href="assets/css/vivi-pro.css">
+</head>
+<body class="pro" data-page="logements" data-titre="Logement">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <div class="pro-shell">
+    <aside id="pro-menu" class="pro-side"></aside>
+    <div>
+      <header id="pro-haut" class="pro-top"></header>
+      <main id="contenu" class="pro-main">
+        <div class="pro-wrap" style="max-width:880px">
+
+          <a class="back-link" href="pro-logements.html"><i class="bi bi-arrow-left" aria-hidden="true"></i>Mes logements</a>
+          <div class="pro-head mt-1">
+            <div>
+              <h1 id="ed-titre">Logement</h1>
+              <p id="ed-sous"></p>
+            </div>
+            <span id="ed-statut"></span>
+          </div>
+
+          <ul class="tabs" role="tablist" aria-label="Rubriques du logement">
+            <li role="presentation"><button class="active" id="o-infos" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#p-infos" aria-controls="p-infos" aria-selected="true">Informations</button></li>
+            <li role="presentation"><button id="o-tarifs" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#p-tarifs" aria-controls="p-tarifs" aria-selected="false">Tarifs et créneaux</button></li>
+            <li role="presentation"><button id="o-services" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#p-services" aria-controls="p-services" aria-selected="false">Services</button></li>
+            <li role="presentation"><button id="o-photos" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#p-photos" aria-controls="p-photos" aria-selected="false">Photos</button></li>
+          </ul>
+
+          <form id="form-logement" novalidate>
+            <div class="tab-content">
+
+              <!-- ===== Informations ===== -->
+              <div class="tab-pane fade show active" id="p-infos" role="tabpanel" aria-labelledby="o-infos" tabindex="0">
+                <div class="panel">
+                  <h2>Présentation</h2>
+                  <div class="row g-3 mt-0">
+                    <div class="col-md-8">
+                      <label class="form-label" for="i-titre">Nom du logement <span aria-hidden="true">*</span></label>
+                      <input class="form-control" type="text" id="i-titre" required>
+                      <div class="invalid-feedback">Donnez un nom au logement.</div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label" for="i-type">Type</label>
+                      <select class="form-select" id="i-type">
+                        <option>Chambre</option><option>Studio</option><option>F2</option><option>F3</option><option>F4</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label" for="i-ville">Ville</label>
+                      <select class="form-select" id="i-ville">
+                        <option>Cotonou</option><option>Abomey-Calavi</option><option>Porto-Novo</option><option>Ouidah</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label" for="i-quartier">Quartier</label>
+                      <input class="form-control" type="text" id="i-quartier">
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label" for="i-adresse">Adresse exacte</label>
+                      <input class="form-control" type="text" id="i-adresse" placeholder="Rue, repère, portail…" aria-describedby="i-adresse-aide">
+                    </div>
+                    <div class="col-12 mt-1"><p class="form-text mb-0" id="i-adresse-aide">L’adresse exacte n’est communiquée au client qu’après le paiement.</p></div>
+                    <div class="col-6 col-md-3">
+                      <label class="form-label" for="i-capacite">Voyageurs</label>
+                      <input class="form-control" type="number" inputmode="numeric" min="1" max="20" id="i-capacite">
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <label class="form-label" for="i-chambres">Chambres</label>
+                      <input class="form-control" type="number" inputmode="numeric" min="0" max="20" id="i-chambres">
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <label class="form-label" for="i-lits">Lits</label>
+                      <input class="form-control" type="number" inputmode="numeric" min="1" max="20" id="i-lits">
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <label class="form-label" for="i-sdb">Salles de bain</label>
+                      <input class="form-control" type="number" inputmode="numeric" min="0" max="10" id="i-sdb">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label" for="i-description">Description</label>
+                      <textarea class="form-control" id="i-description" rows="4" placeholder="Ce que le client trouve en arrivant, l’ambiance, les points forts du quartier."></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <h2 id="t-equip">Équipements</h2>
+                  <div class="row g-1 mt-1" id="i-equipements" role="group" aria-labelledby="t-equip"></div>
+                </div>
+              </div>
+
+              <!-- ===== Tarifs et créneaux ===== -->
+              <div class="tab-pane fade" id="p-tarifs" role="tabpanel" aria-labelledby="o-tarifs" tabindex="0">
+                <p class="text-soft">Activez les formules que vous proposez pour ce logement, puis fixez vos prix et vos horaires.</p>
+
+                <section class="formule-card" data-formule="heure">
+                  <div class="formule-card__head">
+                    <div><h3 id="fh-titre">À l’heure</h3><p>Le client choisit son heure d’arrivée et sa durée.</p></div>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="fh-actif" aria-labelledby="fh-titre"></div>
+                  </div>
+                  <div class="formule-card__body">
+                    <div class="row g-3">
+                      <div class="col-sm-6 col-lg-3">
+                        <label class="form-label" for="fh-prix">Prix par heure</label>
+                        <div class="input-suffix"><input class="form-control" type="number" inputmode="numeric" min="0" step="500" id="fh-prix"><span class="suffix">FCFA</span><div class="invalid-feedback">Indiquez un prix.</div></div>
+                      </div>
+                      <div class="col-6 col-lg-3"><label class="form-label" for="fh-de">Ouverture</label><select class="form-select" id="fh-de"></select></div>
+                      <div class="col-6 col-lg-3"><label class="form-label" for="fh-a">Fermeture</label><select class="form-select" id="fh-a"></select></div>
+                      <div class="col-sm-6 col-lg-3">
+                        <label class="form-label" for="fh-min">Durée minimale</label>
+                        <select class="form-select" id="fh-min">
+                          <option value="1">1 heure</option><option value="2">2 heures</option><option value="3">3 heures</option><option value="4">4 heures</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="formule-card" data-formule="demi">
+                  <div class="formule-card__head">
+                    <div><h3 id="fd-titre">À la demi-journée</h3><p>Vous définissez vos propres créneaux : nom, début et fin.</p></div>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="fd-actif" aria-labelledby="fd-titre"></div>
+                  </div>
+                  <div class="formule-card__body">
+                    <div class="row g-3 mb-3">
+                      <div class="col-sm-6 col-lg-4">
+                        <label class="form-label" for="fd-prix">Prix du créneau</label>
+                        <div class="input-suffix"><input class="form-control" type="number" inputmode="numeric" min="0" step="500" id="fd-prix"><span class="suffix">FCFA</span><div class="invalid-feedback">Indiquez un prix.</div></div>
+                      </div>
+                    </div>
+                    <div id="fd-liste"></div>
+                    <button class="btn btn-ghost btn-sm mt-2" type="button" id="fd-ajouter"><i class="bi bi-plus-lg" aria-hidden="true"></i>Ajouter un créneau</button>
+                  </div>
+                </section>
+
+                <section class="formule-card" data-formule="jour">
+                  <div class="formule-card__head">
+                    <div><h3 id="fj-titre">À la journée</h3><p>Une ou plusieurs journées, du jour d’arrivée au lendemain.</p></div>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="fj-actif" aria-labelledby="fj-titre"></div>
+                  </div>
+                  <div class="formule-card__body">
+                    <div class="row g-3">
+                      <div class="col-sm-6 col-lg-4">
+                        <label class="form-label" for="fj-prix">Prix par jour</label>
+                        <div class="input-suffix"><input class="form-control" type="number" inputmode="numeric" min="0" step="500" id="fj-prix"><span class="suffix">FCFA</span><div class="invalid-feedback">Indiquez un prix.</div></div>
+                      </div>
+                      <div class="col-6 col-lg-4"><label class="form-label" for="fj-arrivee">Arrivée à partir de</label><select class="form-select" id="fj-arrivee"></select></div>
+                      <div class="col-6 col-lg-4"><label class="form-label" for="fj-depart">Départ avant, le lendemain</label><select class="form-select" id="fj-depart"></select></div>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="panel mt-3">
+                  <label class="form-label" for="f-battement">Temps de préparation entre deux réservations</label>
+                  <select class="form-select" id="f-battement" style="max-width:260px" aria-describedby="f-battement-aide">
+                    <option value="0">Aucun</option><option value="30">30 minutes</option><option value="60" selected>1 heure</option><option value="120">2 heures</option>
+                  </select>
+                  <p class="form-text mb-0 mt-2" id="f-battement-aide">Ce temps est bloqué après chaque départ, pour le ménage. Aucun client ne peut réserver pendant ce temps.</p>
+                </div>
+              </div>
+
+              <!-- ===== Services ===== -->
+              <div class="tab-pane fade" id="p-services" role="tabpanel" aria-labelledby="o-services" tabindex="0">
+                <div class="panel">
+                  <h2>Services à la carte</h2>
+                  <p class="text-soft mb-2">Activez les services que vous pouvez assurer dans ce logement. Le client les ajoute au moment de réserver.</p>
+                  <div id="s-liste"></div>
+                  <div class="note-box mt-3">
+                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                    <span>Les prix des services sont fixés par VIVI. Ils sont identiques pour tous les logements.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ===== Photos ===== -->
+              <div class="tab-pane fade" id="p-photos" role="tabpanel" aria-labelledby="o-photos" tabindex="0">
+                <div class="panel">
+                  <h2>Photos</h2>
+                  <p class="text-soft">Des photos nettes de chaque pièce, prises de jour. La première est celle des résultats de recherche.</p>
+                  <div class="photo-grid" id="ph-grille"></div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="savebar">
+              <p id="ed-etat" role="status">Aucune modification en attente.</p>
+              <div class="d-flex gap-2">
+                <a class="btn btn-ghost d-none d-sm-inline-flex" id="ed-annonce" href="logement.html">Voir l’annonce</a>
+                <button class="btn btn-cta" type="submit">Enregistrer</button>
+              </div>
+            </div>
+          </form>
+
+        </div>
+      </main>
+    </div>
+  </div>
+  <nav id="pro-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/vivi-pro.js"></script>
+  <script src="assets/js/pages/pro-logement.js"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Studio Lagune · Fidjrossè, Cotonou · Appartement VIVI</title>
+  <meta name="description" content="Fiche du logement : photos, tarifs à l’heure, à la demi-journée et à la journée, créneaux, équipements, services à la carte et réservation en ligne.">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="logement" class="has-bookbar">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu" class="pb-5">
+    <div class="container pt-3 pt-lg-4">
+
+      <nav aria-label="Fil d’Ariane">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="index.html">Accueil</a></li>
+          <li class="breadcrumb-item"><a href="recherche.html">Logements</a></li>
+          <li class="breadcrumb-item"><a href="recherche.html?ville=Cotonou" id="fil-ville">Cotonou</a></li>
+          <li class="breadcrumb-item active" aria-current="page" data-l="titre">Studio Lagune</li>
+        </ol>
+      </nav>
+
+      <!-- ===== Titre ===== -->
+      <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-3">
+        <div>
+          <h1 class="h2 mb-2" data-l="titre">Studio Lagune</h1>
+          <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3">
+            <span class="rating"><i class="bi bi-star-fill" aria-hidden="true"></i><span data-l="note">4,8</span> <small>(<span data-l="avis">36</span> avis)</small></span>
+            <span class="text-soft"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i><span data-l="lieu">Fidjrossè, Cotonou</span></span>
+            <span class="chip chip--teal"><i class="bi bi-patch-check-fill" aria-hidden="true"></i>Vérifié par VIVI</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Photos ===== -->
+      <div class="gallery-wrap mb-4">
+        <div class="gallery" id="galerie" aria-label="Photos du logement"></div>
+        <a class="btn btn-ghost btn-sm gallery__more d-none d-md-inline-flex" href="#" data-bientot="Visionneuse de photos" style="background:#fff"><i class="bi bi-images" aria-hidden="true"></i>Voir toutes les photos</a>
+      </div>
+
+      <ul class="facts mb-4" id="faits"></ul>
+
+      <div class="fiche-grid">
+
+        <!-- ===== A. Présentation et tarifs ===== -->
+        <div class="fiche-a">
+          <section class="block" aria-labelledby="t-description">
+            <h2 id="t-description">Le logement</h2>
+            <p>Un logement meublé, climatisé et prêt à vivre : literie faite, linge de maison fourni, cuisine équipée. Idéal pour une pause entre deux rendez-vous, une soirée ou un séjour de quelques jours.</p>
+            <p class="mb-0">Le propriétaire ou son gestionnaire vous accueille sur place, scanne votre QR Code et vous remet les clés.</p>
+          </section>
+
+          <section class="block" aria-labelledby="t-tarifs">
+            <h2 id="t-tarifs">Tarifs et créneaux</h2>
+            <div class="tarifs" id="tarifs"></div>
+            <div class="note-box mt-3">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              <span>Les formules, les tarifs et les créneaux sont fixés par le propriétaire pour ce logement. Ils peuvent être différents d’un logement à l’autre.</span>
+            </div>
+          </section>
+        </div>
+
+        <!-- ===== W. Réservation ===== -->
+        <div class="fiche-w">
+          <aside class="booking-card" id="reserver" aria-labelledby="t-reserver">
+            <h2 class="visually-hidden" id="t-reserver">Réserver ce logement</h2>
+            <div class="booking-card__price"><strong id="w-prix">3 500 FCFA</strong><span id="w-unite">par heure</span></div>
+
+            <form id="form-reservation" novalidate>
+              <div class="field">
+                <span class="form-label d-block" id="lbl-formule">Formule</span>
+                <div class="segmented" role="radiogroup" aria-labelledby="lbl-formule">
+                  <input type="radio" name="formule" id="w-heure" value="heure"><label for="w-heure">Heure</label>
+                  <input type="radio" name="formule" id="w-demi" value="demi"><label for="w-demi">Demi-journée</label>
+                  <input type="radio" name="formule" id="w-jour" value="jour"><label for="w-jour">Journée</label>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="form-label" for="w-date">Date</label>
+                <input class="form-control" type="date" id="w-date">
+              </div>
+
+              <!-- Formule « heure » -->
+              <div class="field" data-formule="heure">
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="form-label" for="w-debut">Heure d’arrivée</label>
+                    <select class="form-select" id="w-debut"></select>
+                  </div>
+                  <div class="col-6">
+                    <span class="form-label d-block" id="lbl-duree">Durée</span>
+                    <div class="stepper" id="c-duree" role="group" aria-labelledby="lbl-duree">
+                      <button type="button" data-pas="-1" aria-label="Une heure de moins"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+                      <output aria-live="polite">3 h</output>
+                      <button type="button" data-pas="1" aria-label="Une heure de plus"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+                    </div>
+                  </div>
+                </div>
+                <p class="form-text mb-0 mt-2" id="aide-heure"></p>
+              </div>
+
+              <!-- Formule « demi-journée » -->
+              <fieldset class="field" data-formule="demi">
+                <legend class="form-label">Créneau</legend>
+                <div class="slot-grid" id="w-creneaux"></div>
+              </fieldset>
+
+              <!-- Formule « journée » -->
+              <div class="field" data-formule="jour">
+                <div class="field-row">
+                  <span class="form-label" id="lbl-jours">Nombre de jours</span>
+                  <div class="stepper" id="c-jours" role="group" aria-labelledby="lbl-jours">
+                    <button type="button" data-pas="-1" aria-label="Un jour de moins"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+                    <output aria-live="polite">1</output>
+                    <button type="button" data-pas="1" aria-label="Un jour de plus"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+                  </div>
+                </div>
+                <p class="form-text mb-0 mt-2" id="aide-jour"></p>
+              </div>
+
+              <div class="field field-row">
+                <span class="form-label" id="lbl-voyageurs">Voyageurs</span>
+                <div class="stepper" id="c-voyageurs" role="group" aria-labelledby="lbl-voyageurs">
+                  <button type="button" data-pas="-1" aria-label="Un voyageur de moins"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+                  <output aria-live="polite">2</output>
+                  <button type="button" data-pas="1" aria-label="Un voyageur de plus"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+                </div>
+              </div>
+
+              <dl class="price-lines" id="w-lignes" aria-live="polite"></dl>
+              <p class="form-text mt-2 mb-0">Services à la carte à choisir à l’étape suivante.</p>
+
+              <button class="btn btn-cta btn-lg w-100 mt-3" type="submit">Continuer<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            </form>
+
+            <ul class="reassure">
+              <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Aucun paiement à cette étape.</span></li>
+              <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Entrée par QR Code à votre arrivée.</span></li>
+              <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Report gratuit jusqu’à 3 h avant l’arrivée.</span></li>
+            </ul>
+          </aside>
+        </div>
+
+        <!-- ===== B. Détails ===== -->
+        <div class="fiche-b">
+          <section class="block" aria-labelledby="t-equipements">
+            <h2 id="t-equipements">Équipements</h2>
+            <ul class="amenities" id="equipements"></ul>
+          </section>
+
+          <section class="block" aria-labelledby="t-services">
+            <h2 id="t-services">Services à la carte</h2>
+            <p class="text-soft">À ajouter au moment de réserver. Les prix sont fixés par VIVI.</p>
+            <div class="row g-3" id="services-logement"></div>
+          </section>
+
+          <section class="block" aria-labelledby="t-regles">
+            <h2 id="t-regles">Règles du logement</h2>
+            <ul class="rules">
+              <li><i class="bi bi-people" aria-hidden="true"></i><span>Nombre de voyageurs limité à la capacité du logement.</span></li>
+              <li><i class="bi bi-slash-circle" aria-hidden="true"></i><span>Logement non-fumeur.</span></li>
+              <li><i class="bi bi-volume-mute" aria-hidden="true"></i><span>Pas de fête ni d’événement sans l’accord du propriétaire.</span></li>
+              <li><i class="bi bi-clock" aria-hidden="true"></i><span>Le départ se fait à l’heure prévue : le logement est préparé pour le client suivant.</span></li>
+            </ul>
+          </section>
+
+          <section class="block" aria-labelledby="t-annulation">
+            <h2 id="t-annulation">Annulation et report</h2>
+            <ul class="rules mb-3">
+              <li><i class="bi bi-hourglass-split" aria-hidden="true"></i><span><strong>Heure et demi-journée :</strong> annulation gratuite jusqu’à 24 h avant l’arrivée.</span></li>
+              <li><i class="bi bi-calendar-x" aria-hidden="true"></i><span><strong>Journée :</strong> annulation gratuite jusqu’à 5 jours avant l’arrivée.</span></li>
+              <li><i class="bi bi-arrow-repeat" aria-hidden="true"></i><span><strong>Un empêchement ?</strong> Vous pouvez reporter votre réservation jusqu’à 3 h avant l’arrivée, vers une date libre dans les 10 jours.</span></li>
+            </ul>
+            <a href="#" data-bientot="Conditions d’annulation et de report">Lire les conditions complètes</a>
+          </section>
+
+          <section class="block" aria-labelledby="t-emplacement">
+            <h2 id="t-emplacement">Emplacement</h2>
+            <div class="map-placeholder">
+              <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+              <strong data-l="lieu">Fidjrossè, Cotonou</strong>
+              <span class="small">Emplacement de la carte interactive.<br>L’adresse exacte et l’itinéraire vous sont envoyés après le paiement.</span>
+            </div>
+          </section>
+
+          <section class="block pb-0" aria-labelledby="t-avis">
+            <h2 id="t-avis"><span class="rating"><i class="bi bi-star-fill" aria-hidden="true"></i><span data-l="note">4,8</span></span> · <span data-l="avis">36</span> avis</h2>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <figure class="review mb-0">
+                  <div class="stars" aria-label="5 sur 5"><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i></div>
+                  <blockquote>« Propre, calme, climatisation efficace. L’accueil a pris deux minutes : scan du QR Code et remise des clés. »</blockquote>
+                  <figcaption class="review__who"><span class="avatar" aria-hidden="true">AF</span><span><strong>Arnaud F.</strong><small>Séjour de 3 heures</small></span></figcaption>
+                </figure>
+              </div>
+              <div class="col-md-6">
+                <figure class="review mb-0">
+                  <div class="stars" aria-label="4 sur 5"><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star" aria-hidden="true"></i></div>
+                  <blockquote>« Conforme aux photos. Le groupe électrogène a pris le relais pendant une coupure, nous n’avons rien remarqué. »</blockquote>
+                  <figcaption class="review__who"><span class="avatar" aria-hidden="true">FH</span><span><strong>Fifamè H.</strong><small>Séjour d’une journée</small></span></figcaption>
+                </figure>
+              </div>
+            </div>
+            <p class="mt-3 mb-0"><a href="#" data-bientot="Tous les avis du logement">Lire tous les avis</a></p>
+          </section>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Barre de réservation (mobile) -->
+  <div class="bookbar" id="barre-reserver">
+    <div class="price"><small>À partir de</small><strong id="bb-prix">3 500 FCFA</strong> <span id="bb-unite">/ heure</span></div>
+    <a class="btn btn-cta" href="#reserver">Réserver</a>
+  </div>
+
+  <footer id="vivi-pied" class="vivi-footer"></footer>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/logement.js"></script>
+</body>
+</html>

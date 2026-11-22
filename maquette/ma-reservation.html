@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ma réservation · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="reservations" class="bg-sand">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu">
+    <div class="container py-3 py-lg-4" style="max-width:940px">
+      <a class="back-link" href="mes-reservations.html"><i class="bi bi-arrow-left" aria-hidden="true"></i>Mes réservations</a>
+
+      <div class="d-flex flex-wrap align-items-center gap-2 mt-2 mb-3">
+        <h1 class="page-title mb-0" id="m-titre">Ma réservation</h1>
+        <span id="m-statut"></span>
+      </div>
+
+      <div id="m-alerte" class="mb-3"></div>
+
+      <!-- ===== Billet ===== -->
+      <article class="ticket ticket--plat" id="m-billet" aria-label="Billet de la réservation">
+        <div class="ticket__qr">
+          <div class="qr" id="qr" role="img" aria-label="QR Code de votre réservation"></div>
+          <p class="fw-semibold text-ink mb-1">Votre QR Code d’accès</p>
+          <p class="small text-soft mb-1">Si le scan ne passe pas, donnez ce code :</p>
+          <div class="code-secours" id="m-code"></div>
+        </div>
+        <div class="ticket__cut" aria-hidden="true"></div>
+        <div class="ticket__body">
+          <p class="text-soft mb-3"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i><span id="m-lieu"></span> · Référence <strong class="text-ink tnum" id="m-reference"></strong></p>
+          <dl class="detail-list">
+            <div><dt>Date</dt><dd id="m-date"></dd></div>
+            <div><dt>Créneau</dt><dd id="m-creneau"></dd></div>
+            <div><dt>Voyageurs</dt><dd id="m-voyageurs"></dd></div>
+            <div><dt>Services</dt><dd id="m-services"></dd></div>
+          </dl>
+          <p class="mt-3 mb-0"><a id="m-annonce" href="logement.html">Voir l’annonce du logement</a></p>
+        </div>
+      </article>
+
+      <div class="row g-3 mt-1">
+        <div class="col-lg-7">
+          <section class="panel h-100" aria-labelledby="t-paiement">
+            <h2 id="t-paiement" class="mb-3">Détail du paiement</h2>
+            <dl class="price-lines" id="m-lignes"></dl>
+            <p class="form-text mt-3 mb-0" id="m-moyen"></p>
+          </section>
+        </div>
+        <div class="col-lg-5">
+          <section class="panel h-100" aria-labelledby="t-gerer">
+            <h2 id="t-gerer">Gérer ma réservation</h2>
+            <div id="m-gerer"></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ===== Avis (séjour terminé) ===== -->
+      <section class="panel mt-3" id="avis" aria-labelledby="t-avis" hidden>
+        <h2 id="t-avis">Votre avis sur ce séjour</h2>
+        <form id="form-avis" novalidate>
+          <p class="text-soft">Votre note aide les prochains clients et le propriétaire.</p>
+          <fieldset class="mb-3">
+            <legend class="form-label">Note <span aria-hidden="true">*</span></legend>
+            <div class="stars-input">
+              <input type="radio" name="note" id="n5" value="5"><label for="n5" aria-label="5 étoiles"><i class="bi bi-star-fill" aria-hidden="true"></i></label>
+              <input type="radio" name="note" id="n4" value="4"><label for="n4" aria-label="4 étoiles"><i class="bi bi-star-fill" aria-hidden="true"></i></label>
+              <input type="radio" name="note" id="n3" value="3"><label for="n3" aria-label="3 étoiles"><i class="bi bi-star-fill" aria-hidden="true"></i></label>
+              <input type="radio" name="note" id="n2" value="2"><label for="n2" aria-label="2 étoiles"><i class="bi bi-star-fill" aria-hidden="true"></i></label>
+              <input type="radio" name="note" id="n1" value="1"><label for="n1" aria-label="1 étoile"><i class="bi bi-star-fill" aria-hidden="true"></i></label>
+            </div>
+            <div class="invalid-feedback" id="note-erreur">Choisissez une note de 1 à 5 étoiles.</div>
+          </fieldset>
+          <div class="mb-3">
+            <label class="form-label" for="commentaire">Commentaire (facultatif)</label>
+            <textarea class="form-control" id="commentaire" rows="3" placeholder="Propreté, accueil, conformité aux photos…"></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Publier mon avis</button>
+        </form>
+        <div id="avis-merci" hidden>
+          <p class="mb-0"><i class="bi bi-check-circle-fill me-1" style="color:var(--vivi-success)" aria-hidden="true"></i>Merci, votre avis est enregistré. Il sera publié après vérification par VIVI.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer id="vivi-pied" class="vivi-footer mt-5"></footer>
+  <nav id="vivi-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/qrcode/qrcode.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/ma-reservation.js"></script>
+</body>
+</html>

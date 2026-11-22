@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Symbole blanc de l'écran de démarrage : marge pour tenir dans le cercle de 160 dp imposé par Android 12+ -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/vivi_symbole_blanc"
+    android:inset="30%" />

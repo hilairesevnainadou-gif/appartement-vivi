@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Logements disponibles · Appartement VIVI</title>
+  <meta name="description" content="Comparez les appartements meublés disponibles à l’heure, à la demi-journée ou à la journée, et filtrez par budget, type de logement et services.">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="recherche">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu">
+
+    <!-- ===== Rappel de la recherche ===== -->
+    <section class="search-bar" aria-label="Votre recherche">
+      <div class="container">
+        <form class="row g-2 align-items-end" id="barre">
+          <div class="col-12 col-md-4 col-lg-3">
+            <label class="form-label" for="b-ville">Ville</label>
+            <select class="form-select" id="b-ville">
+              <option value="">Toutes les villes</option>
+              <option>Cotonou</option>
+              <option>Abomey-Calavi</option>
+              <option>Porto-Novo</option>
+              <option>Ouidah</option>
+            </select>
+          </div>
+          <div class="col-7 col-md-3 col-lg-2">
+            <label class="form-label" for="b-date">Date</label>
+            <input class="form-control" type="date" id="b-date">
+          </div>
+          <div class="col-5 col-md-2">
+            <label class="form-label" for="b-voyageurs">Voyageurs</label>
+            <select class="form-select" id="b-voyageurs">
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-3 d-lg-none">
+            <button class="btn btn-ghost w-100" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtres" aria-controls="filtres">
+              <i class="bi bi-sliders" aria-hidden="true"></i>Filtres<span class="chip chip--count d-none" id="nb-filtres"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <div class="container py-4 py-lg-5">
+      <div class="row g-4">
+
+        <!-- ===== Filtres : colonne sur ordinateur, panneau latéral sur mobile ===== -->
+        <div class="col-lg-3">
+          <div class="offcanvas-lg offcanvas-end" tabindex="-1" id="filtres" aria-labelledby="filtres-titre">
+            <div class="offcanvas-header">
+              <h2 class="offcanvas-title h5 mb-0" id="filtres-titre">Filtres</h2>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#filtres" aria-label="Fermer les filtres"></button>
+            </div>
+            <div class="offcanvas-body">
+              <form class="filter-panel w-100" id="form-filtres">
+                <div class="d-none d-lg-flex justify-content-between align-items-center mb-3">
+                  <h2 class="mb-0">Filtres</h2>
+                  <button class="btn btn-link btn-sm p-0" type="reset" style="min-height:0">Réinitialiser</button>
+                </div>
+
+                <div class="filter-group filter-group--first" role="radiogroup" aria-labelledby="lg-formule">
+                  <h3 class="legend" id="lg-formule">Formule</h3>
+                  <div class="form-check"><input class="form-check-input" type="radio" name="formule" id="ff-toutes" value="" checked><label class="form-check-label" for="ff-toutes">Toutes les formules</label></div>
+                  <div class="form-check"><input class="form-check-input" type="radio" name="formule" id="ff-heure" value="heure"><label class="form-check-label" for="ff-heure">À l’heure</label></div>
+                  <div class="form-check"><input class="form-check-input" type="radio" name="formule" id="ff-demi" value="demi"><label class="form-check-label" for="ff-demi">À la demi-journée</label></div>
+                  <div class="form-check"><input class="form-check-input" type="radio" name="formule" id="ff-jour" value="jour"><label class="form-check-label" for="ff-jour">À la journée</label></div>
+                </div>
+
+                <div class="filter-group">
+                  <label class="legend d-block" for="f-budget">Budget maximum</label>
+                  <input class="form-range" type="range" id="f-budget" min="0" max="100" value="100" disabled>
+                  <p class="form-text mb-0" id="f-budget-texte">Choisissez une formule pour filtrer par budget.</p>
+                </div>
+
+                <div class="filter-group" role="group" aria-labelledby="lg-type">
+                  <h3 class="legend" id="lg-type">Type de logement</h3>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="type" id="ft-chambre" value="Chambre"><label class="form-check-label" for="ft-chambre">Chambre</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="type" id="ft-studio" value="Studio"><label class="form-check-label" for="ft-studio">Studio</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="type" id="ft-f2" value="F2"><label class="form-check-label" for="ft-f2">F2 (1 chambre et salon)</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="type" id="ft-f3" value="F3"><label class="form-check-label" for="ft-f3">F3 (2 chambres et salon)</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="type" id="ft-f4" value="F4"><label class="form-check-label" for="ft-f4">F4 et plus</label></div>
+                </div>
+
+                <div class="filter-group" role="group" aria-labelledby="lg-equip">
+                  <h3 class="legend" id="lg-equip">Équipements</h3>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="equip" id="fe-clim" value="clim"><label class="form-check-label" for="fe-clim">Climatisation</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="equip" id="fe-wifi" value="wifi"><label class="form-check-label" for="fe-wifi">Wi-Fi</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="equip" id="fe-cuisine" value="cuisine"><label class="form-check-label" for="fe-cuisine">Cuisine équipée</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="equip" id="fe-parking" value="parking"><label class="form-check-label" for="fe-parking">Parking</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="equip" id="fe-groupe" value="groupe"><label class="form-check-label" for="fe-groupe">Groupe électrogène</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="equip" id="fe-piscine" value="piscine"><label class="form-check-label" for="fe-piscine">Piscine</label></div>
+                </div>
+
+                <div class="filter-group" role="group" aria-labelledby="lg-services">
+                  <h3 class="legend" id="lg-services">Services à la carte</h3>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="service" id="fs-boissons" value="boissons"><label class="form-check-label" for="fs-boissons">Pack Boissons</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="service" id="fs-menage" value="menage"><label class="form-check-label" for="fs-menage">Ménage en cours de séjour</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="service" id="fs-deco" value="deco"><label class="form-check-label" for="fs-deco">Décoration romantique</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="service" id="fs-chauffeur" value="chauffeur"><label class="form-check-label" for="fs-chauffeur">Chauffeur</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="service" id="fs-petitdej" value="petitdej"><label class="form-check-label" for="fs-petitdej">Petit-déjeuner</label></div>
+                </div>
+
+                <div class="d-flex d-lg-none gap-2 pt-3">
+                  <button class="btn btn-ghost flex-fill" type="reset">Réinitialiser</button>
+                  <button class="btn btn-primary flex-fill" type="button" data-bs-dismiss="offcanvas" data-bs-target="#filtres" id="voir-resultats">Voir les résultats</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Résultats ===== -->
+        <div class="col-lg-9">
+          <div class="results-head">
+            <div>
+              <h1 id="titre-resultats" aria-live="polite">Logements</h1>
+              <p class="text-soft mb-0" id="sous-titre"></p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <label class="form-label mb-0 text-nowrap" for="tri">Trier par</label>
+              <select class="form-select" id="tri" style="min-width:11.5rem">
+                <option value="pertinence">Pertinence</option>
+                <option value="prix">Prix croissant</option>
+                <option value="note">Mieux notés</option>
+              </select>
+            </div>
+          </div>
+          <div class="d-grid gap-3" id="resultats"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer id="vivi-pied" class="vivi-footer"></footer>
+  <nav id="vivi-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/recherche.js"></script>
+</body>
+</html>

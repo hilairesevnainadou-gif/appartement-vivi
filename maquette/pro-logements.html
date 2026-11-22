@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mes logements · Espace propriétaire · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+  <link rel="stylesheet" href="assets/css/vivi-pro.css">
+</head>
+<body class="pro" data-page="logements" data-titre="Mes logements">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <div class="pro-shell">
+    <aside id="pro-menu" class="pro-side"></aside>
+    <div>
+      <header id="pro-haut" class="pro-top"></header>
+      <main id="contenu" class="pro-main">
+        <div class="pro-wrap">
+
+          <div class="pro-head">
+            <div>
+              <h1>Mes logements</h1>
+              <p>Chaque logement a ses propres formules, tarifs et créneaux.</p>
+            </div>
+            <a class="btn btn-primary" href="pro-logement.html?nouveau=1"><i class="bi bi-plus-lg" aria-hidden="true"></i>Ajouter un logement</a>
+          </div>
+
+          <section class="panel mb-3" aria-label="Logements inclus dans l’abonnement">
+            <div class="quota">
+              <div style="min-width:0">
+                <strong class="text-ink" id="lg-quota"></strong>
+                <div class="small text-soft" id="lg-quota-detail"></div>
+              </div>
+              <div class="meter" aria-hidden="true"><i id="lg-jauge" style="width:0"></i></div>
+              <a class="btn btn-ghost btn-sm" href="pro-abonnement.html">Abonnement</a>
+            </div>
+          </section>
+
+          <div class="d-grid gap-3" id="lg-liste"></div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+  <nav id="pro-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/vivi-pro.js"></script>
+  <script src="assets/js/pages/pro-logements.js"></script>
+</body>
+</html>

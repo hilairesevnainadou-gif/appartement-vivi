@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pistes de logo · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+  <style>
+    body { background: var(--vivi-sand); }
+    .piste { background: #fff; border: 1px solid var(--vivi-line); border-radius: 20px; padding: 24px; }
+    .piste + .piste { margin-top: 24px; }
+    .piste h2 { font-size: 1.35rem; margin: 0 0 .25rem; }
+    .scenes { display: grid; gap: 14px; grid-template-columns: 1fr; margin-top: 18px; }
+    @media (min-width: 992px) { .scenes { grid-template-columns: 1.4fr 1fr; } }
+    .scene { border-radius: 16px; padding: 22px; display: flex; align-items: center; justify-content: center; min-height: 150px; }
+    .scene--clair { background: #fff; border: 1px dashed var(--vivi-line-strong); }
+    .scene--sombre { background: var(--vivi-teal-900); }
+    .petits { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 14px; }
+    .petits figure { margin: 0; text-align: center; font-size: .78rem; color: var(--vivi-muted); }
+    .petits figure > div { display: flex; align-items: center; justify-content: center; height: 64px; }
+    .entete-demo { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--vivi-line); border-radius: 14px; padding: 10px 16px; margin-top: 14px; background: #fff; }
+    .lockup { display: inline-flex; align-items: center; gap: 12px; }
+    .lockup .mot { font-family: var(--vivi-font-title); line-height: .95; color: var(--vivi-ink); }
+    .lockup .mot small { display: block; font-size: .36em; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: var(--vivi-muted); margin-bottom: .18em; }
+    .lockup .mot b { display: block; font-weight: 800; letter-spacing: .02em; }
+    .scene--sombre .lockup .mot { color: #fff; }
+    .scene--sombre .lockup .mot small { color: #a9c6c4; }
+    .actuel img { height: 70px; }
+    /* Piste F : symbole en blocs + mot très gras, mention sur deux lignes */
+    .lockup-f { display: inline-flex; align-items: center; gap: .28em; color: #0a3d3e; }
+    .lockup-f svg { height: 1.55em; width: 1.55em; flex: none; }
+    .lockup-f .mots { display: flex; align-items: center; gap: .22em; font-family: "Outfit", sans-serif; }
+    .lockup-f b { font-weight: 800; font-size: 1em; letter-spacing: -.01em; line-height: 1; }
+    .lockup-f small { font-weight: 500; font-size: .3em; line-height: 1.12; color: #136f6e; }
+    .lockup-f--sombre { color: #fff; }
+    .lockup-f--sombre small { color: #b4dedb; }
+    .tuile-f { width: var(--t); height: var(--t); border-radius: calc(var(--t) * .22); background: #136f6e; display: inline-flex; align-items: center; justify-content: center; }
+    .tuile-f svg { width: 68%; height: 68%; }
+    /* Style Uber : mot-marque monochrome, très gras, approche serrée */
+    .wm { font-family: "Outfit", sans-serif; font-weight: 800; letter-spacing: -.015em; line-height: 1; color: #000; }
+    .wm--blanc { color: #fff; }
+    .icone {
+      width: var(--t); height: var(--t); border-radius: calc(var(--t) * .22);
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #fff; font-family: "Outfit", sans-serif; font-weight: 800; letter-spacing: -.015em;
+      font-size: calc(var(--t) * .36); line-height: 1;
+    }
+    .icone--v { font-size: calc(var(--t) * .72); letter-spacing: 0; }
+  </style>
+</head>
+<body>
+  <main class="container py-4 py-lg-5" style="max-width:1080px">
+    <h1 class="page-title mb-1">Pistes de logo</h1>
+    <p class="text-soft mb-4">La piste F suit votre exemple (style Uber, symbole d’appartement, couleurs du site) ; D et E suivent le style Uber ; A, B et C sont les propositions précédentes. Chacune est montrée en grand, sur fond sombre, en petit (icône d’onglet, application) et dans l’en-tête du site.</p>
+
+    <!-- Logo actuel, pour comparaison -->
+    <section class="piste actuel">
+      <h2>Logo actuel</h2>
+      <p class="text-soft mb-3">Extrait du cahier des charges.</p>
+      <img src="assets/img/logo-vivi.png" alt="Logo actuel d’Appartement VIVI">
+    </section>
+
+    <!-- ===== Piste F ===== -->
+    <section class="piste" id="f">
+      <h2>F · L’immeuble en V, style Uber</h2>
+      <p class="text-soft mb-0">Un V en blocs pleins : la branche gauche descend en diagonale, la branche droite est un immeuble avec ses fenêtres et sa porte orange. Le nom VIVI, très gras, et la mention « Appartements meublés. » à côté, comme dans votre exemple. Couleurs du site : turquoise, orange pour la porte.</p>
+      <div class="scenes">
+        <div class="scene scene--clair"><span class="lockup-f" style="font-size:64px"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#picto-f"/></svg><span class="mots"><b>VIVI</b><small>Appartements<br>meublés.</small></span></span></div>
+        <div class="scene scene--sombre"><span class="lockup-f lockup-f--sombre" style="font-size:48px"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#picto-f-sombre"/></svg><span class="mots"><b>VIVI</b><small>Appartements<br>meublés.</small></span></span></div>
+      </div>
+      <div class="petits">
+        <figure><div><span class="tuile-f" style="--t:64px"><svg viewBox="0 0 64 64"><use href="#picto-f-tuile"/></svg></span></div>Application</figure>
+        <figure><div><span class="tuile-f" style="--t:32px"><svg viewBox="0 0 64 64"><use href="#picto-f-tuile"/></svg></span></div>32 px</figure>
+        <figure><div><svg width="16" height="16" viewBox="0 0 64 64"><use href="#picto-f"/></svg></div>Onglet, 16 px</figure>
+        <figure><div><svg width="56" height="56" viewBox="0 0 64 64"><use href="#picto-f"/></svg></div>Symbole seul</figure>
+      </div>
+      <div class="entete-demo"><span class="lockup-f" style="font-size:30px"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#picto-f"/></svg><span class="mots"><b>VIVI</b><small>Appartements<br>meublés.</small></span></span><span class="btn btn-cta btn-sm" style="border-radius:999px">Connexion</span></div>
+    </section>
+
+    <!-- ===== Style Uber ===== -->
+    <section class="piste" id="d">
+      <h2>D · Style Uber, noir et blanc</h2>
+      <p class="text-soft mb-0">Le nom seul, en capitale et minuscules, très gras et serré, d’une seule couleur. Pas de pictogramme ni de dégradé : la force vient de la simplicité. L’icône d’application est le nom en blanc sur un carré noir.</p>
+      <div class="scenes">
+        <div class="scene scene--clair"><span class="wm" style="font-size:96px">Vivi</span></div>
+        <div class="scene" style="background:#000"><span class="wm wm--blanc" style="font-size:72px">Vivi</span></div>
+      </div>
+      <div class="petits">
+        <figure><div><span class="icone" style="--t:64px;background:#000">Vivi</span></div>Application</figure>
+        <figure><div><span class="icone" style="--t:32px;background:#000">Vivi</span></div>32 px</figure>
+        <figure><div><span class="icone icone--v" style="--t:16px;background:#000">V</span></div>Onglet, 16 px</figure>
+      </div>
+      <div class="entete-demo"><span class="wm" style="font-size:30px">Vivi</span><span class="btn btn-sm" style="background:#000;color:#fff;border-radius:999px;padding:.35rem 1rem">Connexion</span></div>
+    </section>
+
+    <section class="piste" id="e">
+      <h2>E · Style Uber, turquoise foncé</h2>
+      <p class="text-soft mb-0">Le même mot, dans le turquoise le plus foncé de VIVI au lieu du noir. Même sobriété, mais la marque garde sa couleur ; l’orange reste réservé aux boutons d’action du site.</p>
+      <div class="scenes">
+        <div class="scene scene--clair"><span class="wm" style="font-size:96px;color:#0a3d3e">Vivi</span></div>
+        <div class="scene scene--sombre"><span class="wm wm--blanc" style="font-size:72px">Vivi</span></div>
+      </div>
+      <div class="petits">
+        <figure><div><span class="icone" style="--t:64px;background:#0a3d3e">Vivi</span></div>Application</figure>
+        <figure><div><span class="icone" style="--t:32px;background:#0a3d3e">Vivi</span></div>32 px</figure>
+        <figure><div><span class="icone icone--v" style="--t:16px;background:#0a3d3e">V</span></div>Onglet, 16 px</figure>
+      </div>
+      <div class="entete-demo"><span class="wm" style="font-size:30px;color:#0a3d3e">Vivi</span><span class="btn btn-cta btn-sm" style="border-radius:999px">Connexion</span></div>
+    </section>
+
+    <h2 class="mt-5 mb-3" style="font-size:1.35rem">Pistes précédentes</h2>
+
+    <!-- ===== Piste A ===== -->
+    <section class="piste" id="a">
+      <h2>A · Le toit et le V</h2>
+      <p class="text-soft mb-0">Un toit orange posé sur le V de VIVI : la maison et l’initiale forment un losange, lisible même tout petit.</p>
+      <div class="scenes">
+        <div class="scene scene--clair"><span class="lockup" style="font-size:52px"><svg width="86" height="86" viewBox="0 0 64 64" aria-hidden="true"><use href="#picto-a"/></svg><span class="mot"><small>Appartement</small><b>VIVI</b></span></span></div>
+        <div class="scene scene--sombre"><span class="lockup" style="font-size:40px"><svg width="66" height="66" viewBox="0 0 64 64" aria-hidden="true"><use href="#picto-a"/></svg><span class="mot"><small>Appartement</small><b>VIVI</b></span></span></div>
+      </div>
+      <div class="petits">
+        <figure><div><svg width="64" height="64" viewBox="0 0 64 64"><use href="#picto-a"/></svg></div>Application</figure>
+        <figure><div><svg width="32" height="32" viewBox="0 0 64 64"><use href="#picto-a"/></svg></div>32 px</figure>
+        <figure><div><svg width="16" height="16" viewBox="0 0 64 64"><use href="#picto-a"/></svg></div>Onglet, 16 px</figure>
+      </div>
+      <div class="entete-demo"><span class="lockup" style="font-size:26px"><svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><use href="#picto-a"/></svg><span class="mot"><small>Appartement</small><b>VIVI</b></span></span><span class="btn btn-outline-primary btn-sm">Connexion</span></div>
+    </section>
+
+    <!-- ===== Piste B ===== -->
+    <section class="piste" id="b">
+      <h2>B · Le repère</h2>
+      <p class="text-soft mb-0">Un repère de carte qui abrite une maison, sa porte en orange : « un logement près de vous ». Plus illustratif, très parlant pour le grand public.</p>
+      <div class="scenes">
+        <div class="scene scene--clair"><span class="lockup" style="font-size:52px"><svg width="80" height="86" viewBox="0 0 60 64" aria-hidden="true"><use href="#picto-b"/></svg><span class="mot"><small>Appartement</small><b>VIVI</b></span></span></div>
+        <div class="scene scene--sombre"><span class="lockup" style="font-size:40px"><svg width="62" height="66" viewBox="0 0 60 64" aria-hidden="true"><use href="#picto-b-clair"/></svg><span class="mot"><small>Appartement</small><b>VIVI</b></span></span></div>
+      </div>
+      <div class="petits">
+        <figure><div><svg width="60" height="64" viewBox="0 0 60 64"><use href="#picto-b"/></svg></div>Application</figure>
+        <figure><div><svg width="30" height="32" viewBox="0 0 60 64"><use href="#picto-b"/></svg></div>32 px</figure>
+        <figure><div><svg width="15" height="16" viewBox="0 0 60 64"><use href="#picto-b"/></svg></div>Onglet, 16 px</figure>
+      </div>
+      <div class="entete-demo"><span class="lockup" style="font-size:26px"><svg width="38" height="40" viewBox="0 0 60 64" aria-hidden="true"><use href="#picto-b"/></svg><span class="mot"><small>Appartement</small><b>VIVI</b></span></span><span class="btn btn-outline-primary btn-sm">Connexion</span></div>
+    </section>
+
+    <!-- ===== Piste C ===== -->
+    <section class="piste" id="c">
+      <h2>C · Le mot seul</h2>
+      <p class="text-soft mb-0">Le nom en minuscules, sans pictogramme : le point du premier i devient un petit toit orange. Sobre et moderne ; l’icône d’application reprend le « v » et son toit.</p>
+      <div class="scenes">
+        <div class="scene scene--clair"><svg width="235" height="140" viewBox="0 0 94 56" role="img" aria-label="vivi"><use href="#mot-c"/></svg></div>
+        <div class="scene scene--sombre"><svg width="176" height="105" viewBox="0 0 94 56" role="img" aria-label="vivi"><use href="#mot-c-clair"/></svg></div>
+      </div>
+      <div class="petits">
+        <figure><div><svg width="64" height="64" viewBox="0 0 64 64"><use href="#picto-c"/></svg></div>Application</figure>
+        <figure><div><svg width="32" height="32" viewBox="0 0 64 64"><use href="#picto-c"/></svg></div>32 px</figure>
+        <figure><div><svg width="16" height="16" viewBox="0 0 64 64"><use href="#picto-c"/></svg></div>Onglet, 16 px</figure>
+      </div>
+      <div class="entete-demo"><svg width="67" height="40" viewBox="0 0 94 56" role="img" aria-label="vivi"><use href="#mot-c"/></svg><span class="btn btn-outline-primary btn-sm">Connexion</span></div>
+    </section>
+
+    <p class="form-text mt-4 mb-0">Pistes A et B : le nom est composé en Outfit, la police des titres du site. Piste C : le mot est dessiné. La version retenue sera finalisée et livrée en SVG et en PNG.</p>
+  </main>
+
+  <!-- ===== Dessins ===== -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <g id="picto-f">
+        <path d="M3 6 H17 L41 50 V58 H31 Z" fill="#136f6e"/>
+        <rect x="36" y="4" width="22" height="54" rx="2.5" fill="#136f6e"/>
+        <g fill="#fff"><rect x="41" y="10" width="5" height="6" rx="1"/><rect x="49.5" y="10" width="5" height="6" rx="1"/><rect x="41" y="20" width="5" height="6" rx="1"/><rect x="49.5" y="20" width="5" height="6" rx="1"/><rect x="41" y="30" width="5" height="6" rx="1"/><rect x="49.5" y="30" width="5" height="6" rx="1"/></g>
+        <path d="M44 58 V46 a3 3 0 0 1 3 -3 h1.5 a3 3 0 0 1 3 3 V58 Z" fill="#f4ad4c"/>
+      </g>
+      <g id="picto-f-sombre">
+        <path d="M3 6 H17 L41 50 V58 H31 Z" fill="#fff"/>
+        <rect x="36" y="4" width="22" height="54" rx="2.5" fill="#fff"/>
+        <g fill="#0a3d3e"><rect x="41" y="10" width="5" height="6" rx="1"/><rect x="49.5" y="10" width="5" height="6" rx="1"/><rect x="41" y="20" width="5" height="6" rx="1"/><rect x="49.5" y="20" width="5" height="6" rx="1"/><rect x="41" y="30" width="5" height="6" rx="1"/><rect x="49.5" y="30" width="5" height="6" rx="1"/></g>
+        <path d="M44 58 V46 a3 3 0 0 1 3 -3 h1.5 a3 3 0 0 1 3 3 V58 Z" fill="#f4ad4c"/>
+      </g>
+      <g id="picto-f-tuile">
+        <path d="M3 6 H17 L41 50 V58 H31 Z" fill="#fff"/>
+        <rect x="36" y="4" width="22" height="54" rx="2.5" fill="#fff"/>
+        <g fill="#136f6e"><rect x="41" y="10" width="5" height="6" rx="1"/><rect x="49.5" y="10" width="5" height="6" rx="1"/><rect x="41" y="20" width="5" height="6" rx="1"/><rect x="49.5" y="20" width="5" height="6" rx="1"/><rect x="41" y="30" width="5" height="6" rx="1"/><rect x="49.5" y="30" width="5" height="6" rx="1"/></g>
+        <path d="M44 58 V46 a3 3 0 0 1 3 -3 h1.5 a3 3 0 0 1 3 3 V58 Z" fill="#f4ad4c"/>
+      </g>
+      <!-- A : tuile turquoise, toit orange, V blanc -->
+      <g id="picto-a">
+        <rect width="64" height="64" rx="15" fill="#136f6e"/>
+        <path d="M14 31 L32 15 L50 31" fill="none" stroke="#f4ad4c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M20 31 L32 50 L44 31" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+
+      <!-- B : repère turquoise, maison blanche, porte orange -->
+      <g id="picto-b">
+        <path d="M30 2 C14.5 2 3 13.6 3 28.4 C3 46 30 62 30 62 C30 62 57 46 57 28.4 C57 13.6 45.5 2 30 2 Z" fill="#136f6e"/>
+        <path d="M15 29 L30 16 L45 29 V42 H15 Z" fill="#fff" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+        <rect x="25.5" y="30" width="9" height="13.5" rx="2" fill="#f4ad4c"/>
+      </g>
+      <g id="picto-b-clair">
+        <path d="M30 2 C14.5 2 3 13.6 3 28.4 C3 46 30 62 30 62 C30 62 57 46 57 28.4 C57 13.6 45.5 2 30 2 Z" fill="#64b8b8"/>
+        <path d="M15 29 L30 16 L45 29 V42 H15 Z" fill="#0a3d3e" stroke="#0a3d3e" stroke-width="3" stroke-linejoin="round"/>
+        <rect x="25.5" y="30" width="9" height="13.5" rx="2" fill="#f4ad4c"/>
+      </g>
+
+      <!-- C : mot « vivi » dessiné en tracés ; le point du premier i est un toit orange -->
+      <g id="mot-c"><g fill="none" stroke="#136f6e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22 L17 49 L29 22"/><path d="M41 22 V49"/><path d="M53 22 L65 49 L77 22"/><path d="M89 22 V49"/></g><path d="M34 12.5 L41 6 L48 12.5" fill="none" stroke="#f4ad4c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="89" cy="9" r="5" fill="#136f6e"/></g>
+      <g id="mot-c-clair"><g fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22 L17 49 L29 22"/><path d="M41 22 V49"/><path d="M53 22 L65 49 L77 22"/><path d="M89 22 V49"/></g><path d="M34 12.5 L41 6 L48 12.5" fill="none" stroke="#f4ad4c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="89" cy="9" r="5" fill="#fff"/></g>
+      <g id="picto-c">
+        <rect width="64" height="64" rx="15" fill="#136f6e"/>
+        <path d="M17 26 L32 13 L47 26" fill="none" stroke="#f4ad4c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19 31 L32 51 L45 31" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </defs>
+  </svg>
+</body>
+</html>

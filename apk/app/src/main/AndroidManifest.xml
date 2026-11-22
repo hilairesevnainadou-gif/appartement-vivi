@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Android 13+ : afficher les notifications (réservation confirmée, offres…) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Scanner du QR Code à l'arrivée du client (propriétaire et gestionnaire) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- « Près de moi » dans la recherche -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!-- Android 11+ : ouvrir WhatsApp, Maps et le navigateur (Custom Tabs) -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".ViviApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="${trafficEnTexteClair}"
+        android:theme="@style/Theme.Vivi">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Vivi.Demarrage"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Liens du site vers une fiche (dont les liens des agents marketing : /logements/{slug}?agent=AG…) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:host="${hoteSite}" />
+                <data android:pathPrefix="/logements/" />
+            </intent-filter>
+            <!-- Retour de la page de paiement FedaPay : vivi://paiement/{id}?statut=… (VIVI_APP_LIEN_RETOUR) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="vivi" android:host="paiement" />
+            </intent-filter>
+        </activity>
+        <!-- Push Firebase : nouveau jeton, message reçu application ouverte -->
+        <service
+            android:name=".data.ServicePush"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- Publicité AdMob : identifiant de l'application (viviAdmobAppId dans gradle.properties) -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
+        <!-- Push reçu application fermée : affiché par Android dans le canal « vivi_alertes », avec l'icône VIVI -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="vivi_alertes" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_vivi" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/vivi_teal_700" />
+    </application>
+</manifest>

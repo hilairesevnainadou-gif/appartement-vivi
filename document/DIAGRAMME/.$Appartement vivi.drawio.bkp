@@ -1,0 +1,122 @@
+<mxfile host="Electron" modified="2025-11-17T09:34:09.808Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="pm5N0U78ZjknoMzOLJ-H" version="21.2.1" type="device">
+  <diagram name="Page-1" id="elRLu0CRoCiSGxCsyFUI">
+    <mxGraphModel dx="1428" dy="1016" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-1" value="&lt;b style=&quot;border-color: var(--border-color);&quot;&gt;Client&lt;/b&gt;&lt;br&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontColor=default;labelBackgroundColor=default;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-2" value="&lt;b&gt;Gestionnaire&lt;br/&gt;de Bien&lt;/b&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="310" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-3" value="&lt;b&gt;Administrateur&lt;br/&gt;VIVI&lt;/b&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="450" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-6" value="" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="140" y="-80" width="690" height="690" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-7" value="Recherche,&lt;br&gt;Réserve, Paie, Annuler/Reporter." style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="50" width="330" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-8" value="Gère&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;background-color: initial; text-align: justify;&quot;&gt;&amp;nbsp;ses bien et les accès des Gérants et les revenus.&lt;/span&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="160" width="330" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-9" value="Gère&lt;br/&gt;le calendrier et les services pour un bien&amp;nbsp;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="245" y="250" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-10" value="Gère&lt;br/&gt;les finances centrales (prix, commissions, virements)." style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="380" width="350" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-11" value="Gère&lt;br/&gt;les transactions et l&#39;exécution des virements." style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="440" width="350" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="6N32-XXvSMqSBMDHP-XI-12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="10" y="390" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-50" y="220" />
+              <mxPoint x="-50" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-12" value="&lt;b&gt;Propriétaire&lt;/b&gt;&amp;nbsp;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="30" y="190" width="40" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-17" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="6N32-XXvSMqSBMDHP-XI-8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="210" as="sourcePoint" />
+            <mxPoint x="240" y="80" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-19" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="330" as="sourcePoint" />
+            <mxPoint x="245" y="270" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-20" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="460" as="sourcePoint" />
+            <mxPoint x="230" y="400" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-21" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="460" as="sourcePoint" />
+            <mxPoint x="230" y="460" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-22" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="80" y="100" as="sourcePoint" />
+            <mxPoint x="230" y="70" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-29" value="S&#39;authentifié&amp;nbsp;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="690" y="230" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-30" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;" edge="1" parent="1" target="6N32-XXvSMqSBMDHP-XI-29">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="565" y="270" as="sourcePoint" />
+            <mxPoint x="690" y="220" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-31" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;entryX=0.067;entryY=0.225;entryDx=0;entryDy=0;entryPerimeter=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="6N32-XXvSMqSBMDHP-XI-8" target="6N32-XXvSMqSBMDHP-XI-29">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="575" y="280" as="sourcePoint" />
+            <mxPoint x="700" y="280" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-32" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="6N32-XXvSMqSBMDHP-XI-7" target="6N32-XXvSMqSBMDHP-XI-29">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="570" y="190" as="sourcePoint" />
+            <mxPoint x="708" y="258" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-37" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="6N32-XXvSMqSBMDHP-XI-11" target="6N32-XXvSMqSBMDHP-XI-29">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="575" y="280" as="sourcePoint" />
+            <mxPoint x="700" y="280" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6N32-XXvSMqSBMDHP-XI-38" value="" style="endArrow=classic;html=1;rounded=0;dashed=1;exitX=0.968;exitY=0.285;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.067;entryY=0.782;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="6N32-XXvSMqSBMDHP-XI-10" target="6N32-XXvSMqSBMDHP-XI-29">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="590" y="470" as="sourcePoint" />
+            <mxPoint x="729" y="314" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

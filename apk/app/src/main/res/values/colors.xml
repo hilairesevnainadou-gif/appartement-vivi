@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Charte VIVI : maquette/assets/css/vivi.css (les mêmes jetons sont dans ui/theme/Couleurs.kt) -->
+<resources>
+    <color name="vivi_teal_700">#FF136F6E</color>
+    <color name="vivi_teal_900">#FF0A3D3E</color>
+    <color name="vivi_orange_400">#FFF4AD4C</color>
+    <color name="vivi_sand">#FFFAF7F2</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

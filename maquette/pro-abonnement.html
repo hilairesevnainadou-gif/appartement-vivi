@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Abonnement · Espace propriétaire · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+  <link rel="stylesheet" href="assets/css/vivi-pro.css">
+</head>
+<body class="pro" data-page="abonnement" data-titre="Abonnement">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <div class="pro-shell">
+    <aside id="pro-menu" class="pro-side"></aside>
+    <div>
+      <header id="pro-haut" class="pro-top"></header>
+      <main id="contenu" class="pro-main">
+        <div class="pro-wrap">
+
+          <div class="pro-head">
+            <div>
+              <h1>Abonnement</h1>
+              <p>Un abonnement actif est nécessaire pour publier vos logements.</p>
+            </div>
+          </div>
+
+          <!-- ===== Formule en cours ===== -->
+          <section class="panel" aria-labelledby="t-actuel">
+            <div class="row g-3 align-items-center">
+              <div class="col-md-7">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                  <h2 id="t-actuel" class="mb-0">Formule <span id="ab-nom"></span></h2>
+                  <span class="chip chip--success"><i class="bi bi-check-circle" aria-hidden="true"></i>Actif</span>
+                </div>
+                <p class="mb-1"><strong class="text-ink" id="ab-prix"></strong> par mois, payé par <span id="ab-moyen"></span>.</p>
+                <p class="mb-0 text-soft" id="ab-echeance"></p>
+              </div>
+              <div class="col-md-5">
+                <div class="quota">
+                  <div>
+                    <strong class="text-ink" id="ab-quota"></strong>
+                    <div class="small text-soft">logements publiés</div>
+                  </div>
+                  <div class="meter" aria-hidden="true"><i id="ab-jauge" style="width:0"></i></div>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <a class="btn btn-ghost btn-sm" href="#" data-bientot="Changer de moyen de paiement">Changer de moyen de paiement</a>
+              <a class="btn btn-ghost btn-sm" href="#" data-bientot="Résilier l’abonnement">Résilier</a>
+            </div>
+          </section>
+
+          <!-- ===== Formules ===== -->
+          <section class="mt-4" aria-labelledby="t-formules">
+            <h2 id="t-formules" class="mb-3" style="font-size:1.35rem">Changer de formule</h2>
+            <div class="plans" id="ab-formules"></div>
+            <div class="note-box note-box--orange mt-3">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              <span>Les formules (nom, prix, nombre de logements et de gestionnaires) sont paramétrées par l’administrateur VIVI. Celles-ci sont des exemples.</span>
+            </div>
+          </section>
+
+          <!-- ===== Paiements ===== -->
+          <section class="panel mt-4" aria-labelledby="t-paiements">
+            <h2 id="t-paiements" class="mb-2">Paiements</h2>
+            <div class="table-responsive">
+              <table class="table-simple">
+                <thead>
+                  <tr><th scope="col">Date</th><th scope="col">Formule</th><th scope="col">État</th><th scope="col" class="num">Montant</th></tr>
+                </thead>
+                <tbody id="ab-paiements"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+  <nav id="pro-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/vivi-pro.js"></script>
+  <script src="assets/js/pages/pro-abonnement.js"></script>
+</body>
+</html>

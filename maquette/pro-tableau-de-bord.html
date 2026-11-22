@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tableau de bord · Espace propriétaire · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+  <link rel="stylesheet" href="assets/css/vivi-pro.css">
+</head>
+<body class="pro" data-page="tableau" data-titre="Tableau de bord">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <div class="pro-shell">
+    <aside id="pro-menu" class="pro-side"></aside>
+    <div>
+      <header id="pro-haut" class="pro-top"></header>
+      <main id="contenu" class="pro-main">
+        <div class="pro-wrap">
+
+          <div class="pro-head">
+            <div>
+              <span class="eyebrow" id="tb-date"></span>
+              <h1 id="tb-bonjour">Bonjour</h1>
+            </div>
+            <a class="btn btn-cta" href="pro-scanner.html"><i class="bi bi-qr-code-scan" aria-hidden="true"></i>Scanner un QR Code</a>
+          </div>
+
+          <!-- ===== Indicateurs ===== -->
+          <section class="kpi-row" aria-label="Indicateurs">
+            <div class="kpi">
+              <p class="kpi__label">Arrivées aujourd’hui</p>
+              <p class="kpi__value" id="k-arrivees">0</p>
+              <p class="kpi__delta" id="k-arrivees-detail"></p>
+            </div>
+            <div class="kpi">
+              <p class="kpi__label">Réservations à venir</p>
+              <p class="kpi__value" id="k-avenir">0</p>
+              <p class="kpi__delta">sur les 7 prochains jours</p>
+            </div>
+            <div class="kpi">
+              <p class="kpi__label">Revenus du mois</p>
+              <p class="kpi__value" id="k-revenus"></p>
+              <p class="kpi__delta" id="k-revenus-delta"></p>
+            </div>
+            <div class="kpi">
+              <p class="kpi__label">Taux d’occupation</p>
+              <p class="kpi__value" id="k-occupation"></p>
+              <p class="kpi__delta" id="k-occupation-delta"></p>
+            </div>
+          </section>
+
+          <div class="row g-3 mt-1">
+            <!-- ===== Arrivées du jour ===== -->
+            <div class="col-xl-7">
+              <section class="panel h-100" aria-labelledby="t-arrivees">
+                <div class="panel__head">
+                  <h2 id="t-arrivees">Arrivées d’aujourd’hui</h2>
+                  <a href="pro-calendrier.html">Voir le calendrier</a>
+                </div>
+                <ul class="rows" id="tb-arrivees"></ul>
+              </section>
+            </div>
+
+            <!-- ===== Revenus ===== -->
+            <div class="col-xl-5">
+              <section class="panel h-100" aria-labelledby="t-revenus">
+                <div class="panel__head">
+                  <h2 id="t-revenus">Revenus de location, 7 derniers jours</h2>
+                </div>
+                <p class="text-soft mb-3">Total : <strong class="text-ink" id="tb-total7"></strong>, hors services à la carte.</p>
+                <figure class="chart" aria-labelledby="t-revenus">
+                  <div class="chart__plot">
+                    <div class="chart__y" id="ch-y" aria-hidden="true"></div>
+                    <div class="chart__zone">
+                      <div class="chart__grid" id="ch-grille" aria-hidden="true"></div>
+                      <div class="chart__cols" id="ch-colonnes"></div>
+                      <div class="chart__tip" id="ch-bulle" role="status" hidden></div>
+                    </div>
+                    <div class="chart__x" id="ch-x" aria-hidden="true"></div>
+                  </div>
+                  <details>
+                    <summary>Voir les chiffres</summary>
+                    <table>
+                      <caption class="visually-hidden">Revenus de location par jour, en FCFA</caption>
+                      <tbody id="ch-tableau"></tbody>
+                    </table>
+                  </details>
+                </figure>
+              </section>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-0">
+            <!-- ===== Prochaines réservations ===== -->
+            <div class="col-xl-7">
+              <section class="panel h-100" aria-labelledby="t-prochaines">
+                <div class="panel__head">
+                  <h2 id="t-prochaines">Prochaines réservations</h2>
+                  <a href="#" data-bientot="Toutes les réservations">Tout voir</a>
+                </div>
+                <ul class="rows" id="tb-prochaines"></ul>
+              </section>
+            </div>
+
+            <!-- ===== Solde et retraits ===== -->
+            <div class="col-xl-5">
+              <section class="panel h-100" aria-labelledby="t-retraits">
+                <div class="panel__head">
+                  <h2 id="t-retraits">Solde et retraits</h2>
+                  <a href="#" data-bientot="Revenus et retraits">Historique</a>
+                </div>
+                <p class="kpi__label">Solde disponible</p>
+                <p class="kpi__value mb-3" id="tb-solde"></p>
+                <button class="btn btn-primary w-100" type="button" id="tb-retrait"><i class="bi bi-cash-coin" aria-hidden="true"></i>Demander un retrait</button>
+                <ul class="rows mt-3" id="tb-retraits"></ul>
+                <div class="note-box mt-3">
+                  <i class="bi bi-info-circle" aria-hidden="true"></i>
+                  <span>Chaque séjour démarré (QR Code scanné) s’ajoute à votre solde. Vos retraits sont validés par la caissière VIVI, qui indique le mode de règlement.</span>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- ===== Abonnement ===== -->
+          <section class="panel mt-3" aria-labelledby="t-abonnement">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+              <div>
+                <h2 id="t-abonnement" class="mb-1" style="font-size:1.2rem">Abonnement <span id="tb-formule"></span></h2>
+                <p class="mb-0 text-soft" id="tb-echeance"></p>
+              </div>
+              <a class="btn btn-ghost" href="pro-abonnement.html">Gérer mon abonnement</a>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+  <nav id="pro-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/vivi-pro.js"></script>
+  <script src="assets/js/pages/pro-tableau-de-bord.js"></script>
+</body>
+</html>

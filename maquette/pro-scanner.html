@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Scanner un QR Code · Espace propriétaire · Appartement VIVI</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+  <link rel="stylesheet" href="assets/css/vivi-pro.css">
+</head>
+<body class="pro" data-page="scanner" data-titre="Scanner un QR Code">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <div class="pro-shell">
+    <aside id="pro-menu" class="pro-side"></aside>
+    <div>
+      <header id="pro-haut" class="pro-top"></header>
+      <main id="contenu" class="pro-main">
+        <div class="pro-wrap" style="max-width:980px">
+
+          <div class="pro-head">
+            <div>
+              <h1>Scanner un QR Code</h1>
+              <p>À l’arrivée du client, scannez son QR Code : le séjour démarre et le montant de la location s’ajoute à votre solde.</p>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <!-- ===== Scan ou saisie du code ===== -->
+            <div class="col-lg-5">
+              <section class="panel" aria-labelledby="t-scan">
+                <h2 id="t-scan" class="visually-hidden">Scanner ou saisir le code</h2>
+                <div class="scan-frame">
+                  <span class="coin" aria-hidden="true"></span>
+                  <span class="ligne" aria-hidden="true"></span>
+                  <i class="bi bi-qr-code-scan" aria-hidden="true"></i>
+                  <p class="mb-1">Placez le QR Code du client dans le cadre.</p>
+                  <button class="btn btn-light-on-dark btn-sm" type="button" id="sc-camera"><i class="bi bi-camera" aria-hidden="true"></i>Activer la caméra</button>
+                </div>
+
+                <div class="ou">ou</div>
+
+                <form id="form-code" novalidate>
+                  <label class="form-label" for="sc-code">Code de secours du client</label>
+                  <input class="form-control otp-input" type="text" id="sc-code" inputmode="numeric" autocomplete="off" maxlength="6" aria-describedby="sc-code-aide sc-code-erreur">
+                  <div class="invalid-feedback" id="sc-code-erreur">Le code contient 6 chiffres.</div>
+                  <p class="form-text mb-0 mt-2" id="sc-code-aide">Les 6 chiffres affichés sous le QR Code du client.</p>
+                  <button class="btn btn-primary w-100 mt-3" type="submit">Vérifier le code</button>
+                </form>
+              </section>
+            </div>
+
+            <!-- ===== Résultat ===== -->
+            <div class="col-lg-7">
+              <div id="sc-resultat" aria-live="polite"></div>
+
+              <section class="panel" aria-labelledby="t-attendus" id="sc-attendus-bloc">
+                <div class="panel__head"><h2 id="t-attendus">Clients attendus aujourd’hui</h2></div>
+                <ul class="rows" id="sc-attendus"></ul>
+                <p class="form-text mt-3 mb-0">Maquette : la caméra n’est pas branchée. Saisissez le code d’un client attendu pour voir la suite.</p>
+              </section>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+  <nav id="pro-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/vivi-pro.js"></script>
+  <script src="assets/js/pages/pro-scanner.js"></script>
+</body>
+</html>

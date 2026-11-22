@@ -1,0 +1,115 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+}
+
+// Push Firebase : télécharger google-services.json depuis la console Firebase (application Android
+// « bj.vivi.app ») et le poser dans app/. Sans ce fichier, l'application vérifie les notifications
+// régulièrement à la place (voir data/Alertes.kt).
+if (file('google-services.json').exists()) {
+    apply plugin: 'com.google.gms.google-services'
+}
+
+// Adresse de l'API : -PviviApiUrl=http://192.168.1.20:8000/api/v1/ ou ligne « viviApiUrl=… » dans gradle.properties.
+// Par défaut, 10.0.2.2 = la machine hôte vue depuis l'émulateur Android.
+def apiDebug = (project.findProperty('viviApiUrl') ?: 'http://10.0.2.2:8000/api/v1/').toString()
+def apiRelease = (project.findProperty('viviApiUrlProd') ?: 'https://vivi.bj/api/v1/').toString()
+
+// Identifiant de l'APPLICATION AdMob (ca-app-pub-…~…) : ligne « viviAdmobAppId=… » dans gradle.properties.
+// Par défaut, l'identifiant de test de Google : sans identifiant, le SDK publicitaire plante au démarrage.
+def admobAppId = (project.findProperty('viviAdmobAppId') ?: 'ca-app-pub-3940256099942544~3347511713').toString()
+
+android {
+    namespace 'bj.vivi.app'
+    compileSdk {
+        version = release(37)
+    }
+
+    defaultConfig {
+        applicationId "bj.vivi.app"
+        minSdk 26
+        targetSdk 37
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables { useSupportLibrary true }
+        manifestPlaceholders = [admobAppId: admobAppId]
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "API_URL", "\"${apiDebug}\""
+            manifestPlaceholders += [trafficEnTexteClair: "true", hoteSite: new URI(apiDebug).host]
+        }
+        release {
+            buildConfigField "String", "API_URL", "\"${apiRelease}\""
+            manifestPlaceholders += [trafficEnTexteClair: "false", hoteSite: new URI(apiRelease).host]
+            optimization {
+                enable false
+            }
+        }
+    }
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.androidx.splashscreen
+
+    implementation platform(libs.compose.bom)
+    implementation libs.compose.ui
+    implementation libs.compose.ui.graphics
+    implementation libs.compose.ui.tooling.preview
+    implementation libs.compose.foundation
+    implementation libs.compose.material3
+    implementation libs.compose.material.icons
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.lifecycle.viewmodel.compose
+    implementation libs.androidx.lifecycle.runtime.compose
+    implementation libs.androidx.navigation.compose
+    debugImplementation libs.compose.ui.tooling
+
+    implementation libs.retrofit
+    implementation libs.retrofit.serialization
+    implementation libs.okhttp.logging
+    implementation libs.kotlinx.serialization.json
+    implementation libs.coil.compose
+
+    implementation libs.camerax.camera2
+    implementation libs.camerax.lifecycle
+    implementation libs.camerax.view
+    implementation libs.mlkit.barcode
+    implementation libs.zxing.core
+
+    implementation libs.androidx.security.crypto
+    implementation libs.androidx.browser
+    // Verrouillage par empreinte / code du téléphone, confirmation des retraits
+    implementation 'androidx.biometric:biometric:1.1.0'
+    // Notifications du téléphone : vérification en arrière-plan toutes les 15 min
+    implementation 'androidx.work:work-runtime-ktx:2.10.1'
+    // Push Firebase (actif seulement avec app/google-services.json, voir plus bas)
+    implementation 'com.google.firebase:firebase-messaging:24.1.1'
+    // « Continuer avec Google » (comptes clients) : Credential Manager + Google ID
+    implementation 'androidx.credentials:credentials:1.5.0'
+    implementation 'androidx.credentials:credentials-play-services-auth:1.5.0'
+    implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
+    implementation 'androidx.lifecycle:lifecycle-process:2.9.1'
+    // Publicité Google AdMob + consentement (UMP) ; le SDK ne démarre que si l'API donne un bloc AdMob
+    implementation 'com.google.android.gms:play-services-ads:24.9.0'
+    implementation 'com.google.android.ump:user-messaging-platform:3.2.0'
+
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.androidx.junit
+}

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Appartement VIVI · Appartements meublés à l’heure, à la demi-journée ou à la journée au Bénin</title>
+  <meta name="description" content="Réservez un appartement meublé vérifié à Cotonou, Abomey-Calavi, Porto-Novo ou Ouidah. Services à la carte, paiement Mobile Money, entrée par QR Code.">
+  <meta name="theme-color" content="#0a3d3e">
+  <link rel="icon" href="assets/img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/css/vivi.css">
+</head>
+<body data-page="accueil">
+  <a class="skip-link visually-hidden-focusable" href="#contenu">Aller au contenu</a>
+  <header id="vivi-entete" class="vivi-header"></header>
+
+  <main id="contenu">
+
+    <!-- ===== Bandeau et recherche ===== -->
+    <section class="hero" aria-labelledby="titre-accueil">
+      <picture>
+        <source media="(max-width: 767.98px)" srcset="assets/img/hero-900.webp">
+        <img class="hero__img" src="assets/img/hero-1600.webp" alt="" width="1600" height="1000" fetchpriority="high">
+      </picture>
+      <div class="container">
+        <span class="chip chip--hero"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i>Cotonou · Abomey-Calavi · Porto-Novo · Ouidah</span>
+        <h1 id="titre-accueil">Un appartement pour une heure, une demi-journée ou la journée.</h1>
+        <p class="hero__lead">Choisissez un logement vérifié, ajoutez vos services, payez par Mobile Money et entrez avec votre QR Code.</p>
+
+        <form class="search-card" action="recherche.html" method="get" role="search" aria-label="Rechercher un logement">
+          <div class="search-grid">
+            <div class="sg-ville">
+              <label class="form-label" for="r-ville">Où ?</label>
+              <select class="form-select" id="r-ville" name="ville">
+                <option value="">Toutes les villes</option>
+                <option>Cotonou</option>
+                <option>Abomey-Calavi</option>
+                <option>Porto-Novo</option>
+                <option>Ouidah</option>
+              </select>
+            </div>
+            <div class="sg-formule">
+              <span class="form-label d-block" id="lbl-r-formule">Pour combien de temps ?</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="lbl-r-formule">
+                <input type="radio" name="formule" id="r-heure" value="heure" checked><label for="r-heure">Heure</label>
+                <input type="radio" name="formule" id="r-demi" value="demi"><label for="r-demi">Demi-journée</label>
+                <input type="radio" name="formule" id="r-jour" value="jour"><label for="r-jour">Journée</label>
+              </div>
+            </div>
+            <div class="sg-date">
+              <label class="form-label" for="r-date">Quand ?</label>
+              <input class="form-control" type="date" id="r-date" name="date">
+            </div>
+            <div class="sg-voyageurs">
+              <label class="form-label" for="r-voyageurs">Voyageurs</label>
+              <select class="form-select" id="r-voyageurs" name="voyageurs">
+                <option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+              </select>
+            </div>
+            <div class="sg-submit">
+              <button class="btn btn-cta btn-lg w-100" type="submit"><i class="bi bi-search" aria-hidden="true"></i>Rechercher</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== Engagements ===== -->
+    <section class="trust-strip" aria-label="Nos engagements">
+      <div class="container">
+        <ul>
+          <li><i class="bi bi-patch-check" aria-hidden="true"></i>Logements vérifiés par VIVI</li>
+          <li><i class="bi bi-phone" aria-hidden="true"></i>Paiement Mobile Money ou carte</li>
+          <li><i class="bi bi-qr-code-scan" aria-hidden="true"></i>Entrée par QR Code</li>
+          <li><i class="bi bi-receipt" aria-hidden="true"></i>Prix total affiché avant de payer</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Logements à la une ===== -->
+    <section class="section" aria-labelledby="titre-une">
+      <div class="container">
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+          <div class="section-head mb-0">
+            <span class="eyebrow">À la une</span>
+            <h2 id="titre-une">Des logements prêts à vous accueillir</h2>
+          </div>
+          <a class="btn btn-ghost" href="recherche.html">Voir tous les logements<i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="row g-3 g-lg-4" id="a-la-une"></div>
+      </div>
+    </section>
+
+    <!-- ===== Comment ça marche ===== -->
+    <section class="section bg-sand" id="comment-ca-marche" aria-labelledby="titre-comment">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Comment ça marche</span>
+          <h2 id="titre-comment">Réservé en quatre étapes</h2>
+        </div>
+        <ol class="steps-how">
+          <li>
+            <h3>Cherchez</h3>
+            <p>Indiquez la ville, la date et la formule : heure, demi-journée ou journée.</p>
+          </li>
+          <li>
+            <h3>Composez</h3>
+            <p>Ajoutez les services dont vous avez besoin. Le total s’ajuste, commission VIVI comprise.</p>
+          </li>
+          <li>
+            <h3>Payez</h3>
+            <p>Par Mobile Money ou carte bancaire. Votre créneau reste bloqué le temps du paiement.</p>
+          </li>
+          <li>
+            <h3>Entrez</h3>
+            <p>Présentez votre QR Code à l’arrivée : le propriétaire le scanne et votre séjour commence.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== Services à la carte ===== -->
+    <section class="section" id="services" aria-labelledby="titre-services">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Services à la carte</span>
+          <h2 id="titre-services">Composez votre séjour selon votre budget</h2>
+          <p>Les prix sont fixés par VIVI : ils sont identiques dans tous les logements qui proposent le service.</p>
+        </div>
+        <div class="row g-3" id="grille-services"></div>
+      </div>
+    </section>
+
+    <!-- ===== Villes ===== -->
+    <section class="section bg-sand" id="quartiers" aria-labelledby="titre-villes">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Où séjourner</span>
+          <h2 id="titre-villes">Nos villes</h2>
+        </div>
+        <div class="place-grid" id="grille-villes"></div>
+      </div>
+    </section>
+
+    <!-- ===== Propriétaires ===== -->
+    <section class="section" id="proprietaires" aria-labelledby="titre-proprietaires">
+      <div class="container">
+        <div class="owner-band">
+          <div class="row g-0 align-items-stretch">
+            <div class="col-lg-7">
+              <div class="owner-band__body">
+                <span class="eyebrow" style="color:var(--vivi-orange-400)">Propriétaires</span>
+                <h2 id="titre-proprietaires">Publiez votre appartement meublé sur VIVI</h2>
+                <p class="mb-0">Un abonnement, et vous gardez la main sur votre logement.</p>
+                <ul>
+                  <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Vous fixez vos prix à l’heure, à la demi-journée et à la journée.</span></li>
+                  <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Vous définissez vos propres créneaux et bloquez les dates de votre choix.</span></li>
+                  <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>La commission de la plateforme est payée par le client, pas par vous.</span></li>
+                  <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Vous scannez le QR Code à l’arrivée, ou vous confiez la gestion à un gestionnaire.</span></li>
+                </ul>
+                <div class="d-flex flex-wrap gap-2">
+                  <a class="btn btn-cta btn-lg" href="connexion.html?mode=inscription&amp;role=proprietaire">Publier mon logement</a>
+                  <a class="btn btn-light-on-dark btn-lg" href="pro-abonnement.html">Voir les abonnements</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <img class="owner-band__img" src="assets/img/logements/salon-baies-1280.webp" alt="" width="1280" height="960" loading="lazy" decoding="async">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Avis ===== -->
+    <section class="section bg-sand" aria-labelledby="titre-avis">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Avis</span>
+          <h2 id="titre-avis">Ils ont séjourné avec VIVI</h2>
+        </div>
+        <div class="row g-3 g-lg-4">
+          <div class="col-md-4">
+            <figure class="review mb-0">
+              <div class="stars" aria-label="5 sur 5"><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i></div>
+              <blockquote>« J’avais trois heures entre deux rendez-vous à Cotonou. Réservé depuis le taxi, le studio était prêt et climatisé à mon arrivée. »</blockquote>
+              <figcaption class="review__who"><span class="avatar" aria-hidden="true">MA</span><span><strong>Mireille A.</strong><small>Studio Lagune · 3 heures</small></span></figcaption>
+            </figure>
+          </div>
+          <div class="col-md-4">
+            <figure class="review mb-0">
+              <div class="stars" aria-label="5 sur 5"><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i></div>
+              <blockquote>« Le prix affiché était le prix payé, frais compris. Le pack boissons attendait au frais, rien à demander sur place. »</blockquote>
+              <figcaption class="review__who"><span class="avatar" aria-hidden="true">GK</span><span><strong>Géraud K.</strong><small>Appartement Haie Vive · 2 jours</small></span></figcaption>
+            </figure>
+          </div>
+          <div class="col-md-4">
+            <figure class="review mb-0">
+              <div class="stars" aria-label="4 sur 5"><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star-fill" aria-hidden="true"></i><i class="bi bi-star" aria-hidden="true"></i></div>
+              <blockquote>« Un empêchement de dernière minute : j’ai déplacé ma réservation à la semaine suivante depuis mon téléphone. »</blockquote>
+              <figcaption class="review__who"><span class="avatar" aria-hidden="true">PD</span><span><strong>Prisca D.</strong><small>Résidence Les Cocotiers · demi-journée</small></span></figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="vivi-pied" class="vivi-footer"></footer>
+  <nav id="vivi-nav-basse"></nav>
+
+  <script src="assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/vivi-data.js"></script>
+  <script src="assets/js/vivi.js"></script>
+  <script src="assets/js/pages/accueil.js"></script>
+</body>
+</html>
