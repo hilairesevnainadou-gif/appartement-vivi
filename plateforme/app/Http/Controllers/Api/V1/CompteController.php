@@ -73,7 +73,7 @@ class CompteController extends Controller
             if (! $valeur) {
                 $erreur('Numéro béninois à 10 chiffres, par exemple 01 97 00 00 00.');
             }
-            if (! Parametres::get('notifications_sms')) {
+            if (! Parametres::smsActif()) {
                 $erreur('L’envoi de SMS est désactivé pour le moment.');
             }
             $canal = 'sms';

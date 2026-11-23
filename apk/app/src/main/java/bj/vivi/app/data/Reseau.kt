@@ -108,6 +108,24 @@ object Reseau {
 
     val nomAppareil: String = "${Build.MANUFACTURER} ${Build.MODEL}".trim().take(100)
 
+    /**
+     * Photos : adresses « http:// » de la plateforme passées en HTTPS (Android bloque le trafic en clair), délais plus
+     * longs que ceux de Coil (10 s) pour les connexions lentes, et photos gardées sur le téléphone.
+     */
+    fun chargeurImages(context: Context): coil.ImageLoader = coil.ImageLoader.Builder(context)
+        .okHttpClient {
+            OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .addInterceptor { chaine ->
+                    val requete = chaine.request()
+                    chaine.proceed(requete.newBuilder().url(Serveur.securiser(requete.url)).build())
+                }
+                .build()
+        }
+        .respectCacheHeaders(false)
+        .build()
+
     fun initialiser(context: Context) {
         val app = context.applicationContext
         sessionEnPreparation = java.util.concurrent.FutureTask { Session(app) }
@@ -125,8 +143,8 @@ object Reseau {
             reponse
         }
         val client = OkHttpClient.Builder()
-            .connectTimeout(if (Serveur.rechercheActive) 6L else 15L, TimeUnit.SECONDS)   // serveur local : bascule vite vers la recherche du serveur
-            .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(if (Serveur.rechercheActive) 6L else 30L, TimeUnit.SECONDS)   // serveur local : bascule vite vers la recherche du serveur
+            .readTimeout(60, TimeUnit.SECONDS)   // envoi du code (email) et ouverture du paiement (FedaPay) : le serveur attend un autre service
             .addInterceptor(enTetes)
             .addInterceptor(Serveur.intercepteur)   // test : suit la plateforme si l'IP du PC change
             .apply {

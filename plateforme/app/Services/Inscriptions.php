@@ -56,7 +56,7 @@ class Inscriptions
 
     public function verifierCanalActif(string $canal): void
     {
-        if ($canal === 'sms' && ! Parametres::get('notifications_sms')) {
+        if ($canal === 'sms' && ! Parametres::smsActif()) {
             $this->erreur('L’envoi de codes par SMS est désactivé pour le moment : utilisez votre adresse email.');
         }
         if ($canal === 'mail' && ! Parametres::get('notifications_email')) {

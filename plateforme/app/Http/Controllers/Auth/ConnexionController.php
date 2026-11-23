@@ -48,7 +48,7 @@ class ConnexionController extends Controller
             'parrainageActif' => $this->parrainage->actif(),
             'bonusBienvenue' => (int) Parametres::get('parrainage_bonus_filleul'),
             'role' => $request->query('role') === 'proprietaire' ? 'proprietaire' : 'client',
-            'smsActif' => Parametres::get('notifications_sms'),
+            'smsActif' => Parametres::smsActif(),
             'emailActif' => Parametres::get('notifications_email'),
             'googleActif' => app(\App\Services\ConnexionGoogle::class)->actif(),
         ]);

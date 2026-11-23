@@ -7,6 +7,7 @@ use App\Notifications\CodeDeConnexion;
 use App\Support\Telephone;
 use Illuminate\Support\Facades\Notification;
 use RuntimeException;
+use Throwable;
 
 /**
  * Codes à usage unique pour la connexion sans mot de passe.
@@ -47,7 +48,7 @@ class CodesConnexion
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $minutes = (int) config('vivi.connexion.code_validite_minutes');
 
-        CodeConnexion::create([
+        $enregistrement = CodeConnexion::create([
             'identifiant' => $identifiant,
             'canal' => $canal,
             'empreinte' => self::empreinte($identifiant, $code),
@@ -56,8 +57,14 @@ class CodesConnexion
         ]);
 
         $destination = $canal === 'sms' ? Telephone::international($identifiant) : $identifiant;
-        Notification::route($canal === 'sms' ? 'sms' : 'mail', $destination)
-            ->notifyNow(new CodeDeConnexion($code, $canal, $minutes, $motif));
+        try {
+            Notification::route($canal === 'sms' ? 'sms' : 'mail', $destination)
+                ->notifyNow(new CodeDeConnexion($code, $canal, $minutes, $motif));
+        } catch (Throwable $e) {
+            // Rien n'est parti : la personne peut réessayer tout de suite, sans « Un code vient d'être envoyé »
+            $enregistrement->delete();
+            throw $e;
+        }
 
         return $code;
     }

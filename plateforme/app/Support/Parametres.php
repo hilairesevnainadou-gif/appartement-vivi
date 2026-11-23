@@ -81,6 +81,16 @@ class Parametres
         return 'https://wa.me/'.$chiffres.($texte !== '' ? '?text='.rawurlencode($texte) : '');
     }
 
+    /**
+     * SMS utilisables pour les codes : activés par l'administrateur ET un vrai fournisseur configuré. Avec le pilote
+     * « log », rien n'est envoyé : hors développement, la personne attendrait un code qui n'arrive jamais.
+     */
+    public static function smsActif(): bool
+    {
+        return self::get('notifications_sms')
+            && (config('vivi.sms.pilote') !== 'log' || app()->environment(['local', 'testing']));
+    }
+
     public static function get(string $cle): mixed
     {
         if (! array_key_exists($cle, self::DEFINITIONS)) {

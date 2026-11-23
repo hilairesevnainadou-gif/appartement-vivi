@@ -177,6 +177,30 @@ class ConnexionTest extends TestCase
         $this->assertSame(2, CodeConnexion::count());
     }
 
+    public function test_un_envoi_rate_n_empeche_pas_de_reessayer(): void
+    {
+        $this->utilisateur(Role::Client, ['email' => 'panne@exemple.com']);
+        Notification::shouldReceive('route->notifyNow')->andThrow(new \Symfony\Component\Mailer\Exception\TransportException('SMTP refusé'));
+
+        $this->post('/connexion', ['mode' => 'connexion', 'identifiant' => 'panne@exemple.com'])
+            ->assertSessionHasErrors(['identifiant' => 'Le code n’a pas pu être envoyé. Réessayez dans un instant.']);
+        $this->assertSame(0, CodeConnexion::count());
+    }
+
+    public function test_sans_fournisseur_de_sms_le_numero_n_est_pas_propose_en_ligne(): void
+    {
+        config(['vivi.sms.pilote' => 'log']);
+        $this->assertTrue(Parametres::smsActif());
+
+        $this->app['env'] = 'production';
+        $this->assertFalse(Parametres::smsActif());
+        $this->getJson('/api/v1/configuration')->assertJsonPath('data.connexion.sms', false);
+
+        config(['vivi.sms.pilote' => 'smsto']);
+        $this->assertTrue(Parametres::smsActif());
+        $this->app['env'] = 'testing';
+    }
+
     public function test_les_pages_des_espaces_demandent_une_connexion_et_le_bon_role(): void
     {
         $this->get('/mon-compte')->assertRedirect('/connexion');

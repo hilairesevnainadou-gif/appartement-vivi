@@ -49,6 +49,10 @@ object Serveur {
     /** Adresse de l'API utilisée en ce moment (celle de l'APK ou celle trouvée sur le réseau). */
     val api: HttpUrl get() = actuelle.get()
 
+    /** Adresse « http:// » de la plateforme alors que l’API est en HTTPS : la même adresse en HTTPS. Les autres sites ne changent pas. */
+    fun securiser(url: HttpUrl): HttpUrl =
+        if (origine.isHttps && !url.isHttps && url.host == origine.host) url.newBuilder().scheme("https").port(origine.port).build() else url
+
     fun initialiser(context: Context) {
         contexte = context.applicationContext
         if (!BuildConfig.DEBUG) return

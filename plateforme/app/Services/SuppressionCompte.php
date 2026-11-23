@@ -114,7 +114,7 @@ class SuppressionCompte
     {
         $email = $u->email && Parametres::get('notifications_email')
             ? ['identifiant' => $u->email, 'canal' => 'mail', 'lisible' => $u->email] : null;
-        $sms = $u->telephone && Parametres::get('notifications_sms')
+        $sms = $u->telephone && Parametres::smsActif()
             ? ['identifiant' => $u->telephone, 'canal' => 'sms', 'lisible' => Telephone::masque($u->telephone)] : null;
 
         return match (true) {

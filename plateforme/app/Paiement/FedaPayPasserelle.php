@@ -84,7 +84,11 @@ class FedaPayPasserelle implements Passerelle
                 'http' => $e instanceof \FedaPay\Error\Base ? $e->getHttpStatus() : null, 'erreur' => $e->getMessage(),
             ]);
             report($e);
-            throw new EchecPaiement('Le service de paiement ne répond pas. Réessayez dans un instant.', previous: $e);
+            // Clé absente, fausse ou d'un autre environnement : réessayer ne sert à rien, il faut corriger FEDAPAY_SECRET_KEY
+            $cleRefusee = $e instanceof \FedaPay\Error\Base && in_array($e->getHttpStatus(), [401, 403], true);
+            throw new EchecPaiement($cleRefusee
+                ? 'Le paiement en ligne n’est pas disponible pour le moment (clé FedaPay refusée). Contactez VIVI.'
+                : 'Le service de paiement ne répond pas. Réessayez dans un instant.', previous: $e);
         }
 
         $paiement->forceFill(['reference_passerelle' => (string) $transaction->id])->save();

@@ -49,9 +49,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import bj.vivi.app.data.Serveur
 import bj.vivi.app.ui.composants.EtatVide
 import bj.vivi.app.ui.composants.BoutonSecondaire
 import bj.vivi.app.ui.theme.Vivi
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 /**
  * Paiement FedaPay affiché DANS l'application (plus de navigateur externe) :
@@ -121,6 +123,8 @@ fun EcranPaiementWeb(idPaiement: Long, onTermine: (Long) -> Unit, onQuitter: (Lo
                         settings.allowFileAccess = false
                         settings.allowContentAccess = false
                         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                        // Carte bancaire : la vérification de la banque (3-D Secure) s'affiche dans un cadre d'un autre site
+                        android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
                         webChromeClient = object : WebChromeClient() {
                             override fun onProgressChanged(view: WebView, nouvelle: Int) { progression = nouvelle }
                         }
@@ -134,7 +138,11 @@ fun EcranPaiementWeb(idPaiement: Long, onTermine: (Long) -> Unit, onQuitter: (Lo
                                         terminer(id)
                                         true
                                     }
-                                    "http", "https" -> false   // les pages de paiement restent dans l'application
+                                    "http", "https" -> {
+                                        // Les pages de paiement restent dans l'application ; retour « http:// » de la plateforme passé en HTTPS
+                                        val sur = lien.toString().toHttpUrlOrNull()?.let { Serveur.securiser(it).toString() }
+                                        if (lien.scheme == "http" && sur?.startsWith("https") == true) { view.loadUrl(sur); true } else false
+                                    }
                                     else -> {
                                         // tel: (code USSD Mobile Money), intent:, application de l'opérateur
                                         runCatching {

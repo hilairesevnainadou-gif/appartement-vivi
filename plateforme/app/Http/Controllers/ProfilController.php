@@ -33,7 +33,7 @@ class ProfilController extends Controller
             'user' => $user,
             'enAttente' => $request->session()->get(self::SESSION),
             'emailActif' => (bool) Parametres::get('notifications_email'),
-            'smsActif' => (bool) Parametres::get('notifications_sms'),
+            'smsActif' => (bool) Parametres::smsActif(),
             'stats' => [
                 'reservations' => $user->reservations()->whereNotIn('statut', ['en_attente_paiement', 'annulee'])->count(),
                 'membreDepuis' => $user->created_at,
@@ -82,7 +82,7 @@ class ProfilController extends Controller
             if (! $valeur) {
                 $erreur('Numéro béninois à 10 chiffres, par exemple 01 97 00 00 00.');
             }
-            if (! Parametres::get('notifications_sms')) {
+            if (! Parametres::smsActif()) {
                 $erreur('L’envoi de SMS est désactivé pour le moment.');
             }
             $canal = 'sms';

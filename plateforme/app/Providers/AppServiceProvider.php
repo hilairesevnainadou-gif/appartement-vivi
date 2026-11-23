@@ -66,6 +66,13 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
+        // Site appelé en HTTPS alors que APP_URL est resté en « http:// » : les liens et les photos suivent en HTTPS.
+        // Sans cela l'application Android, qui refuse le trafic en clair, n'affiche aucune photo.
+        if (! $this->app->runningInConsole() && request()->isSecure()) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+            config(['filesystems.disks.public.url' => preg_replace('#^http://#i', 'https://', (string) config('filesystems.disks.public.url'))]);
+        }
+
         // L'administrateur a toutes les permissions : il ne peut pas se retirer lui-même l'accès
         \Illuminate\Support\Facades\Gate::before(fn ($user) => $user->hasRole(\App\Enums\Role::Administrateur->value) ? true : null);
 

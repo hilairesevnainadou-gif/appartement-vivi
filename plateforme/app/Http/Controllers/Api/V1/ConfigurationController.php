@@ -38,7 +38,7 @@ class ConfigurationController extends Controller
             'services' => Service::where('actif', true)->orderBy('ordre')->get(['id', 'nom', 'description', 'prix', 'unite', 'icone']),
             'connexion' => [
                 'email' => (bool) Parametres::get('notifications_email'),
-                'sms' => (bool) Parametres::get('notifications_sms'),
+                'sms' => (bool) Parametres::smsActif(),
                 // Bouton « Continuer avec Google » (clients seulement) ; identifiant client Web à donner à Google Sign-In
                 'google' => app(\App\Services\ConnexionGoogle::class)->actif(),
                 'google_client_id' => app(\App\Services\ConnexionGoogle::class)->actif() ? config('services.google.client_id') : null,

@@ -14,7 +14,9 @@ import bj.vivi.app.ui.AppVivi
 import bj.vivi.app.ui.LiensEntrants
 import bj.vivi.app.ui.theme.ViviTheme
 
-class ViviApplication : Application() {
+class ViviApplication : Application(), coil.ImageLoaderFactory {
+    override fun newImageLoader() = Reseau.chargeurImages(this)
+
     override fun onCreate() {
         super.onCreate()
         Reseau.initialiser(this)   // la session chiffrée s'ouvre en arrière-plan
