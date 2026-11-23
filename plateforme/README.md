@@ -138,7 +138,7 @@ Les droits sont définis dans chaque ressource (`$rolesLecture`, `$rolesEcriture
 - demi-journée : prix du créneau choisi ;
 - journée : prix × nombre de jours (arrivée le jour J, départ le jour J + n) ;
 - services à la carte : seulement ceux proposés dans le logement, au prix du catalogue ;
-- commission VIVI : taux des paramètres, appliqué à la location et aux services, arrondi au franc.
+- commission VIVI : taux des paramètres, appliqué à la location seulement (pas aux services), arrondi au franc.
 
 ## Réservation et paiement
 
@@ -221,7 +221,7 @@ Il existe 5 types de salles :
 **Commission des salles par tranches** :
 - paramètre `commission_salles_tranches`, réglé dans Administration › Paramètres ;
 - le taux dépend du montant de la réservation (location + services) ;
-- le taux de la tranche s'applique à tout le montant (`Parametres::commissionPourcentage($logement, $montant)`) ;
+- la tranche se lit sur la location, et son taux s'applique à toute la location (`Parametres::commissionPourcentage($logement, $montant)`) ;
 - valeurs par défaut : jusqu'à 100 000 FCFA 10 %, jusqu'à 500 000 FCFA 8 %, au-delà 6 % ;
 - les logements gardent le taux unique `commission_pourcentage` ;
 - le taux est figé dans chaque réservation (`taux_commission`).

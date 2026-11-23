@@ -449,7 +449,8 @@ fun EcranReport(onRetour: () -> Unit, onFait: () -> Unit, vm: ReportViewModel = 
                             TitreSection("Créneau")
                             Spacer(Modifier.height(10.dp))
                             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                j.options.forEach { op -> CaseChoix(op.libelle, choisi = op.valeur == vm.option) { vm.option = op.valeur } }
+                                // Les heures déjà prises restent visibles, barrées
+                                j.affichees.forEach { op -> CaseChoix(op.libelle, choisi = op.valeur == vm.option, actif = op.libre) { vm.option = op.valeur } }
                             }
                         }
                     }

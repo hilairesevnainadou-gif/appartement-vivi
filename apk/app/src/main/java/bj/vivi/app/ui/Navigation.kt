@@ -335,8 +335,15 @@ fun AppVivi() {
         }
     }
 
-    // Un nouveau graphe de navigation quand on passe de visiteur/client à pro (ou inversement)
-    if (interfacePrete) key(espacePro, espaceAgent, utilisateur == null) {
+    // Un nouveau graphe de navigation quand on passe de visiteur/client à pro (ou inversement), et à la déconnexion.
+    // Un visiteur qui se connecte ou crée son compte client garde ses écrans : il revient sur la fiche qu'il réservait.
+    var deconnexions by remember { mutableIntStateOf(0) }
+    var etaitConnecte by remember { mutableStateOf(utilisateur != null) }
+    if (etaitConnecte != (utilisateur != null)) {
+        if (utilisateur == null) deconnexions++
+        etaitConnecte = utilisateur != null
+    }
+    if (interfacePrete) key(espacePro, espaceAgent, deconnexions) {
         val nav = rememberNavController()
         val entree by nav.currentBackStackEntryAsState()
         val route = entree?.destination?.route
@@ -456,7 +463,7 @@ private fun BarreOnglets(nav: NavHostController, onglets: List<Onglet>, route: S
 @Composable
 private fun Graphe(nav: NavHostController, depart: String, nonLues: Int, surNonLues: (Int) -> Unit) {
     val retour: () -> Unit = { if (!nav.popBackStack()) nav.navigate(depart) }
-    val connecte = Reseau.session.jeton != null
+    val connecte = Reseau.session.utilisateur.collectAsState().value != null
     fun versConnexion(mode: String = "connexion") = nav.navigate("connexion?mode=$mode")
     val argRef = listOf(navArgument("ref") { type = NavType.StringType })
 
@@ -525,7 +532,7 @@ private fun Graphe(nav: NavHostController, depart: String, nonLues: Int, surNonL
                 onSuppression = { nav.navigate("suppression-compte") { launchSingleTop = true } })
         }
         composable("connexion?mode={mode}", listOf(navArgument("mode") { defaultValue = "connexion" })) { e ->
-            // La session ouverte recrée le graphe (key) : rien d'autre à faire ici en cas de succès
+            // Session ouverte : l'écran se ferme et l'on revient sur la page d'avant (fiche, réservation…)
             EcranConnexion(onFermer = retour, modeInitial = e.arguments?.getString("mode") ?: "connexion")
         }
         composable("logement/{slug}", listOf(navArgument("slug") { type = NavType.StringType })) {

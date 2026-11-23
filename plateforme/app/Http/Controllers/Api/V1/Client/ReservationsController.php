@@ -139,6 +139,8 @@ class ReservationsController extends Controller
             'jours' => collect($jours)->map(fn ($j) => [
                 'date' => Format::jour($j['date']),
                 'options' => collect($j['options'])->map(fn ($o) => ['valeur' => $o['valeur'], 'libelle' => $o['libelle'], 'debut' => Format::date($o['debut'])])->values(),
+                // Toutes les arrivées du jour : celles qui sont prises (« libre » à false) s'affichent barrées
+                'creneaux' => collect($j['creneaux'])->map(fn ($o) => ['valeur' => $o['valeur'], 'libelle' => $o['libelle'], 'debut' => Format::date($o['debut']), 'libre' => $o['libre']])->values(),
             ])->values(),
         ]]);
     }

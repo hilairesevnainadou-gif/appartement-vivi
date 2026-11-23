@@ -213,7 +213,7 @@ class DisponibilitesTest extends TestCase
         $this->assertSame('2026-11-13 17:00', $devis->fin->format('Y-m-d H:i'));
     }
 
-    public function test_le_taux_de_commission_des_parametres_s_applique_aux_services(): void
+    public function test_la_commission_porte_sur_la_location_et_pas_sur_les_services(): void
     {
         Parametres::enregistrer(['commission_pourcentage' => 10]);
         $petitDej = Service::create(['nom' => 'Petit-déjeuner', 'prix' => 2500, 'unite' => 'par personne', 'actif' => true]);
@@ -224,8 +224,8 @@ class DisponibilitesTest extends TestCase
 
         $this->assertSame(36000, $devis->location);
         $this->assertSame(5000, $devis->services);        // 2 petits-déjeuners, chauffeur ignoré
-        $this->assertSame(4100, $devis->commission);      // 10 % de 41 000
-        $this->assertSame(45100, $devis->total);
+        $this->assertSame(3600, $devis->commission);      // 10 % de la location (36 000), rien sur les services
+        $this->assertSame(44600, $devis->total);
     }
 
     public function test_un_choix_incoherent_est_refuse(): void

@@ -92,7 +92,7 @@ VIVI loue deux familles d'espaces. Les deux se réservent de la même façon (he
     - `espace_complet` (maison ou villa entière louée pour un événement) ;
   - `modes_gestion` : `proprietaire` (« Je gère moi-même ») ou `vivi` (« Je confie la gestion à VIVI »), avec `choix` et `aide` à afficher ;
   - chaque formule a `budget` (logements) et `budget_salle` (salles, plus cher) pour le filtre de prix ;
-  - `commission_pourcentage` vaut pour les logements. `commission_salles_tranches` (`[{jusqua, pourcentage}]`, `jusqua: null` pour « au-delà ») donne le taux des salles selon le montant (location + services). Le devis (`devis.taux_commission`, `devis.commission`) applique déjà le bon taux.
+  - `commission_pourcentage` vaut pour les logements. `commission_salles_tranches` (`[{jusqua, pourcentage}]`, `jusqua: null` pour « au-delà ») donne le taux des salles selon le montant de la location. La commission porte sur la location seulement, pas sur les services. Le devis (`devis.taux_commission`, `devis.commission`) applique déjà le bon taux.
 - **`GET /logements?categorie=salle`** ne renvoie que les salles, `categorie=logement` que les logements ; sans le paramètre, tout est renvoyé. Pour les salles, `voyageurs` filtre sur la capacité ; le champ s'intitule « Capacité » (paliers proposés : 20, 50, 100, 200, 300, 500 places et plus).
 - **Fiche et liste** :
   - `categorie` (`logement` ou `salle`) ;
@@ -207,7 +207,7 @@ Le billet contient aussi `actions` : `payer`, `reporter`, `annuler`, `donner_avi
 | Méthode | Chemin | Rôle |
 |---|---|---|
 | GET | `/reservations?onglet=avenir\|passees\|annulees` | Mes réservations |
-| GET | `/reservations/{ref}/report` | Jours possibles et créneaux libres (même durée, dans la fenêtre de report) |
+| GET | `/reservations/{ref}/report` | Jours possibles (même durée, dans la fenêtre de report ; les jours bloqués par le propriétaire ne sont pas listés). Par jour : `options` (libres seulement) et `creneaux` (toutes les arrivées à venir, avec `libre` : afficher barrées celles à `false`, sans pouvoir les choisir). Un jour sans aucune option libre s'affiche barré |
 | POST | `/reservations/{ref}/report` | `{ date, option, accord: true }`. L'ancien QR Code devient invalide et la réservation n'est plus remboursable |
 | GET | `/reservations/{ref}/annulation` | Montants : payé, commission (jamais remboursée), retenue, remboursé, règle appliquée |
 | POST | `/reservations/{ref}/annuler` | `{ motif? }` |

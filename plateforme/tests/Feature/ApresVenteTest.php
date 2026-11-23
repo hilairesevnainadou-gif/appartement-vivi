@@ -76,7 +76,9 @@ class ApresVenteTest extends TestCase
         $this->actingAs($this->client);
 
         $this->get("/mes-reservations/{$r->reference}/reporter?date=2026-11-15")->assertOk()
-            ->assertSee('Reporter ma réservation')->assertSee('14:00 → 17:00')->assertDontSee('11:00 → 14:00');
+            ->assertSee('Reporter ma réservation')->assertSee('14:00 → 17:00')
+            // 11:00 touche la réservation du matin : affichée barrée, impossible à choisir
+            ->assertSee('slot--pris', false)->assertSee('value="11:00" disabled', false);
 
         $this->post("/mes-reservations/{$r->reference}/reporter", ['date' => '2026-11-15', 'option' => '11:00', 'accord' => '1'])
             ->assertSessionHasErrors('report');                            // 11:00 touche la réservation du matin
@@ -96,6 +98,26 @@ class ApresVenteTest extends TestCase
         Notification::assertSentTo($this->client, ReservationReportee::class);
         Notification::assertSentTo($this->proprio, ReservationReportee::class);
         $this->assertTrue(app(Disponibilites::class)->estLibre($this->logement, CarbonImmutable::parse('2026-11-14 14:00'), CarbonImmutable::parse('2026-11-14 17:00')));
+    }
+
+    public function test_le_report_barre_les_heures_prises_et_cache_les_jours_bloques(): void
+    {
+        $r = $this->reservation('2026-11-14 14:00', '2026-11-14 17:00');
+        $this->reservation('2026-11-15 10:00', '2026-11-15 13:00');
+        $this->logement->blocages()->create(['date_debut' => '2026-11-16', 'date_fin' => '2026-11-17', 'motif' => 'Travaux']);
+        $jours = collect(app(\App\Services\ApresVente::class)->joursDeReport($r))->keyBy(fn ($j) => $j['date']->toDateString());
+
+        $this->assertArrayNotHasKey('2026-11-16', $jours->all());           // jours bloqués : pas proposés
+        $this->assertArrayNotHasKey('2026-11-17', $jours->all());
+        $creneaux = collect($jours['2026-11-15']['creneaux'])->keyBy('valeur');
+        $this->assertFalse($creneaux['11:00']['libre']);                   // prise : barrée
+        $this->assertTrue($creneaux['15:00']['libre']);
+        $this->assertNotContains('11:00', array_column($jours['2026-11-15']['options'], 'valeur'));
+
+        \Laravel\Sanctum\Sanctum::actingAs($this->client);
+        $this->getJson("/api/v1/reservations/{$r->reference}/report")->assertOk()
+            ->assertJsonMissing(['date' => '2026-11-16'])
+            ->assertJsonFragment(['valeur' => '11:00', 'libelle' => '11:00 → 14:00', 'libre' => false]);
     }
 
     public function test_pas_de_report_a_moins_de_3_h_ni_au_dela_de_10_jours(): void

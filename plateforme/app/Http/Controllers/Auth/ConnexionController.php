@@ -134,6 +134,16 @@ class ConnexionController extends Controller
         Auth::login($utilisateur, remember: true);
         $request->session()->regenerate();
 
+        // Nouveau compte : on revient sur la page d'où il venait (fiche, réservation) ;
+        // sinon un client va à l'accueil chercher un lieu plutôt que sur une liste de réservations vide
+        if ($attente['mode'] === 'inscription') {
+            $bienvenue = 'Bienvenue sur VIVI, '.$utilisateur->prenom().' ! Votre compte est créé.';
+            $parDefaut = $utilisateur->hasRole(Role::Client->value) && ! $utilisateur->hasAnyRole([Role::Proprietaire->value, Role::Gestionnaire->value])
+                ? route('accueil') : $utilisateur->urlEspace();
+
+            return redirect()->intended($parDefaut)->with('statut', $bienvenue);
+        }
+
         return redirect()->intended($utilisateur->urlEspace());
     }
 

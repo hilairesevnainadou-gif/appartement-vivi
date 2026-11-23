@@ -67,22 +67,31 @@ class FedaPayPasserelle implements Passerelle
             $client['phone_number'] = ['number' => $numero, 'country' => 'bj'];
         }
 
+        $demande = [
+            'description' => mb_substr($description, 0, 250),
+            'amount' => (int) $paiement->montant,
+            'currency' => ['iso' => 'XOF'],
+            'callback_url' => $urlRetour,
+            'custom_metadata' => ['paiement_id' => $paiement->getKey()],
+        ];
         try {
-            $transaction = Transaction::create(array_filter([
-                'description' => mb_substr($description, 0, 250),
-                'amount' => $paiement->montant,
-                'currency' => ['iso' => 'XOF'],
-                'callback_url' => $urlRetour,
-                'customer' => $client ?: null,
-                'custom_metadata' => ['paiement_id' => $paiement->getKey()],
-            ]));
+            try {
+                $transaction = Transaction::create($demande + ($client ? ['customer' => $client] : []));
+            } catch (\FedaPay\Error\Base $e) {
+                // Demande refusée (400, 422) : souvent un client que FedaPay n'accepte pas (numéro, email déjà lié à
+                // un autre nom…). Le client saisira ses coordonnées sur la page FedaPay : on réessaie sans elles.
+                if (! $client || ! in_array($e->getHttpStatus(), [400, 422], true)) {
+                    throw $e;
+                }
+                Log::warning('FedaPay : coordonnées du client refusées, nouvel essai sans elles', ['paiement' => $paiement->getKey()] + self::details($e));
+                $transaction = Transaction::create($demande);
+            }
             $jeton = $transaction->generateToken();
         } catch (Throwable $e) {
-            // Dans le journal : clé refusée (401) ou demande refusée ne se règlent pas en réessayant
+            // Dans le journal : la raison donnée par FedaPay (« errors »), sans la clé
             Log::error('FedaPay : création du paiement impossible', [
-                'paiement' => $paiement->getKey(), 'environnement' => FedaPay::getEnvironment(),
-                'http' => $e instanceof \FedaPay\Error\Base ? $e->getHttpStatus() : null, 'erreur' => $e->getMessage(),
-            ]);
+                'paiement' => $paiement->getKey(), 'environnement' => FedaPay::getEnvironment(), 'montant' => (int) $paiement->montant,
+            ] + self::details($e));
             report($e);
             // Clé absente, fausse ou d'un autre environnement : réessayer ne sert à rien, il faut corriger FEDAPAY_SECRET_KEY
             $cleRefusee = $e instanceof \FedaPay\Error\Base && in_array($e->getHttpStatus(), [401, 403], true);
@@ -94,6 +103,21 @@ class FedaPayPasserelle implements Passerelle
         $paiement->forceFill(['reference_passerelle' => (string) $transaction->id])->save();
 
         return (string) $jeton->url;
+    }
+
+    /** Statut HTTP, message et erreurs détaillées renvoyés par FedaPay. */
+    private static function details(Throwable $e): array
+    {
+        if (! $e instanceof \FedaPay\Error\Base) {
+            return ['erreur' => $e->getMessage()];
+        }
+
+        return [
+            'http' => $e->getHttpStatus(),
+            'erreur' => $e->getMessage(),
+            'erreurs' => $e->getJsonBody()['errors'] ?? null,
+            'reponse' => mb_substr((string) $e->getHttpBody(), 0, 1000),
+        ];
     }
 
     public function consulter(Paiement $paiement): EtatTransaction

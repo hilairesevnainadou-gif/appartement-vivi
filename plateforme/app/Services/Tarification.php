@@ -18,7 +18,7 @@ use InvalidArgumentException;
  *
  *  - Location : prix à l'heure × nombre d'heures, prix du créneau (demi-journée), ou prix par jour × nombre de jours.
  *  - Services à la carte : seulement ceux proposés dans ce logement, au prix fixé par VIVI.
- *  - Commission VIVI : payée par le client, au taux des paramètres, sur la location et les services.
+ *  - Commission VIVI : payée par le client, au taux des paramètres, sur la location seulement (pas sur les services).
  */
 class Tarification
 {
@@ -101,9 +101,10 @@ class Tarification
         }
         $totalServices = array_sum(array_column($lignes, 'montant'));
 
-        // Logement : taux unique ; salle : taux de la tranche où tombe le montant (Administration › Paramètres)
-        $taux = Parametres::commissionPourcentage($logement, $location + $totalServices);
-        $commission = (int) round(($location + $totalServices) * $taux / 100);
+        // Commission VIVI sur la réservation (location) seulement, pas sur les services.
+        // Logement : taux unique ; salle : taux de la tranche où tombe la location (Administration › Paramètres)
+        $taux = Parametres::commissionPourcentage($logement, $location);
+        $commission = (int) round($location * $taux / 100);
 
         return new Devis(
             formule: $formule,

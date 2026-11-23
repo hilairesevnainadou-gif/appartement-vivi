@@ -168,8 +168,8 @@ class PaiementTest extends TestCase
         $this->getJson("/reservations/{$r->reference}/devis?services[{$this->petitDej->id}]=2&services[{$cache->id}]=1")
             ->assertOk()
             ->assertJsonPath('services', 5000)
-            ->assertJsonPath('commission', 775)          // 5 % de 15 500
-            ->assertJsonPath('total', 16275);
+            ->assertJsonPath('commission', 525)          // 5 % de la location (10 500), rien sur les services
+            ->assertJsonPath('total', 16025);
     }
 
     public function test_paiement_reussi_confirme_la_reservation_et_previent_client_et_proprietaire(): void
@@ -178,8 +178,8 @@ class PaiementTest extends TestCase
         $p = $this->payer($r, [$this->petitDej->id => 2]);
 
         $this->assertSame('simulation', $p->passerelle);
-        $this->assertSame(16275, $p->montant);
-        $this->assertSame(16275, $r->fresh()->montant_total);
+        $this->assertSame(16025, $p->montant);
+        $this->assertSame(16025, $r->fresh()->montant_total);
         $this->assertSame(1, $r->services()->count());
         $this->assertSame('0197000011', $this->client->fresh()->telephone);   // numéro enregistré sur le compte
 
@@ -198,7 +198,7 @@ class PaiementTest extends TestCase
             ->assertSee('<svg', false)                    // QR Code
             ->assertSee('Rue 12.345')                      // adresse exacte, après paiement
             ->assertSee('Code de secours '.$r->code_secours);
-        $this->get("/mes-reservations/{$r->reference}/recu")->assertOk()->assertSee('Reçu de paiement')->assertSee("16\u{00A0}275\u{00A0}FCFA");
+        $this->get("/mes-reservations/{$r->reference}/recu")->assertOk()->assertSee('Reçu de paiement')->assertSee("16\u{00A0}025\u{00A0}FCFA");
     }
 
     public function test_paiement_refuse_laisse_le_client_reessayer(): void

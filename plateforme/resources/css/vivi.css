@@ -623,6 +623,7 @@ a.service-tile:hover, a.service-tile:focus-visible { border-color: var(--vivi-te
 .slot input:focus-visible + label { outline: 3px solid rgba(19, 111, 110, .55); outline-offset: 2px; }
 .slot input:disabled + label { background: #f3f6f6; border-style: dashed; cursor: not-allowed; }
 .slot input:disabled + label strong, .slot input:disabled + label span { color: #8a9a9b; }
+.slot--pris input:disabled + label strong, .slot--pris input:disabled + label span { text-decoration: line-through; }
 
 .price-lines { margin: 0; display: grid; gap: .45rem; font-size: .95rem; }
 .price-lines > div { display: flex; justify-content: space-between; gap: 1rem; }

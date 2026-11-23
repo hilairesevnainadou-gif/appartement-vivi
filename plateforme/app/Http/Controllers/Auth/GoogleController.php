@@ -42,7 +42,7 @@ class GoogleController extends Controller
 
         try {
             $compte = $this->google->compteDuCode((string) $request->query('code'));
-            [$utilisateur] = $this->google->connecter($compte['sub'], $compte['email'], $compte['email_verified'], $compte['name'], $request->session()->get('invitation'));
+            [$utilisateur, $nouveau] = $this->google->connecter($compte['sub'], $compte['email'], $compte['email_verified'], $compte['name'], $request->session()->get('invitation'));
         } catch (ValidationException $e) {
             return redirect()->route('connexion')->withErrors($e->errors());
         }
@@ -50,6 +50,11 @@ class GoogleController extends Controller
         $request->session()->forget('invitation');
         Auth::login($utilisateur, remember: true);
         $request->session()->regenerate();
+
+        // Compte créé par Google (toujours un client) : retour à la page d'où il venait, sinon à l'accueil
+        if ($nouveau) {
+            return redirect()->intended(route('accueil'))->with('statut', 'Bienvenue sur VIVI, '.$utilisateur->prenom().' ! Votre compte est créé.');
+        }
 
         return redirect()->intended($utilisateur->urlEspace());
     }

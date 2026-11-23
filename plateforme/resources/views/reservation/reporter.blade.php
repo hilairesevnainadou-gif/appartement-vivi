@@ -66,12 +66,13 @@
                         <p class="text-soft mb-0 mt-2">Choisissez d’abord une date.</p>
                     @elseif ($r->formule === Formule::Journee)
                         <input type="hidden" name="option" value="journee">
+                        {{-- Journée : un seul choix par date, déjà vérifié libre --}}
                         <p class="mb-0 mt-2">{{ rtrim($choisi['options'][0]['libelle'], '.') }}. Durée inchangée : {{ $r->dureeCourte() }}.</p>
                     @else
                         <div class="slot-grid mt-3" role="radiogroup" aria-labelledby="t-creneau">
-                            @foreach ($choisi['options'] as $k => $o)
-                                <div class="slot">
-                                    <input type="radio" name="option" id="o-{{ $k }}" value="{{ $o['valeur'] }}" @checked(old('option') === $o['valeur'])>
+                            @foreach ($choisi['creneaux'] as $k => $o)
+                                <div class="slot{{ $o['libre'] ? '' : ' slot--pris' }}">
+                                    <input type="radio" name="option" id="o-{{ $k }}" value="{{ $o['valeur'] }}" @disabled(! $o['libre']) @checked($o['libre'] && old('option') === $o['valeur'])>
                                     <label for="o-{{ $k }}"><strong>{{ \Illuminate\Support\Str::before($o['libelle'], ' · ') ?: $o['libelle'] }}</strong>
                                         <span>{{ \Illuminate\Support\Str::contains($o['libelle'], ' · ') ? \Illuminate\Support\Str::after($o['libelle'], ' · ') : 'Durée inchangée : '.$r->dureeCourte() }}</span></label>
                                 </div>

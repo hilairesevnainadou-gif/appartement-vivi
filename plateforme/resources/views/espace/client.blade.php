@@ -56,7 +56,9 @@
                             <ul class="recap">
                                 <li><i class="bi bi-calendar-event" aria-hidden="true"></i><span>{{ $r->debut->translatedFormat('l j F Y') }}</span></li>
                                 <li><i class="bi bi-clock" aria-hidden="true"></i><span>{{ $r->creneauEnClair() }}</span></li>
-                                <li><i class="bi bi-wallet2" aria-hidden="true"></i><span>{{ Montant::fcfa($r->montant_total) }}{{ $r->suffixePersonnes() }}</span></li>
+                                <li><i class="bi bi-wallet2" aria-hidden="true"></i><span>{{ Montant::fcfa($r->montant_total) }}{{ $r->suffixePersonnes() }}
+                                    @if ($r->montant_commission > 0)<small class="d-block text-soft">Réservation {{ Montant::fcfa($r->montant_location) }}@if ($r->montant_services > 0) · services {{ Montant::fcfa($r->montant_services) }}@endif · commission VIVI {{ Montant::fcfa($r->montant_commission) }}, sur la réservation</small>@endif
+                                </span></li>
                             </ul>
 
                             @if ($cle === 'avenir')

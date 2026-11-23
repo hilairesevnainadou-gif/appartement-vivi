@@ -56,6 +56,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -300,6 +301,9 @@ class ConnexionViewModel : ViewModel() {
 @Composable
 fun EcranConnexion(onFermer: () -> Unit, modeInitial: String = "connexion", vm: ConnexionViewModel = viewModel()) {
     LaunchedEffect(Unit) { if (vm.demande == null && vm.identifiant.isEmpty()) vm.mode = modeInitial }
+    // Connecté (code ou Google) : retour à l'écran d'où l'on venait, par exemple la fiche à réserver
+    val connecte = Reseau.session.utilisateur.collectAsState().value != null
+    LaunchedEffect(connecte) { if (connecte) onFermer() }
     val contexte = LocalContext.current
     LaunchedEffect(Unit) {
         val tel = contexte.getSystemService(android.telephony.TelephonyManager::class.java)

@@ -50,9 +50,11 @@ class ApresVente
     }
 
     /**
-     * Possibilités de report jour par jour : pour chaque date, les arrivées possibles (même formule, même durée).
+     * Possibilités de report jour par jour (même formule, même durée). Les jours bloqués par le propriétaire ne sont
+     * pas proposés. Pour chaque date : « creneaux », toutes les arrivées du jour encore à venir (« libre » à false si
+     * elle est prise, pour l'afficher barrée), et « options », seulement les libres.
      *
-     * @return list<array{date: CarbonImmutable, options: list<array{valeur: string, libelle: string, debut: CarbonImmutable}>}>
+     * @return list<array{date: CarbonImmutable, options: list<array{valeur: string, libelle: string, debut: CarbonImmutable, libre: bool}>, creneaux: list<array{valeur: string, libelle: string, debut: CarbonImmutable, libre: bool}>}>
      */
     public function joursDeReport(Reservation $r): array
     {
@@ -63,41 +65,57 @@ class ApresVente
         }
         $this->disponibilites->oublier();
         $duree = (int) round($r->debut->diffInMinutes($r->fin));
+        $limite = $this->limiteReport($r);
+        $bloques = $logement->blocages()
+            ->whereDate('date_fin', '>=', today())->whereDate('date_debut', '<=', $limite)
+            ->get(['date_debut', 'date_fin']);
         $jours = [];
-        for ($jour = CarbonImmutable::today(); $jour->lte($this->limiteReport($r)); $jour = $jour->addDay()) {
-            $jours[] = ['date' => $jour, 'options' => $this->options($r, $logement, $jour, $duree)];
+        for ($jour = CarbonImmutable::today(); $jour->lte($limite); $jour = $jour->addDay()) {
+            // Jour bloqué par le propriétaire (travaux, fermeture) : il n'est pas proposé
+            if ($bloques->contains(fn ($b) => $jour->betweenIncluded(CarbonImmutable::instance($b->date_debut)->startOfDay(), CarbonImmutable::instance($b->date_fin)->startOfDay()))) {
+                continue;
+            }
+            $creneaux = $this->options($r, $logement, $jour, $duree);
+            $jours[] = ['date' => $jour, 'options' => array_values(array_filter($creneaux, fn ($o) => $o['libre'])), 'creneaux' => $creneaux];
         }
 
         return $jours;
     }
 
-    /** @return list<array{valeur: string, libelle: string, debut: CarbonImmutable}> */
+    /**
+     * Arrivées du jour pour la même durée, libres ou non. Les heures déjà passées et le créneau actuel ne sont pas listés.
+     *
+     * @return list<array{valeur: string, libelle: string, debut: CarbonImmutable, libre: bool}>
+     */
     private function options(Reservation $r, Logement $logement, CarbonImmutable $jour, int $duree): array
     {
-        $libre = fn (CarbonImmutable $d, CarbonImmutable $f) => ! $d->eq($r->debut) && $this->disponibilites->estLibre($logement, $d, $f, $r->getKey());
-        $options = [];
+        $candidats = [];
         switch ($r->formule) {
             case Formule::Heure:
                 foreach ($this->disponibilites->arrivees($logement->tarif(Formule::Heure), $jour, $duree) as [$d]) {
-                    if ($libre($d, $d->addMinutes($duree))) {
-                        $options[] = ['valeur' => $d->format('H:i'), 'libelle' => $d->format('H:i').' → '.$d->addMinutes($duree)->format('H:i'), 'debut' => $d];
-                    }
+                    $f = $d->addMinutes($duree);
+                    $candidats[] = [$d->format('H:i'), $d->format('H:i').' → '.$f->format('H:i').($f->subMinute()->isSameDay($d) ? '' : ' (lendemain)'), $d, $f];
                 }
                 break;
             case Formule::DemiJournee:
                 foreach ($logement->creneaux->sortBy('ordre') as $c) {
                     [$d, $f] = $this->disponibilites->periodeCreneau($c, $jour);
-                    if ($libre($d, $f)) {
-                        $options[] = ['valeur' => (string) $c->id, 'libelle' => $c->nom.' · '.$d->format('H:i').' – '.$f->format('H:i'), 'debut' => $d];
-                    }
+                    $candidats[] = [(string) $c->id, $c->nom.' · '.$d->format('H:i').' – '.$f->format('H:i'), $d, $f];
                 }
                 break;
             case Formule::Journee:
                 [$d, $f] = $this->disponibilites->periodeJournees($logement->tarif(Formule::Journee), $jour, $r->nombreJours(), $logement->estSalle());
-                if ($libre($d, $f)) {
-                    $options[] = ['valeur' => 'journee', 'libelle' => Reservation::journeeEnClair($d, $f, $logement->estSalle()), 'debut' => $d];
-                }
+                $candidats[] = ['journee', Reservation::journeeEnClair($d, $f, $logement->estSalle()), $d, $f];
                 break;
+        }
+
+        $options = [];
+        foreach ($candidats as [$valeur, $libelle, $d, $f]) {
+            if ($d->eq($r->debut) || $d->lte(now())) {
+                continue;
+            }
+            $options[] = ['valeur' => $valeur, 'libelle' => $libelle, 'debut' => $d,
+                'libre' => $this->disponibilites->estLibre($logement, $d, $f, $r->getKey())];
         }
 
         return $options;
@@ -113,7 +131,7 @@ class ApresVente
                 throw new ReservationImpossible('Le report n’est plus possible : il doit être demandé au plus tard '.Parametres::get('report_delai_minimum_heures').' h avant l’arrivée.');
             }
             $choisi = collect($this->joursDeReport($r))->firstWhere(fn ($j) => $j['date']->toDateString() === $date);
-            $retenue = $choisi ? collect($choisi['options'])->firstWhere('valeur', $option) : null;
+            $retenue = $choisi ? collect($choisi['options'])->first(fn ($o) => $o['valeur'] === $option && $o['libre']) : null;
             if (! $retenue) {
                 throw new ReservationImpossible('Ce créneau n’est plus libre. Choisissez-en un autre.');
             }

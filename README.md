@@ -112,7 +112,7 @@ Les tests utilisent une base à part : ils ne touchent pas à vos données.
 
 | Qui paie | Quoi | Valeur de départ |
 | --- | --- | --- |
-| **Client** | La location, les services et la commission de VIVI | Logement : 5 %. Salle : 10 % jusqu'à 100 000 FCFA, 8 % jusqu'à 500 000, 6 % au-delà |
+| **Client** | La location, les services et la commission de VIVI (calculée sur la location seulement) | Logement : 5 %. Salle : 10 % jusqu'à 100 000 FCFA, 8 % jusqu'à 500 000, 6 % au-delà |
 | **Propriétaire** | Un abonnement mensuel pour publier | Selon la formule |
 | **Propriétaire** | La gestion, s'il la confie à VIVI | Selon son contrat : pourcentage, prix fixe par réservation ou prix fixe par jour |
 | **Propriétaire** | La part marketing, s'il en fixe une | À l'agent, ou à VIVI sans agent |

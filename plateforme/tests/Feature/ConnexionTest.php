@@ -52,7 +52,8 @@ class ConnexionTest extends TestCase
 
         Notification::assertSentOnDemand(CodeDeConnexion::class, fn ($n, $canaux, AnonymousNotifiable $dest) => $canaux === ['mail'] && $dest->routes['mail'] === 'mireille@exemple.com');
 
-        $this->post('/connexion/code', ['code' => $code])->assertRedirect('/mon-compte');
+        // Nouveau client : à l'accueil pour chercher un lieu, avec un mot de bienvenue
+        $this->post('/connexion/code', ['code' => $code])->assertRedirect('/')->assertSessionHas('statut', 'Bienvenue sur VIVI, Mireille ! Votre compte est créé.');
 
         $client = User::where('email', 'mireille@exemple.com')->first();
         $this->assertNotNull($client);
@@ -60,6 +61,14 @@ class ConnexionTest extends TestCase
         $this->assertNotNull($client->email_verified_at);
         $this->assertAuthenticatedAs($client);
         Notification::assertSentTo($client, Bienvenue::class);
+    }
+
+    public function test_un_nouveau_client_revient_sur_la_fiche_qu_il_reservait(): void
+    {
+        $this->get('/connexion?suite='.urlencode('/logements/studio-lagune?formule=heure&reserver=1'))->assertOk();
+        $code = $this->demanderCode(['mode' => 'inscription', 'nom' => 'Géraud Kiki', 'role' => 'client', 'identifiant' => 'geraud@exemple.com']);
+
+        $this->post('/connexion/code', ['code' => $code])->assertRedirect('/logements/studio-lagune?formule=heure&reserver=1');
     }
 
     public function test_un_proprietaire_cree_son_compte_avec_son_telephone_par_sms(): void

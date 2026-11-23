@@ -66,7 +66,7 @@ class ConnexionGoogleTest extends TestCase
         $this->assertStringStartsWith('https://accounts.google.com/o/oauth2/v2/auth?', $aller->headers->get('Location'));
         $this->assertStringContainsString(urlencode('/connexion/google/retour'), $aller->headers->get('Location'));
 
-        $this->retourDeGoogle()->assertRedirect(route('espace.client'));
+        $this->retourDeGoogle()->assertRedirect(route('accueil'))->assertSessionHas('statut');   // nouveau compte : à l'accueil, avec un mot de bienvenue
 
         $u = User::where('email', 'awa@gmail.com')->firstOrFail();
         $this->assertAuthenticatedAs($u);

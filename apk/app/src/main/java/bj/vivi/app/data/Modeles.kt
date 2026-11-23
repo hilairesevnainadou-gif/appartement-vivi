@@ -538,10 +538,13 @@ data class OptionsReport(
     val jours: List<Jour> = emptyList(),
 ) {
     @Serializable
-    data class Jour(val date: String, val options: List<Option> = emptyList())
+    data class Jour(val date: String, val options: List<Option> = emptyList(), val creneaux: List<Option> = emptyList()) {
+        /** Toutes les arrivées du jour, prises comprises (à barrer) ; les seules libres avec un ancien serveur. */
+        val affichees: List<Option> get() = creneaux.ifEmpty { options }
+    }
 
     @Serializable
-    data class Option(val valeur: String, val libelle: String = "", val debut: String? = null)
+    data class Option(val valeur: String, val libelle: String = "", val debut: String? = null, val libre: Boolean = true)
 }
 
 @Serializable
