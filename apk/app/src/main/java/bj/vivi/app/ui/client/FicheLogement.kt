@@ -470,6 +470,9 @@ class ReserverViewModel : ViewModel() {
         private set
     var envoi by mutableStateOf(false)
         private set
+    /** Jour proposé à la place d’aujourd’hui, où il ne reste plus rien de libre (null : aucun report). */
+    var jourPropose by mutableStateOf<String?>(null)
+        private set
     private var slug = ""
     /** Salle : réservée entière, aucun nombre de personnes n'est envoyé. */
     private var salle = false
@@ -489,7 +492,9 @@ class ReserverViewModel : ViewModel() {
             "date" to e.date, "formule" to e.formule, "voyageurs" to e.voyageurs.toString().takeIf { !salle },
             "heure" to e.heure, "duree" to e.duree?.toString(), "creneau_id" to e.creneauId?.toString(), "jours" to e.jours?.toString(),
         )
-        demander(base + changement)
+        // Date avancée par l’application : une autre formule est peut-être encore libre aujourd’hui
+        val retour = if ("formule" in changement && e.date == jourPropose) mapOf("date" to e.dateMin) else emptyMap()
+        demander(base + retour + changement)
     }
 
     private fun demander(params: Map<String, String?>) {
@@ -497,11 +502,34 @@ class ReserverViewModel : ViewModel() {
         tache = viewModelScope.launch {
             delay(150)   // regroupe les appuis rapides sur + / −
             calcul = true
-            appel { disponibilites(slug, params.filterValues { it != null }.mapValues { it.value!! }) }
-                .onSuccess { etat = it.data; erreur = null }
+            lire(params)
+                .onSuccess { recu ->
+                    val libre = if (recu.date == recu.dateMin && recu.complet) prochainJourLibre(recu, params) else null
+                    if (libre != null) jourPropose = libre.date
+                    else if (recu.date != jourPropose) jourPropose = null
+                    etat = libre ?: recu
+                    erreur = null
+                }
                 .onFailure { erreur = it.message }
             calcul = false
         }
+    }
+
+    private suspend fun lire(params: Map<String, String?>) =
+        appel { disponibilites(slug, params.filterValues { it != null }.mapValues { it.value!! }) }.map { it.data }
+
+    /** Plus rien de libre aujourd’hui : premier des jours suivants où la formule est libre (null : aucun, ou réseau coupé). */
+    private suspend fun prochainJourLibre(recu: Disponibilites, params: Map<String, String?>): Disponibilites? {
+        val aujourdhui = Fmt.jour(recu.dateMin) ?: return null
+        for (n in 1L..JOURS_CHERCHES) {
+            val jour = lire(params + mapOf("date" to aujourdhui.plusDays(n).toString(), "formule" to recu.formule)).getOrNull() ?: return null
+            if (!jour.complet) return jour
+        }
+        return null
+    }
+
+    private companion object {
+        const val JOURS_CHERCHES = 7L
     }
 
     fun continuer(onConnexion: () -> Unit, onTunnel: (String) -> Unit) {
@@ -564,6 +592,22 @@ private fun FeuilleReserver(l: Logement, onFermer: () -> Unit, onConnexion: () -
                 }
             }
             Spacer(Modifier.height(16.dp))
+
+            // Plus rien de libre aujourd’hui : la date a été avancée au premier jour libre
+            if (etat.date == vm.jourPropose) {
+                val jour = Fmt.jour(etat.date)
+                val demain = jour != null && jour == Fmt.jour(etat.dateMin)?.plusDays(1)
+                val quand = if (demain) "demain, ${Fmt.jourLong(etat.date).lowercase(Fmt.locale)}" else Fmt.jourLong(etat.date).lowercase(Fmt.locale)
+                Bandeau(
+                    when (etat.formule) {
+                        "heure" -> "Plus d’heure libre aujourd’hui. Voici les heures disponibles $quand."
+                        "demi_journee" -> "Plus de créneau libre aujourd’hui. Voici les créneaux disponibles $quand."
+                        else -> "Plus de journée libre aujourd’hui. Prochaine date disponible : $quand."
+                    },
+                    icone = Icons.Outlined.Info,
+                )
+                Spacer(Modifier.height(16.dp))
+            }
 
             when (etat.formule) {
                 "heure" -> {

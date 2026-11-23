@@ -350,6 +350,15 @@ data class Disponibilites(
     val devis: Devis? = null,
     val message: String? = null,
 ) {
+    /** Aucune heure, aucun créneau ou aucune journée libre à cette date pour la formule choisie. */
+    val complet: Boolean
+        get() = when (formule) {
+            "heure" -> heures.none { it.libre }
+            "demi_journee" -> creneaux.none { it.libre }
+            "journee" -> (joursMax ?: 0) == 0
+            else -> false
+        }
+
     @Serializable
     data class Formule(
         val valeur: String,

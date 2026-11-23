@@ -134,54 +134,71 @@
 
                 {{-- ===== W. Réservation ===== --}}
                 <div class="fiche-w">
-                    <aside class="booking-card" id="reserver" aria-labelledby="t-reserver">
-                        <h2 class="visually-hidden" id="t-reserver">Réserver {{ $l->mot('ce') }}</h2>
-                        <div class="booking-card__price">
-                            <strong id="w-prix">{{ $formuleInitiale['prix_texte'] ?? '—' }}</strong><span id="w-unite">{{ $formuleInitiale['par'] ?? '' }}</span>
+                    {{-- Bloc « Réserver », comme la feuille de l'application : feuille qui monte du bas sur mobile, carte à droite sur grand écran --}}
+                    <div class="booking-sheet offcanvas-lg offcanvas-bottom" tabindex="-1" id="reserver" aria-labelledby="t-reserver">
+                        <div class="offcanvas-header">
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#reserver" aria-label="Fermer"></button>
                         </div>
+                        <div class="offcanvas-body">
+                    <aside class="booking-card">
+                        <h2 class="booking-card__titre" id="t-reserver">Réserver</h2>
+                        <p class="booking-card__sous">{{ $l->titre }}</p>
 
                         @error('reservation')
                             <div class="note-box note-box--orange mb-3" role="alert"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ $message }}</span></div>
                         @enderror
                         <form id="form-reservation" novalidate data-url="{{ route('logement.disponibilites', $l->slug) }}"
                               data-reserver="{{ route('reservation.bloquer', $l->slug) }}" data-connexion="{{ route('connexion') }}" data-connecte="{{ auth()->check() ? '1' : '0' }}">
-                            <div class="field">
-                                <span class="form-label d-block" id="lbl-formule">Formule</span>
-                                <div class="segmented" role="radiogroup" aria-labelledby="lbl-formule">
-                                    @foreach (Formule::cases() as $f)
-                                        <input type="radio" name="formule" id="w-{{ $f->value }}" value="{{ $f->value }}" @disabled(! $l->tarif($f)) @checked($etat['formule'] === $f->value)>
+                            {{-- Formules proposées seulement ; aucun choix s'il n'y en a qu'une --}}
+                            <div class="field" @if (count($l->formulesProposees()) < 2) hidden @endif>
+                                <div class="segmented" role="radiogroup" aria-label="Formule">
+                                    @foreach ($l->formulesProposees() as $f)
+                                        <input type="radio" name="formule" id="w-{{ $f->value }}" value="{{ $f->value }}" @checked($etat['formule'] === $f->value)>
                                         <label for="w-{{ $f->value }}">{{ $f->court() }}</label>
                                     @endforeach
                                 </div>
                             </div>
 
-                            <div class="field">
-                                <label class="form-label" for="w-date">Date</label>
-                                <input class="form-control" type="date" id="w-date" name="date" min="{{ $etat['date_min'] }}" value="{{ $etat['date'] }}">
-                            </div>
-
-                            {{-- Formule « heure » --}}
-                            <div class="field" data-formule="heure" hidden>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <label class="form-label" for="w-arrivee">{{ $l->estSalle() ? 'Heure de début' : 'Heure d’arrivée' }}</label>
-                                        <select class="form-select" id="w-arrivee" name="heure"></select>
-                                    </div>
-                                    <div class="col-6">
-                                        <span class="form-label d-block" id="lbl-duree">Durée</span>
-                                        <div class="stepper" id="c-duree" role="group" aria-labelledby="lbl-duree" data-nom="duree" data-suffixe=" h">
-                                            <button type="button" data-pas="-1" aria-label="Une heure de moins"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+                            <div class="booking-ligne">
+                                <label class="booking-date" for="w-date">
+                                    <small>{{ $l->estSalle() ? 'Date de l’événement' : 'Date d’arrivée' }}</small>
+                                    <strong id="w-date-texte">{{ $etat['date_texte'] }}</strong>
+                                    <input type="date" id="w-date" name="date" min="{{ $etat['date_min'] }}" value="{{ $etat['date'] }}">
+                                </label>
+                                {{-- Nombre de voyageurs : logements seulement (une salle se réserve entière) --}}
+                                @unless ($l->estSalle())
+                                    <div class="text-end">
+                                        <small class="d-block text-soft" id="lbl-voyageurs">Voyageurs</small>
+                                        <div class="stepper" id="c-voyageurs" role="group" aria-labelledby="lbl-voyageurs" data-nom="voyageurs" data-suffixe="">
+                                            <button type="button" data-pas="-1" aria-label="Un voyageur de moins"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
                                             <output aria-live="polite"></output>
-                                            <button type="button" data-pas="1" aria-label="Une heure de plus"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+                                            <button type="button" data-pas="1" aria-label="Un voyageur de plus"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
                                         </div>
                                     </div>
-                                </div>
+                                @endunless
                             </div>
+
+                            {{-- Plus rien de libre aujourd'hui : la date est avancée au premier jour libre --}}
+                            <div class="note-box mb-3" id="w-propose" role="status" hidden><i class="bi bi-info-circle" aria-hidden="true"></i><span></span></div>
+
+                            {{-- Formule « heure » --}}
+                            <fieldset class="field" data-formule="heure" hidden>
+                                <legend class="form-label">{{ $l->estSalle() ? 'Heure de début' : 'Heure d’arrivée' }}</legend>
+                                <div class="choix-grille" id="w-heures"></div>
+                                <div class="field-row mt-3" id="w-ligne-duree">
+                                    <span class="form-label" id="lbl-duree">Durée</span>
+                                    <div class="stepper" id="c-duree" role="group" aria-labelledby="lbl-duree" data-nom="duree" data-suffixe=" h">
+                                        <button type="button" data-pas="-1" aria-label="Une heure de moins"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+                                        <output aria-live="polite"></output>
+                                        <button type="button" data-pas="1" aria-label="Une heure de plus"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+                                    </div>
+                                </div>
+                            </fieldset>
 
                             {{-- Formule « demi-journée » --}}
                             <fieldset class="field" data-formule="demi_journee" hidden>
                                 <legend class="form-label">Créneau</legend>
-                                <div class="slot-grid" id="w-creneaux"></div>
+                                <div class="choix-liste" id="w-creneaux"></div>
                             </fieldset>
 
                             {{-- Formule « journée » --}}
@@ -198,31 +215,23 @@
 
                             <p class="form-text mb-0 mt-n2" id="w-aide"></p>
 
-                            {{-- Nombre de voyageurs : logements seulement (une salle se réserve entière, sa capacité est affichée) --}}
-                            @unless ($l->estSalle())
-                                <div class="field field-row mt-3">
-                                    <span class="form-label" id="lbl-voyageurs">Voyageurs</span>
-                                    <div class="stepper" id="c-voyageurs" role="group" aria-labelledby="lbl-voyageurs" data-nom="voyageurs" data-suffixe="">
-                                        <button type="button" data-pas="-1" aria-label="Un voyageur de moins"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
-                                        <output aria-live="polite"></output>
-                                        <button type="button" data-pas="1" aria-label="Un voyageur de plus"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
-                                    </div>
-                                </div>
-                            @endunless
+                            <div class="note-box note-box--orange mt-3" id="w-message" role="status" hidden><i class="bi bi-info-circle" aria-hidden="true"></i><span></span></div>
+                            <div id="w-devis" hidden>
+                                <hr class="booking-separateur">
+                                <dl class="price-lines" id="w-lignes" aria-live="polite"></dl>
+                            </div>
 
-                            <div class="note-box note-box--orange" id="w-message" role="status" hidden><i class="bi bi-calendar-x" aria-hidden="true"></i><span></span></div>
-                            <dl class="price-lines" id="w-lignes" aria-live="polite"></dl>
-                            <p class="form-text mt-2 mb-0">Services à la carte à choisir à l’étape suivante.</p>
-
-                            <button class="btn btn-cta btn-lg w-100 mt-3" type="submit" id="w-continuer">Continuer<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                            <button class="btn btn-cta btn-lg w-100 mt-3" type="submit" id="w-continuer">{{ auth()->check() ? 'Continuer' : 'Me connecter pour réserver' }}</button>
                         </form>
 
-                        <ul class="reassure">
+                        <ul class="reassure d-none d-lg-grid">
                             <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Aucun paiement à cette étape.</span></li>
                             <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Entrée par QR Code à votre arrivée.</span></li>
                             <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Report gratuit jusqu’à {{ $delaiReport }} h avant l’arrivée.</span></li>
                         </ul>
                     </aside>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- ===== B. Détails ===== --}}
@@ -342,19 +351,34 @@
         {{-- Barre basse (mobile) : prix et accès au bloc de réservation --}}
         <div class="bookbar" id="barre-reserver">
             <div class="price"><small>À partir de</small><strong id="bb-prix">{{ $formuleInitiale['prix_texte'] ?? '—' }}</strong> <span id="bb-unite">{{ $formuleInitiale['unite'] ?? '' }}</span></div>
-            <a class="btn btn-cta" href="#reserver">Réserver</a>
+            <button class="btn btn-cta" type="button" data-bs-toggle="offcanvas" data-bs-target="#reserver" aria-controls="reserver">Réserver</button>
         </div>
     @endpush
 
     @push('scripts')
         <script type="application/json" id="etat-initial">@json($etat)</script>
         <script>
-            /* Bloc « Réserver » : l'état (disponibilités et prix) vient toujours du serveur */
+            /* Bloc « Réserver » : l'état (disponibilités et prix) vient toujours du serveur. Même comportement que l'application. */
             (function () {
                 var form = document.getElementById('form-reservation');
                 var $ = function (id) { return document.getElementById(id); };
                 var etat = JSON.parse($('etat-initial').textContent);
+                var jourPropose = null;     // date avancée automatiquement (plus rien de libre aujourd'hui)
+                var JOURS_CHERCHES = 7;
                 var echapper = function (t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+                var fcfa = function (n) { return new Intl.NumberFormat('fr-FR').format(n).replace(/ | /g, ' ') + ' FCFA'; };
+                var jourLong = function (iso) {
+                    var d = new Date(iso + 'T12:00:00');
+                    var t = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+                    return t.charAt(0).toUpperCase() + t.slice(1);
+                };
+
+                function complet(e) {
+                    if (e.formule === 'heure') { return !e.heures.some(function (h) { return h.libre; }); }
+                    if (e.formule === 'demi_journee') { return !e.creneaux.some(function (c) { return c.libre; }); }
+                    if (e.formule === 'journee') { return !e.jours_max; }
+                    return false;
+                }
 
                 function stepper(id, valeur, min, max, format) {
                     var el = $(id), moins = el.querySelector('[data-pas="-1"]'), plus = el.querySelector('[data-pas="1"]');
@@ -368,27 +392,36 @@
                     [].forEach.call(form.querySelectorAll('[name="formule"]'), function (r) { r.checked = r.value === formule; });
                     form.querySelectorAll('[data-formule]').forEach(function (b) { b.hidden = b.dataset.formule !== formule; });
                     $('w-date').value = etat.date;
+                    $('w-date-texte').textContent = jourLong(etat.date);
 
                     var f = (etat.formules || []).filter(function (x) { return x.valeur === formule; })[0];
-                    if (f) {
-                        $('w-prix').textContent = f.prix_texte; $('w-unite').textContent = f.par;
-                        $('bb-prix').textContent = f.prix_texte; $('bb-unite').textContent = f.unite;
+                    if (f) { $('bb-prix').textContent = f.prix_texte; $('bb-unite').textContent = f.unite; }
+
+                    // Date avancée : on le dit, comme dans l'application
+                    var propose = $('w-propose');
+                    propose.hidden = etat.date !== jourPropose;
+                    if (!propose.hidden) {
+                        var demain = new Date(etat.date_min + 'T12:00:00'); demain.setDate(demain.getDate() + 1);
+                        var quand = (demain.toISOString().slice(0, 10) === etat.date ? 'demain, ' : '') + jourLong(etat.date).toLowerCase();
+                        propose.querySelector('span').textContent = formule === 'heure' ? 'Plus d’heure libre aujourd’hui. Voici les heures disponibles ' + quand + '.'
+                            : formule === 'demi_journee' ? 'Plus de créneau libre aujourd’hui. Voici les créneaux disponibles ' + quand + '.'
+                            : 'Plus de journée libre aujourd’hui. Prochaine date disponible : ' + quand + '.';
                     }
 
-                    // Heure : seules les heures libres sont proposées
-                    var select = $('w-arrivee');
-                    select.innerHTML = etat.heures.map(function (h) {
-                        return '<option value="' + h.heure + '"' + (h.libre ? '' : ' disabled') + (h.heure === etat.heure ? ' selected' : '') + '>' +
-                            h.heure + (h.libre ? '' : ' · pris') + '</option>';
+                    // Heure : cases ; une heure prise est barrée
+                    $('w-heures').innerHTML = etat.heures.map(function (h, i) {
+                        return '<div class="choix"><input type="radio" name="heure" id="h-' + i + '" value="' + h.heure + '"' +
+                            (h.libre ? '' : ' disabled') + (h.heure === etat.heure ? ' checked' : '') + '>' +
+                            '<label for="h-' + i + '"' + (h.libre ? '' : ' title="Déjà pris"') + '>' + h.heure + '</label></div>';
                     }).join('');
+                    $('w-ligne-duree').hidden = !(etat.heure && etat.duree);
                     if (etat.duree) { stepper('c-duree', etat.duree, etat.duree_min, etat.duree_max, function (n) { return n + ' h'; }); }
 
-                    // Demi-journée : créneaux, complets désactivés
+                    // Demi-journée : « Matin · 06:00 – 11:00 », barré s'il est complet
                     $('w-creneaux').innerHTML = etat.creneaux.map(function (c) {
-                        return '<div class="slot"><input type="radio" name="creneau_id" id="cr-' + c.id + '" value="' + c.id + '"' +
+                        return '<div class="choix"><input type="radio" name="creneau_id" id="cr-' + c.id + '" value="' + c.id + '"' +
                             (c.libre ? '' : ' disabled') + (c.id === etat.creneau_id ? ' checked' : '') + '>' +
-                            '<label for="cr-' + c.id + '"><strong>' + echapper(c.nom) + '</strong>' +
-                            '<span>' + (c.libre ? c.de + ' – ' + c.a : 'Complet ce jour-là') + '</span></label></div>';
+                            '<label for="cr-' + c.id + '">' + echapper(c.nom) + ' · ' + c.de + ' – ' + c.a + '</label></div>';
                     }).join('');
 
                     if (etat.jours) { stepper('c-jours', etat.jours, 1, etat.jours_max); }
@@ -401,30 +434,58 @@
                     message.querySelector('span').textContent = etat.message || '';
 
                     var d = etat.devis;
+                    $('w-devis').hidden = !d;
                     $('w-lignes').innerHTML = d
-                        ? '<div><dt>' + echapper(d.detail_location) + '</dt><dd>' + d.texte.location + '</dd></div>' +
-                          '<div><dt>Commission VIVI</dt><dd>' + d.texte.commission + '</dd></div>' +
+                        ? '<div><dt>Location</dt><dd>' + d.texte.location + '</dd></div>' +
+                          '<div><dt>Commission VIVI (' + String(d.taux_commission).replace('.', ',') + ' %)<small>Non remboursable en cas d’annulation</small></dt><dd>' + d.texte.commission + '</dd></div>' +
                           '<div class="total"><dt>Total</dt><dd>' + d.texte.total + '</dd></div>'
                         : '';
                     $('w-continuer').disabled = !d;
                 }
 
+                function lire(params, signal) {
+                    return fetch(form.dataset.url + '?' + new URLSearchParams(params).toString(), { headers: { Accept: 'application/json' }, signal: signal })
+                        .then(function (r) { return r.json(); });
+                }
+
+                // Plus rien de libre aujourd'hui : premier des jours suivants où la formule est libre
+                function prochainJourLibre(recu, params, signal, n) {
+                    n = n || 1;
+                    if (n > JOURS_CHERCHES) { return Promise.resolve(null); }
+                    var jour = new Date(recu.date_min + 'T12:00:00'); jour.setDate(jour.getDate() + n);
+                    var p = Object.assign({}, params, { date: jour.toISOString().slice(0, 10), formule: recu.formule });
+                    return lire(p, signal).then(function (e) { return complet(e) ? prochainJourLibre(recu, params, signal, n + 1) : e; });
+                }
+
                 var enCours = null;
                 function demander(modif) {
-                    var p = new URLSearchParams({ date: etat.date, formule: etat.formule || '', voyageurs: etat.voyageurs });
-                    if (etat.heure) { p.set('heure', etat.heure); }
-                    if (etat.duree) { p.set('duree', etat.duree); }
-                    if (etat.creneau_id) { p.set('creneau_id', etat.creneau_id); }
-                    if (etat.jours) { p.set('jours', etat.jours); }
-                    Object.keys(modif).forEach(function (k) { p.set(k, modif[k]); });
+                    var p = { date: etat.date, formule: etat.formule || '', voyageurs: etat.voyageurs };
+                    if (etat.heure) { p.heure = etat.heure; }
+                    if (etat.duree) { p.duree = etat.duree; }
+                    if (etat.creneau_id) { p.creneau_id = etat.creneau_id; }
+                    if (etat.jours) { p.jours = etat.jours; }
+                    // Date avancée par le site : une autre formule est peut-être encore libre aujourd'hui
+                    if ('formule' in modif && etat.date === jourPropose) { p.date = etat.date_min; }
+                    Object.assign(p, modif);
                     if (enCours) { enCours.abort(); }
                     enCours = new AbortController();
+                    var signal = enCours.signal;
                     form.setAttribute('aria-busy', 'true');
-                    fetch(form.dataset.url + '?' + p.toString(), { headers: { Accept: 'application/json' }, signal: enCours.signal })
-                        .then(function (r) { return r.json(); })
+                    $('w-continuer').disabled = true;
+                    lire(p, signal)
+                        .then(function (recu) {
+                            if (recu.date === recu.date_min && complet(recu)) {
+                                return prochainJourLibre(recu, p, signal).then(function (libre) {
+                                    if (libre) { jourPropose = libre.date; return libre; }
+                                    return recu;
+                                });
+                            }
+                            if (recu.date !== jourPropose) { jourPropose = null; }
+                            return recu;
+                        })
                         .then(function (nouvel) { etat = nouvel; afficher(); })
                         .catch(function () {})
-                        .finally(function () { form.removeAttribute('aria-busy'); });
+                        .finally(function () { form.removeAttribute('aria-busy'); $('w-continuer').disabled = !etat.devis; });
                 }
 
                 form.addEventListener('change', function (e) {
@@ -443,6 +504,9 @@
                     if (s.dataset.nom === 'voyageurs') { etat.voyageurs = v; stepper('c-voyageurs', v, 1, etat.capacite); return; }
                     demander(modif);
                 });
+                // Le calendrier du téléphone s'ouvre d'un appui sur la date
+                $('w-date').addEventListener('click', function () { try { this.showPicker(); } catch (e) {} });
+
                 // « Continuer » : le créneau est retenu par le serveur, puis services et paiement.
                 // Sans compte, on passe par la connexion et on revient sur cette fiche avec les mêmes choix.
                 form.addEventListener('submit', function (e) {
@@ -454,7 +518,7 @@
                     if (etat.formule === 'journee') { champs.jours = etat.jours; }
 
                     if (form.dataset.connecte !== '1') {
-                        var ici = window.location.pathname + '?' + new URLSearchParams(champs).toString();
+                        var ici = window.location.pathname + '?' + new URLSearchParams(Object.assign({ reserver: 1 }, champs)).toString();
                         window.location.href = form.dataset.connexion + '?suite=' + encodeURIComponent(ici);
                         return;
                     }
@@ -472,13 +536,18 @@
                     envoi.submit();
                 });
 
-                // La barre basse disparaît quand le bloc de réservation est à l'écran
-                var barre = $('barre-reserver');
-                if ('IntersectionObserver' in window && barre) {
-                    new IntersectionObserver(function (entrees) { barre.classList.toggle('d-none', entrees[0].isIntersecting); }, { threshold: 0.15 })
-                        .observe($('reserver'));
-                }
+                // Retour de la connexion (ou d'une erreur de réservation) : la feuille se rouvre sur mobile
+                var feuille = $('reserver');
+                var rouvrir = new URLSearchParams(window.location.search).has('reserver') || {{ $errors->has('reservation') ? 'true' : 'false' }};
+                // Bootstrap est chargé en module, après ce script : on attend la fin du chargement de la page
+                document.addEventListener('DOMContentLoaded', function () {
+                    if (rouvrir && window.matchMedia('(max-width: 991.98px)').matches && window.bootstrap) {
+                        bootstrap.Offcanvas.getOrCreateInstance(feuille).show();
+                    }
+                });
 
+                // Aujourd'hui déjà complet à l'ouverture : on cherche le prochain jour libre
+                if (etat.formule && etat.date === etat.date_min && complet(etat)) { demander({}); }
                 afficher();
             })();
         </script>

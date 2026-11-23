@@ -878,3 +878,54 @@ a.service-tile:hover, a.service-tile:focus-visible { border-color: var(--vivi-te
 .onglets-categorie a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--vivi-line); background: #fff; color: var(--vivi-ink); font-weight: 600; font-size: .92rem; text-decoration: none; }
 .onglets-categorie a:hover { border-color: var(--vivi-teal-700, #0f5c5a); }
 .onglets-categorie a[aria-current="page"] { background: var(--vivi-teal-700, #0f5c5a); border-color: var(--vivi-teal-700, #0f5c5a); color: #fff; }
+
+/* ---------- Petits écrans : la page ne glisse plus de côté ----------
+   « clip » coupe ce qui dépasse sans créer de zone défilante : l'en-tête collant (sticky) continue de marcher. */
+html, body { overflow-x: clip; max-width: 100%; }
+@media (max-width: 400px) {
+  .vivi-header .container { gap: .5rem; }
+  .vivi-brand__text small { display: none; }
+  .vivi-header__actions .btn-sm { padding-left: .6rem; padding-right: .6rem; }
+}
+.hero .chip--hero { white-space: normal; max-width: 100%; }
+/* Choix à deux ou trois libellés longs (« Une salle de fête ou de conférence ») : retour à la ligne */
+.segmented label { white-space: normal; line-height: 1.2; min-width: 0; }
+
+/* ---------- Bloc « Réserver », comme la feuille de l'application ---------- */
+.booking-card__titre { font-family: var(--vivi-font-title); font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--vivi-ink); }
+.booking-card__sous { color: var(--vivi-muted); margin: 0 0 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.booking-ligne { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 16px; }
+.booking-ligne small { display: block; font-size: .78rem; color: var(--vivi-muted); }
+.booking-date { position: relative; flex: 1 1 auto; min-width: 0; border-radius: 12px; padding: 6px 0; }
+.booking-date strong { display: block; font-family: var(--vivi-font-title); font-size: 1.05rem; color: var(--vivi-teal-700); }
+/* Le champ date couvre le libellé : un appui ouvre le calendrier du téléphone */
+.booking-date input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.booking-date:focus-within { outline: 3px solid rgba(19, 111, 110, .55); outline-offset: 2px; }
+.choix-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 8px; }
+.choix-liste { display: grid; gap: 8px; }
+.choix input { position: absolute; opacity: 0; pointer-events: none; }
+.choix label {
+  display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 14px; border-radius: 10px;
+  border: 1px solid var(--vivi-line-strong); background: #fff; color: var(--vivi-ink); font-weight: 600; cursor: pointer;
+  font-variant-numeric: tabular-nums; text-align: center;
+}
+.choix input:checked + label { background: var(--vivi-teal-700); border-color: var(--vivi-teal-700); color: #fff; }
+.choix input:focus-visible + label { outline: 3px solid rgba(19, 111, 110, .55); outline-offset: 2px; }
+.choix input:disabled + label { background: #edf2f1; color: var(--vivi-muted); text-decoration: line-through; cursor: not-allowed; }
+.price-lines dt small { display: block; font-size: .78rem; color: var(--vivi-muted); font-weight: 400; }
+.booking-separateur { border: 0; border-top: 1px solid var(--vivi-line); margin: 16px 0 8px; opacity: 1; }
+/* Mobile : le bloc devient une feuille qui monte du bas, comme dans l'application.
+   Grand écran : carte collée à droite pendant le défilement. */
+@media (max-width: 991.98px) {
+  .booking-sheet.offcanvas-lg.offcanvas-bottom { height: auto; max-height: 92vh; border-radius: 20px 20px 0 0; }
+  .booking-sheet .offcanvas-header { padding: 10px 20px 0; justify-content: center; position: relative; }
+  .booking-sheet .offcanvas-header::before { content: ""; width: 36px; height: 4px; border-radius: 4px; background: var(--vivi-line-strong); }
+  .booking-sheet .offcanvas-header .btn-close { position: absolute; right: 16px; top: 8px; }
+  .booking-sheet .offcanvas-body { padding: 0 0 env(safe-area-inset-bottom); overflow-y: auto; }
+  .booking-sheet .booking-card { border: 0; box-shadow: none; border-radius: 0; padding: 8px 20px 16px; }
+}
+@media (min-width: 992px) {
+  .booking-sheet { position: sticky; top: calc(var(--vivi-header-h) + 20px); }
+  .booking-sheet .offcanvas-body { display: block; }
+  .booking-sheet .booking-card { position: static; }
+}
