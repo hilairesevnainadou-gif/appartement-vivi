@@ -283,6 +283,32 @@ class Disponibilites
         return $resume;
     }
 
+    /**
+     * Jours complets pour une formule, à partir de $de sur $nombre jours : aucune heure, aucun créneau
+     * ou aucune arrivée possible. Sert à griser ces dates dans le calendrier de réservation.
+     *
+     * @return list<string> dates au format Y-m-d
+     */
+    public function joursComplets(Logement $logement, Formule $formule, CarbonInterface $de, int $nombre): array
+    {
+        $tarifJournee = $logement->tarif(Formule::Journee);
+        $complets = [];
+        $jour = CarbonImmutable::instance($de)->startOfDay();
+        for ($i = 0; $i < $nombre; $i++, $jour = $jour->addDay()) {
+            $libre = match ($formule) {
+                Formule::Heure => $this->uneHeureLibre($logement, $jour),
+                Formule::DemiJournee => collect($this->creneaux($logement, $jour))->contains('libre', true),
+                Formule::Journee => $tarifJournee !== null
+                    && $this->estLibre($logement, ...$this->periodeJournees($tarifJournee, $jour, 1, $logement->estSalle())),
+            };
+            if (! $libre) {
+                $complets[] = $jour->toDateString();
+            }
+        }
+
+        return $complets;
+    }
+
     /* ---------------------------------------------------------------------
      | Outils
      * --------------------------------------------------------------------- */

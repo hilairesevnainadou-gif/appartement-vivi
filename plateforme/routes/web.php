@@ -158,6 +158,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pro/calendrier', [CalendrierController::class, 'index'])->name('pro.calendrier');
         Route::post('/pro/calendrier/{logement}/blocages', [CalendrierController::class, 'bloquer'])->name('pro.calendrier.bloquer');
         Route::delete('/pro/calendrier/{logement}/blocages/{blocage}', [CalendrierController::class, 'debloquer'])->name('pro.calendrier.debloquer');
+        Route::get('/pro/reservations/{reservation:reference}/deplacement', [CalendrierController::class, 'optionsDeplacement'])->name('pro.calendrier.deplacement');
         Route::post('/pro/reservations/{reservation:reference}/deplacer', [CalendrierController::class, 'deplacer'])->name('pro.calendrier.deplacer');
         Route::post('/pro/calendrier/{logement}/reservations', [CalendrierController::class, 'reserver'])->middleware('throttle:30,1')->name('pro.calendrier.reserver');
         Route::post('/pro/reservations/{reservation:reference}/retirer', [CalendrierController::class, 'retirer'])->name('pro.calendrier.retirer');

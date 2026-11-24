@@ -301,6 +301,25 @@ class EspaceProprietaireTest extends TestCase
         Notification::assertSentTo($this->client, ReservationDeplacee::class);
     }
 
+    public function test_deplacer_montre_les_jours_complets_et_les_heures_prises(): void
+    {
+        $r = $this->reservation('2026-11-11 10:00', '2026-11-11 13:00', StatutReservation::Consommee);
+        $this->reservation('2026-11-14 10:00', '2026-11-14 12:00');
+        $this->logement->blocages()->create(['date_debut' => '2026-11-16', 'date_fin' => '2026-11-16', 'motif' => 'Travaux']);
+        $this->actingAs($this->proprio);
+
+        $data = $this->getJson("/pro/reservations/{$r->reference}/deplacement?date=2026-11-14")->assertOk()->json('data');
+        $heures = collect($data['heures'])->pluck('libre', 'heure');
+        $this->assertSame('2026-11-14', $data['date']);
+        $this->assertFalse($heures['10:00']);   // déjà prise : affichée barrée
+        $this->assertTrue($heures['15:00']);
+        $this->assertContains('2026-11-16', $data['jours_complets']);   // jour bloqué : grisé
+        $this->assertNotContains('2026-11-14', $data['jours_complets']);
+
+        // Le formulaire du calendrier grise le jour complet et barre l'heure prise
+        $this->get('/pro/calendrier?jour=2026-11-11')->assertOk()->assertSee('· complet')->assertSee('slot--pris', false);
+    }
+
     /* ---------- Abonnement ---------- */
 
     public function test_souscrire_un_abonnement_par_le_paiement(): void

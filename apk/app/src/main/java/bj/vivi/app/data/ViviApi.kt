@@ -193,6 +193,9 @@ interface ViviApi {
     @GET("pro/reservations/{ref}")
     suspend fun reservationPro(@Path("ref") reference: String): Enveloppe<Reservation>
 
+    @GET("pro/reservations/{ref}/deplacement")
+    suspend fun optionsDeplacement(@Path("ref") reference: String, @Query("date") date: String? = null): Enveloppe<OptionsDeplacement>
+
     @POST("pro/reservations/{ref}/deplacer")
     suspend fun deplacer(@Path("ref") reference: String, @Body corps: JsonObject): Enveloppe<Reservation>
 

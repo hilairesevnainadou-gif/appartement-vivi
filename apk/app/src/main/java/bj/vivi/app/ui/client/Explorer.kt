@@ -560,13 +560,25 @@ fun CarteLogement(l: Logement, modifier: Modifier = Modifier, onClick: () -> Uni
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChoixDate(initiale: LocalDate, min: LocalDate = Fmt.aujourdhui(), max: LocalDate? = null, onFermer: () -> Unit, onChoix: (LocalDate) -> Unit) {
+fun ChoixDate(
+    initiale: LocalDate,
+    min: LocalDate = Fmt.aujourdhui(),
+    max: LocalDate? = null,
+    /** Dates complètes (déjà prises) : grisées et non sélectionnables. */
+    exclues: Set<LocalDate> = emptySet(),
+    onFermer: () -> Unit,
+    onChoix: (LocalDate) -> Unit,
+) {
     val minMs = min.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
     val maxMs = max?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
     val etat = rememberDatePickerState(
-        initialSelectedDateMillis = initiale.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
+        // Une date déjà prise n'est pas présélectionnée : l'utilisateur en choisit une libre
+        initialSelectedDateMillis = initiale.takeIf { it !in exclues }?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
+        initialDisplayedMonthMillis = initiale.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),
         selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis >= minMs && (maxMs == null || utcTimeMillis <= maxMs)
+            override fun isSelectableDate(utcTimeMillis: Long) =
+                utcTimeMillis >= minMs && (maxMs == null || utcTimeMillis <= maxMs) &&
+                    Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate() !in exclues
         },
     )
     DatePickerDialog(

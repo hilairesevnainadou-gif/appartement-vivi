@@ -16,6 +16,9 @@ use InvalidArgumentException;
  */
 class SimulationSejour
 {
+    /** Nombre de jours pour lesquels le calendrier de réservation reçoit les dates complètes. */
+    public const JOURS_CALENDRIER = 90;
+
     public function __construct(
         private readonly Disponibilites $disponibilites,
         private readonly Tarification $tarification,
@@ -44,6 +47,7 @@ class SimulationSejour
             'date' => $date->toDateString(),
             'date_min' => $aujourdhui->toDateString(),
             'date_texte' => $date->translatedFormat('l j F'),
+            'jours_complets' => [],
             'voyageurs' => $voyageurs,
             'capacite' => (int) $logement->capacite,
             'formule' => $formule?->value,
@@ -68,6 +72,9 @@ class SimulationSejour
 
             return $etat;
         }
+
+        // Dates à griser dans le calendrier pour la formule choisie
+        $etat['jours_complets'] = $this->disponibilites->joursComplets($logement, $formule, $aujourdhui, self::JOURS_CALENDRIER);
 
         $choix = [];
         switch ($formule) {

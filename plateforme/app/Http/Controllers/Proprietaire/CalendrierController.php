@@ -14,6 +14,7 @@ use App\Services\ReservationImpossible;
 use App\Services\Reservations;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonPeriod;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -101,6 +102,14 @@ class CalendrierController extends Controller
         $blocage->delete();
 
         return back()->with('statut', 'Journée débloquée : elle est de nouveau réservable.');
+    }
+
+    /** Jours complets (grisés) et heures du jour choisi, prises comprises (barrées), pour le formulaire « Déplacer ». */
+    public function optionsDeplacement(Request $request, Reservation $reservation, Reservations $reservations): JsonResponse
+    {
+        $this->accessible($request, $reservation->logement);
+
+        return response()->json(['data' => $reservations->optionsDeplacement($reservation, $request->query('date'))]);
     }
 
     public function deplacer(Request $request, Reservation $reservation, Reservations $reservations): RedirectResponse

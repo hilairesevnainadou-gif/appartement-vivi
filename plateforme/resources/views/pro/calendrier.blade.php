@@ -155,14 +155,37 @@
                                         <summary class="small fw-semibold" style="cursor:pointer;color:var(--vivi-teal-700)">
                                             <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>Déplacer cette réservation
                                         </summary>
+                                        @php
+                                            // Mêmes disponibilités que dans l'appli : jours complets grisés, heures prises barrées
+                                            $enErreur = $errors->has('deplacement_'.$r->id);
+                                            $dep = app(\App\Services\Reservations::class)->optionsDeplacement($r, $enErreur ? old('date') : null);
+                                            $heureChoisie = $enErreur ? old('heure') : null;
+                                        @endphp
                                         <form method="POST" action="{{ route('pro.calendrier.deplacer', $r) }}" class="row g-2 align-items-end mt-1"
+                                              data-deplacement="{{ route('pro.calendrier.deplacement', $r) }}" data-id="{{ $r->id }}"
                                               data-confirmer="La réservation {{ $r->reference }} de {{ $r->client->name }} sera déplacée (même durée). Le client est prévenu." data-confirmer-titre="Déplacer la réservation ?" data-confirmer-bouton="Déplacer">
                                             @csrf
-                                            <div class="col-6 col-sm-5"><label class="form-label small" for="dd-{{ $r->id }}">Nouvelle date</label>
-                                                <input class="form-control" type="date" id="dd-{{ $r->id }}" name="date" min="{{ $aujourdhui->toDateString() }}" value="{{ old('date', $r->debut->toDateString()) }}" required></div>
-                                            <div class="col-6 col-sm-3"><label class="form-label small" for="dh-{{ $r->id }}">Arrivée</label>
-                                                <input class="form-control" type="time" id="dh-{{ $r->id }}" name="heure" step="1800" value="{{ old('heure', $r->debut->format('H:i')) }}" required></div>
-                                            <div class="col-12 col-sm-4"><button class="btn btn-primary w-100" type="submit">Déplacer</button></div>
+                                            <div class="col-12 col-sm-8"><label class="form-label small" for="dd-{{ $r->id }}">Nouvelle date</label>
+                                                <select class="form-select" id="dd-{{ $r->id }}" name="date" required data-dates>
+                                                    @if (! $dep['date'])<option value="" selected disabled>Aucun jour libre d’ici {{ \Carbon\CarbonImmutable::parse($dep['date_max'])->translatedFormat('j F') }}</option>@endif
+                                                    @for ($d = \Carbon\CarbonImmutable::parse($dep['date_min']); $d->lte(\Carbon\CarbonImmutable::parse($dep['date_max'])); $d = $d->addDay())
+                                                        @php $complet = in_array($d->toDateString(), $dep['jours_complets'], true); @endphp
+                                                        <option value="{{ $d->toDateString() }}" @disabled($complet) @selected($d->toDateString() === $dep['date'])>{{ ucfirst($d->translatedFormat('l j F')) }}{{ $complet ? ' · complet' : '' }}</option>
+                                                    @endfor
+                                                </select>
+                                                <p class="form-text mb-0">Les jours complets sont grisés.</p></div>
+                                            <div class="col-12"><span class="form-label small d-block" id="dh-t-{{ $r->id }}">Arrivée</span>
+                                                <div class="slot-grid" style="grid-template-columns:repeat(auto-fill, minmax(84px, 1fr))" role="radiogroup" aria-labelledby="dh-t-{{ $r->id }}" data-heures>
+                                                    @forelse ($dep['heures'] as $k => $h)
+                                                        <div class="slot{{ $h['libre'] ? '' : ' slot--pris' }}">
+                                                            <input type="radio" name="heure" id="dh-{{ $r->id }}-{{ $k }}" value="{{ $h['heure'] }}" @disabled(! $h['libre']) @checked($h['libre'] && $heureChoisie === $h['heure']) required>
+                                                            <label for="dh-{{ $r->id }}-{{ $k }}"><strong>{{ $h['heure'] }}</strong><span>{{ $h['libre'] ? 'libre' : 'prise' }}</span></label>
+                                                        </div>
+                                                    @empty
+                                                        <p class="form-text mb-0">Aucune heure libre ce jour-là.</p>
+                                                    @endforelse
+                                                </div></div>
+                                            <div class="col-12 col-sm-4"><button class="btn btn-primary w-100" type="submit" @disabled(! $dep['date'])>Déplacer</button></div>
                                             @error('deplacement_'.$r->id)<div class="col-12"><p class="small mb-0" style="color:var(--vivi-danger)">{{ $message }}</p></div>@enderror
                                             <div class="col-12"><p class="form-text mb-0">Même durée ({{ $r->dureeCourte() }}). {{ $r->statut === StatutReservation::Consommee ? 'Le client ne s’est pas présenté : seuls vous et VIVI pouvez déplacer.' : 'Arrivée à moins de '.$delai.' h : le client ne peut plus reporter lui-même.' }} Le client est prévenu.</p></div>
                                         </form>
@@ -303,6 +326,38 @@
         @endif
     @endif
     @push('scripts')
+        <script>
+            // Déplacer : changer de date recharge les heures de ce jour (prises barrées et non sélectionnables)
+            document.querySelectorAll('form[data-deplacement]').forEach(function (form) {
+                var dates = form.querySelector('[data-dates]'), grille = form.querySelector('[data-heures]');
+                dates.addEventListener('change', function () {
+                    grille.setAttribute('aria-busy', 'true');
+                    fetch(form.dataset.deplacement + '?date=' + encodeURIComponent(dates.value), { headers: { Accept: 'application/json' } })
+                        .then(function (rep) { if (!rep.ok) { throw new Error(rep.status); } return rep.json(); })
+                        .then(function (json) {
+                            grille.innerHTML = '';
+                            var heures = json.data.heures || [];
+                            if (!heures.length) {
+                                grille.innerHTML = '<p class="form-text mb-0">Aucune heure libre ce jour-là.</p>';
+                            }
+                            heures.forEach(function (h, k) {
+                                var id = 'dh-' + form.dataset.id + '-' + k;
+                                var case_ = document.createElement('div');
+                                case_.className = 'slot' + (h.libre ? '' : ' slot--pris');
+                                case_.innerHTML = '<input type="radio" name="heure" required><label><strong></strong><span></span></label>';
+                                var champ = case_.querySelector('input'), lib = case_.querySelector('label');
+                                champ.id = id; champ.value = h.heure; champ.disabled = !h.libre;
+                                lib.htmlFor = id;
+                                lib.querySelector('strong').textContent = h.heure;
+                                lib.querySelector('span').textContent = h.libre ? 'libre' : 'prise';
+                                grille.appendChild(case_);
+                            });
+                        })
+                        .catch(function () { grille.innerHTML = '<p class="form-text mb-0">Impossible de charger les heures. Rechargez la page.</p>'; })
+                        .finally(function () { grille.removeAttribute('aria-busy'); });
+                });
+            });
+        </script>
         <script>
             // Réservation hors plateforme : champs de la formule choisie, montant à payer, encaissé et reste en direct
             (function () {

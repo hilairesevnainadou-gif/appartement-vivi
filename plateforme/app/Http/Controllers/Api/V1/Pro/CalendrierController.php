@@ -155,6 +155,14 @@ class CalendrierController extends Controller
         return response()->json(['message' => 'Journée débloquée : elle est de nouveau réservable.']);
     }
 
+    /** GET /pro/reservations/{reference}/deplacement?date= : jours complets (grisés) et heures du jour, prises comprises (barrées). */
+    public function optionsDeplacement(Request $request, Reservation $reservation): JsonResponse
+    {
+        $this->accessible($request, $reservation->logement);
+
+        return response()->json(['data' => $this->reservations->optionsDeplacement($reservation, $request->query('date'))]);
+    }
+
     /** POST /pro/reservations/{reference}/deplacer {date, heure} : réservation consommée ou à moins de 3 h. */
     public function deplacer(Request $request, Reservation $reservation): ReservationProResource
     {

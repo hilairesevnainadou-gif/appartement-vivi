@@ -499,9 +499,10 @@ class ReserverViewModel : ViewModel() {
 
     private fun demander(params: Map<String, String?>) {
         tache?.cancel()
+        // Bouton « Continuer » bloqué dès le choix, pas seulement après le délai : l’ancien prix ne vaut plus
+        calcul = true
         tache = viewModelScope.launch {
             delay(150)   // regroupe les appuis rapides sur + / −
-            calcul = true
             lire(params)
                 .onSuccess { recu ->
                     val libre = if (recu.date == recu.dateMin && recu.complet) prochainJourLibre(recu, params) else null
@@ -534,6 +535,8 @@ class ReserverViewModel : ViewModel() {
 
     fun continuer(onConnexion: () -> Unit, onTunnel: (String) -> Unit) {
         val e = etat ?: return
+        // Réponse du serveur pas encore reçue, ou réservation déjà envoyée : on ne valide pas
+        if (calcul || envoi || e.devis == null) return
         if (Reseau.session.jeton == null) {
             onConnexion()
             return
@@ -667,14 +670,15 @@ private fun FeuilleReserver(l: Logement, onFermer: () -> Unit, onConnexion: () -
                 if (Reseau.session.jeton == null) "Me connecter pour réserver" else "Continuer",
                 { vm.continuer(onConnexion, onTunnel) },
                 Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                actif = etat.devis != null && !vm.calcul,
+                actif = etat.devis != null && !vm.calcul && !vm.envoi,
                 enCours = vm.envoi,
             )
         }
     }
 
     if (choixDate) {
-        ChoixDate(LocalDate.parse(etat?.date ?: Fmt.aujourdhui().toString()), onFermer = { choixDate = false }) {
+        val complets = remember(etat?.joursComplets) { etat?.joursComplets.orEmpty().mapNotNull { Fmt.jour(it) }.toSet() }
+        ChoixDate(LocalDate.parse(etat?.date ?: Fmt.aujourdhui().toString()), exclues = complets, onFermer = { choixDate = false }) {
             vm.changer(mapOf("date" to it.toString()))
             choixDate = false
         }

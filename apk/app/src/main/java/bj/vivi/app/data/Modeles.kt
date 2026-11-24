@@ -333,6 +333,8 @@ data class Disponibilites(
     val date: String = "",
     @SerialName("date_min") val dateMin: String = "",
     @SerialName("date_texte") val dateTexte: String = "",
+    /** Dates (AAAA-MM-JJ) où la formule choisie est complète : grisées dans le calendrier. */
+    @SerialName("jours_complets") val joursComplets: List<String> = emptyList(),
     val voyageurs: Int = 1,
     val capacite: Int = 1,
     val formule: String? = null,
@@ -545,6 +547,19 @@ data class OptionsReport(
 
     @Serializable
     data class Option(val valeur: String, val libelle: String = "", val debut: String? = null, val libre: Boolean = true)
+}
+
+/** Déplacement par le propriétaire ou le gestionnaire : jours complets (grisés) et heures du jour (prises barrées). */
+@Serializable
+data class OptionsDeplacement(
+    @SerialName("jours_complets") val joursComplets: List<String> = emptyList(),
+    @SerialName("date_min") val dateMin: String = "",
+    @SerialName("date_max") val dateMax: String = "",
+    val date: String? = null,
+    val heures: List<Heure> = emptyList(),
+) {
+    @Serializable
+    data class Heure(val heure: String, val libre: Boolean = true)
 }
 
 @Serializable

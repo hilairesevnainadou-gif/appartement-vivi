@@ -11,7 +11,10 @@ use App\Services\Reservations;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\HtmlString;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Icons\Heroicon;
@@ -41,12 +44,24 @@ class ViewReservation extends ViewRecord
                     && in_array($this->getRecord()->statut, [StatutReservation::Confirmee, StatutReservation::Consommee], true))
                 ->modalHeading('Déplacer la réservation')
                 ->modalDescription(fn () => 'Même durée ('.$this->getRecord()->dureeCourte().'). Le logement doit être libre, temps de préparation compris. Le client est prévenu et garde son QR Code.')
-                ->schema([
-                    DatePicker::make('date')->label('Nouvelle date')->native(false)->displayFormat('d/m/Y')->minDate(today())->required()
-                        ->default(fn () => $this->getRecord()->debut->toDateString()),
-                    TimePicker::make('heure')->label('Arrivée')->seconds(false)->required()
-                        ->default(fn () => $this->getRecord()->debut->format('H:i')),
-                ])
+                ->schema(function () {
+                    // Mêmes disponibilités que le propriétaire et l'appli : jours complets grisés, heures prises non cliquables
+                    $options = app(Reservations::class)->optionsDeplacement($this->getRecord());
+
+                    return [
+                        DatePicker::make('date')->label('Nouvelle date')->native(false)->displayFormat('d/m/Y')->required()
+                            ->minDate($options['date_min'])->maxDate($options['date_max'])
+                            ->disabledDates($options['jours_complets'])
+                            ->helperText('Les jours complets sont grisés.')
+                            ->default($options['date'])
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set) => $set('heure', null)),
+                        ToggleButtons::make('heure')->label('Arrivée')->required()->inline()
+                            ->helperText('Les heures déjà prises sont barrées et ne peuvent pas être choisies.')
+                            ->options(fn (Get $get) => $this->heuresDeplacement($get('date'), barrer: true))
+                            ->disableOptionWhen(fn (string $value, Get $get) => ! ($this->heuresDeplacement($get('date'))[$value] ?? false)),
+                    ];
+                })
                 ->action(function (array $data) {
                     /** @var Reservation $r */
                     $r = $this->getRecord();
@@ -61,6 +76,28 @@ class ViewReservation extends ViewRecord
                     }
                 }),
         ];
+    }
+
+    /** @var array<string, array<string, bool>> heures du jour déjà calculées (le formulaire les demande plusieurs fois) */
+    private array $heuresCalculees = [];
+
+    /**
+     * Heures d'arrivée du jour pour déplacer : ['14:00' => libre ?], ou, avec $barrer, les libellés (heures prises barrées).
+     *
+     * @return array<string, bool|HtmlString>
+     */
+    private function heuresDeplacement(?string $date, bool $barrer = false): array
+    {
+        if (! $date || ! ($jour = rescue(fn () => CarbonImmutable::parse($date)->startOfDay(), null, false))) {
+            return [];
+        }
+        $cle = $jour->toDateString();
+        $this->heuresCalculees[$cle] ??= collect(app(Reservations::class)->heuresDeplacement($this->getRecord()->loadMissing('logement'), $jour))
+            ->mapWithKeys(fn ($h) => [$h['heure'] => $h['libre']])->all();
+
+        return $barrer
+            ? collect($this->heuresCalculees[$cle])->map(fn ($libre, $h) => $libre ? $h : new HtmlString('<s>'.e($h).'</s>'))->all()
+            : $this->heuresCalculees[$cle];
     }
 
     /** Charge en une fois tout ce que la fiche affiche (pas de requêtes une par une). */

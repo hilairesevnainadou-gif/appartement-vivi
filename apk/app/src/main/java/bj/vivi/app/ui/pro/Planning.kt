@@ -47,6 +47,7 @@ import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -62,6 +63,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,6 +86,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bj.vivi.app.data.Calendrier
 import bj.vivi.app.data.LogementGere
+import bj.vivi.app.data.OptionsDeplacement
 import bj.vivi.app.data.Reservation
 import bj.vivi.app.data.appel
 import bj.vivi.app.data.corps
@@ -110,6 +113,7 @@ import bj.vivi.app.ui.composants.TitreSection
 import bj.vivi.app.ui.composants.TonPuce
 import bj.vivi.app.ui.pluriel
 import bj.vivi.app.ui.theme.Vivi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -465,6 +469,27 @@ class ReservationProViewModel(etatNav: SavedStateHandle) : EcranViewModel<Reserv
         appel { encaisser(reference, corps("montant" to montant)) }.map { remplacer(it.data); Messages.afficher("Encaissement enregistré."); fait() }
     }
 
+    /** Disponibilités pour déplacer : null pendant le chargement. */
+    var deplacement by mutableStateOf<OptionsDeplacement?>(null)
+        private set
+    var chargementDeplacement by mutableStateOf(false)
+        private set
+    var erreurDeplacement by mutableStateOf(false)
+        private set
+    private var tacheDeplacement: Job? = null
+
+    fun chargerDeplacement(date: String? = null) {
+        tacheDeplacement?.cancel()
+        tacheDeplacement = viewModelScope.launch {
+            chargementDeplacement = true
+            erreurDeplacement = false
+            appel { optionsDeplacement(reference, date) }
+                .onSuccess { deplacement = it.data }
+                .onFailure { erreurDeplacement = deplacement == null; Messages.erreur(it.message ?: "") }
+            chargementDeplacement = false
+        }
+    }
+
     fun deplacer(date: LocalDate, heure: String, fait: () -> Unit) = action {
         appel { deplacer(reference, corps("date" to date.toString(), "heure" to heure)) }.map { remplacer(it.data); Messages.afficher(it.message ?: "Réservation déplacée."); fait() }
     }
@@ -644,22 +669,48 @@ private fun EtapeSejour(icone: androidx.compose.ui.graphics.vector.ImageVector, 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun FeuilleDeplacer(vm: ReservationProViewModel, onFermer: () -> Unit) {
-    var date by remember { mutableStateOf(Fmt.aujourdhui()) }
-    var heure by remember { mutableStateOf("14:00") }
+    // Jours complets et heures prises calculés par le serveur, comme pour le report du client
+    LaunchedEffect(Unit) { vm.chargerDeplacement() }
+    val options = vm.deplacement
+    val date = options?.date?.let { Fmt.jour(it) }
+    var heure by remember(options?.date) { mutableStateOf<String?>(null) }
     var choixDate by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onFermer, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), containerColor = Vivi.White) {
-        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp).navigationBarsPadding().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text("Déplacer la réservation", style = MaterialTheme.typography.headlineSmall)
-            Text("Même durée et même formule ; le client est prévenu.", style = MaterialTheme.typography.bodyMedium, color = Vivi.Muted)
-            BoutonContour(Fmt.jourLong(date), { choixDate = true }, Modifier.fillMaxWidth(), icone = Icons.Outlined.CalendarMonth)
-            Text("Heure d’arrivée", style = MaterialTheme.typography.labelMedium, color = Vivi.Ink)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                (0..23).map { "%02d:00".format(it) }.forEach { h -> CaseChoix(h, choisi = h == heure) { heure = h } }
+            Text("Même durée et même formule ; le client est prévenu. Les jours complets sont grisés, les heures prises barrées.", style = MaterialTheme.typography.bodyMedium, color = Vivi.Muted)
+            when {
+                options == null && vm.erreurDeplacement -> BoutonContour("Réessayer", { vm.chargerDeplacement() }, Modifier.fillMaxWidth())
+                options == null -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Vivi.Teal700) }
+                date == null -> Text("Aucun jour libre d’ici le ${Fmt.jourLong(options.dateMax)}.", style = MaterialTheme.typography.bodyMedium, color = Vivi.Ink)
+                else -> {
+                    BoutonContour(Fmt.jourLong(date), { choixDate = true }, Modifier.fillMaxWidth(), icone = Icons.Outlined.CalendarMonth)
+                    Text("Heure d’arrivée", style = MaterialTheme.typography.labelMedium, color = Vivi.Ink)
+                    if (vm.chargementDeplacement) {
+                        Box(Modifier.fillMaxWidth().padding(12.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = Vivi.Teal700) }
+                    } else if (options.heures.isEmpty()) {
+                        Text("Aucune heure libre ce jour-là.", style = MaterialTheme.typography.bodyMedium)
+                    } else {
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            options.heures.forEach { h -> CaseChoix(h.heure, choisi = h.heure == heure, actif = h.libre) { heure = h.heure } }
+                        }
+                    }
+                    val choisie = heure
+                    BoutonPrincipal(
+                        if (choisie == null) "Choisissez une heure" else "Déplacer au ${Fmt.jourCourt(date)} à $choisie",
+                        { if (choisie != null) vm.deplacer(date, choisie, onFermer) },
+                        Modifier.fillMaxWidth(), actif = choisie != null && !vm.chargementDeplacement, enCours = vm.enCours, icone = Icons.Outlined.EventRepeat,
+                    )
+                }
             }
-            BoutonPrincipal("Déplacer au ${Fmt.jourCourt(date)} à $heure", { vm.deplacer(date, heure, onFermer) }, Modifier.fillMaxWidth(), enCours = vm.enCours, icone = Icons.Outlined.EventRepeat)
         }
     }
-    if (choixDate) ChoixDate(date, onFermer = { choixDate = false }) { date = it; choixDate = false }
+    if (choixDate && options != null && date != null) {
+        val complets = remember(options.joursComplets) { options.joursComplets.mapNotNull { Fmt.jour(it) }.toSet() }
+        ChoixDate(date, min = Fmt.jour(options.dateMin) ?: Fmt.aujourdhui(), max = Fmt.jour(options.dateMax), exclues = complets, onFermer = { choixDate = false }) {
+            vm.chargerDeplacement(it.toString()); choixDate = false
+        }
+    }
 }
 
 /* ======================================================================

@@ -121,6 +121,7 @@ Route::prefix('v1')->name('api.')->middleware('throttle:api')->group(function ()
                 Route::get('/logements-geres', 'logements')->name('logements-geres');
                 Route::get('/reservations', 'reservations')->name('reservations');
                 Route::get('/reservations/{reservation:reference}', 'reservation')->name('reservations.show');
+                Route::get('/reservations/{reservation:reference}/deplacement', 'optionsDeplacement')->name('reservations.deplacement');
                 Route::post('/reservations/{reservation:reference}/deplacer', 'deplacer')->name('reservations.deplacer');
                 Route::post('/reservations/{reservation:reference}/encaisser', 'encaisser')->name('reservations.encaisser');
                 Route::post('/reservations/{reservation:reference}/retirer', 'retirer')->name('reservations.retirer');

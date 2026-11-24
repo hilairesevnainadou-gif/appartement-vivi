@@ -284,6 +284,87 @@ class Reservations
         }
     }
 
+    /** Nombre de jours proposés pour déplacer une réservation (propriétaire, gestionnaire, VIVI). */
+    public const JOURS_DEPLACEMENT = 60;
+
+    /**
+     * Arrivées possibles d'un jour pour déplacer la réservation (même durée), à chaque heure pleine encore à venir.
+     * « libre » à false : heure déjà prise (réservation, préparation, jour bloqué) ou heure actuelle, affichée barrée.
+     *
+     * @return list<array{heure: string, libre: bool}>
+     */
+    public function heuresDeplacement(Reservation $r, CarbonImmutable $jour): array
+    {
+        $duree = (int) round($r->debut->diffInMinutes($r->fin));
+        $heures = [];
+        for ($h = 0; $h < 24; $h++) {
+            $debut = $jour->startOfDay()->setTime($h, 0);
+            if ($debut->lte(now())) {
+                continue;
+            }
+            $heures[] = ['heure' => $debut->format('H:i'),
+                'libre' => ! $debut->eq($r->debut) && $this->disponibilites->estLibre($r->logement, $debut, $debut->addMinutes($duree), $r->getKey())];
+        }
+
+        return $heures;
+    }
+
+    /**
+     * Jours (Y-m-d) sans aucune heure d'arrivée libre pour déplacer la réservation, d'aujourd'hui à
+     * JOURS_DEPLACEMENT jours : grisés dans le calendrier, quel que soit le rôle de qui déplace.
+     *
+     * @return list<string>
+     */
+    public function joursCompletsDeplacement(Reservation $r): array
+    {
+        $this->disponibilites->oublier();
+        $complets = [];
+        for ($i = 0, $jour = CarbonImmutable::today(); $i < self::JOURS_DEPLACEMENT; $i++, $jour = $jour->addDay()) {
+            if (! collect($this->heuresDeplacement($r, $jour))->contains('libre', true)) {
+                $complets[] = $jour->toDateString();
+            }
+        }
+
+        return $complets;
+    }
+
+    /**
+     * Tout ce qu'il faut pour choisir où déplacer : jours complets à griser, jour retenu (celui demandé, sinon le
+     * jour actuel de la réservation, sinon le premier jour libre) et ses heures, prises comprises (à barrer).
+     *
+     * @return array{jours_complets: list<string>, date_min: string, date_max: string, date: ?string, heures: list<array{heure: string, libre: bool}>}
+     */
+    public function optionsDeplacement(Reservation $r, ?string $date = null): array
+    {
+        $r->loadMissing('logement');
+        $complets = $this->joursCompletsDeplacement($r);
+        $min = CarbonImmutable::today();
+        $max = $min->addDays(self::JOURS_DEPLACEMENT - 1);
+        $possible = fn (?CarbonImmutable $j) => $j && $j->betweenIncluded($min, $max) && ! in_array($j->toDateString(), $complets, true);
+
+        $jour = rescue(fn () => $date ? CarbonImmutable::createFromFormat('!Y-m-d', $date) : null, null, false);
+        if (! $possible($jour)) {
+            $jour = CarbonImmutable::instance($r->debut)->startOfDay();
+        }
+        if (! $possible($jour)) {
+            $jour = null;
+            for ($j = $min; $j->lte($max); $j = $j->addDay()) {
+                if ($possible($j)) {
+                    $jour = $j;
+                    break;
+                }
+            }
+        }
+
+        return [
+            'jours_complets' => $complets,
+            'date_min' => $min->toDateString(),
+            'date_max' => $max->toDateString(),
+            'date' => $jour?->toDateString(),
+            'heures' => $jour ? $this->heuresDeplacement($r, $jour) : [],
+        ];
+    }
+
     /**
      * Déplacement par le propriétaire ou l'équipe VIVI : la même durée, à une nouvelle date et heure.
      * C'est le seul moyen de déplacer une réservation consommée (client absent) ou à moins de 3 h de l'arrivée.
