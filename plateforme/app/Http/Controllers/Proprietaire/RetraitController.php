@@ -33,7 +33,10 @@ class RetraitController extends Controller
             return back()->withErrors(['retrait' => $e->getMessage()]);
         }
 
-        return back()->with('statut', 'Demande de retrait '.$retrait->reference.' de '.Montant::fcfa($retrait->montant)
-            .' envoyée. La caissière VIVI la validera et indiquera le mode de règlement.');
+        return back()->with('statut', 'Demande de retrait '.$retrait->reference.' de '.Montant::fcfa($retrait->montant).' envoyée'
+            .((int) $retrait->montant_commission > 0
+                ? ' : commission VIVI '.Montant::fcfa($retrait->montant_commission).', vous recevrez '.Montant::fcfa($retrait->aVerser())
+                : '')
+            .'. La caissière VIVI la validera et indiquera le mode de règlement.');
     }
 }

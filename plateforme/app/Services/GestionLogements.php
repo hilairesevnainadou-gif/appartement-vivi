@@ -26,11 +26,14 @@ class GestionLogements
      * Quotas de l'abonnement, séparés : logements d'un côté, salles (fêtes, conférences…) de l'autre.
      * Les clés « utilises » et « max » concernent les logements (compatibilité) ; « salles » donne le détail des salles.
      *
-     * @return array{utilises: int, max: ?int, formule: ?string, salles: array{utilises: int, max: ?int}}
+     * Propriétaire sur commission : quotas des Paramètres, sans abonnement (« commission » vaut true).
+     *
+     * @return array{utilises: int, max: ?int, formule: ?string, commission: bool, salles: array{utilises: int, max: ?int}}
      */
     public function quota(User $proprietaire, ?Logement $sauf = null): array
     {
-        $formule = $proprietaire->abonnementActif()->with('formule')->first()?->formule;
+        $commission = app(ModeleEconomique::class)->quotas($proprietaire);
+        $formule = $commission ? null : $proprietaire->abonnementActif()->with('formule')->first()?->formule;
         $parCategorie = $proprietaire->logements()
             ->whereIn('statut', [StatutLogement::Publie, StatutLogement::EnValidation])
             ->when($sauf, fn ($q) => $q->whereKeyNot($sauf->getKey()))
@@ -39,9 +42,10 @@ class GestionLogements
 
         return [
             'utilises' => (int) ($parCategorie['logement'] ?? 0),
-            'max' => $formule?->logements_max,
-            'formule' => $formule?->nom,
-            'salles' => ['utilises' => (int) ($parCategorie['salle'] ?? 0), 'max' => $formule?->salles_max],
+            'max' => $commission ? $commission['logements'] : $formule?->logements_max,
+            'formule' => $commission ? 'Commission sur retrait' : $formule?->nom,
+            'commission' => $commission !== null,
+            'salles' => ['utilises' => (int) ($parCategorie['salle'] ?? 0), 'max' => $commission ? $commission['salles'] : $formule?->salles_max],
         ];
     }
 
@@ -78,7 +82,8 @@ class GestionLogements
         $q = $this->quota($proprietaire, $logement);
         $compte = $logement?->categorie() === 'salle' ? $q['salles'] : $q;
 
-        return $compte['max'] !== null && $compte['utilises'] < $compte['max'];
+        return $compte['max'] !== null
+            && ($compte['max'] >= ModeleEconomique::ILLIMITE_LOGEMENTS || $compte['utilises'] < $compte['max']);
     }
 
     /** Crée ou met à jour le logement et tout ce qui en dépend. Renvoie le logement et un message pour le propriétaire. */

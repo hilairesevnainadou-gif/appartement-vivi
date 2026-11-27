@@ -103,11 +103,11 @@ class ExportsController extends Controller
         $lignes = Retrait::with(['proprietaire', 'traitePar'])->whereBetween('created_at', [$du, $au])->orderBy('created_at')->lazy()
             ->map(fn (Retrait $r) => [
                 $r->reference, $r->created_at->format('d/m/Y H:i'), $r->proprietaire?->name, $this->contact($r->proprietaire),
-                $r->montant, $r->statut->getLabel(), $r->mode_reglement, $r->reference_reglement,
+                $r->montant, (int) $r->montant_commission, $r->aVerser(), $r->statut->getLabel(), $r->mode_reglement, $r->reference_reglement,
                 $r->traitePar?->name, $r->traite_le?->format('d/m/Y H:i'),
             ]);
 
-        return [['Référence', 'Demandé le', 'Bénéficiaire (propriétaire ou agent)', 'Contact', 'Montant', 'Statut', 'Mode de règlement', 'Référence règlement', 'Traité par', 'Traité le'], $lignes];
+        return [['Référence', 'Demandé le', 'Bénéficiaire (propriétaire ou agent)', 'Contact', 'Retenu sur le solde', 'Commission VIVI sur retrait', 'À verser', 'Statut', 'Mode de règlement', 'Référence règlement', 'Traité par', 'Traité le'], $lignes];
     }
 
     private function remboursements(CarbonImmutable $du, CarbonImmutable $au): array
@@ -169,7 +169,7 @@ class ExportsController extends Controller
             ->whereBetween('paye_le', [$du->toDateString(), $au->toDateString()])->orderBy('paye_le')->orderBy('id')->get()
             ->map(fn (\App\Models\PublicitePaiement $p) => [
                 $p->paye_le->format('d/m/Y'), $p->publicite->annonceur ?: 'VIVI', $p->publicite->annonceur_contact, $p->publicite->titre,
-                $p->publicite->emplacement->getLabel(), $p->publicite->debut?->format('d/m/Y'), $p->publicite->fin?->format('d/m/Y'),
+                $p->publicite->espacesEnClair(), $p->publicite->debut?->format('d/m/Y'), $p->publicite->fin?->format('d/m/Y'),
                 $p->publicite->prix, $p->montant, $p->publicite->resteAPayer(), $p->mode, $p->reference, $p->caissier?->name,
             ]);
 

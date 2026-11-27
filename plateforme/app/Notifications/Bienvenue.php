@@ -28,7 +28,9 @@ class Bienvenue extends Notification
 
         return $this->role === Role::Proprietaire
             ? $message
-                ->line('Prochaine étape : choisissez un abonnement, puis publiez votre premier logement. VIVI le vérifie avant sa mise en ligne.')
+                ->line(\App\Services\ModeleEconomique::formulesProposees()
+                    ? 'Prochaine étape : choisissez un abonnement, puis publiez votre premier logement. VIVI le vérifie avant sa mise en ligne.'
+                    : 'Prochaine étape : publiez votre premier logement. VIVI le vérifie avant sa mise en ligne.')
                 ->action('Ouvrir mon espace propriétaire', route('espace.proprietaire'))
                 ->salutation('L’équipe VIVI')
             : $message
@@ -40,7 +42,9 @@ class Bienvenue extends Notification
     public function toSms(object $notifiable): string
     {
         return $this->role === Role::Proprietaire
-            ? 'Bienvenue sur VIVI ! Choisissez un abonnement puis publiez votre premier logement depuis votre espace propriétaire.'
+            ? (\App\Services\ModeleEconomique::formulesProposees()
+                ? 'Bienvenue sur VIVI ! Choisissez un abonnement puis publiez votre premier logement depuis votre espace propriétaire.'
+                : 'Bienvenue sur VIVI ! Publiez votre premier logement depuis votre espace propriétaire.')
             : 'Bienvenue sur VIVI ! Réservez un appartement meublé à l’heure, à la demi-journée ou à la journée.';
     }
 }

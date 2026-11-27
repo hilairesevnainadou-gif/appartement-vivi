@@ -69,6 +69,23 @@ class RechercheTest extends TestCase
         $this->get('/logements?formule=heure&budget=5000')->assertSee('Studio Lagune')->assertDontSee('Loft Cher');
     }
 
+    public function test_la_recherche_par_mots_cherche_titre_quartier_et_ville(): void
+    {
+        $this->logement('Studio Lagune');
+        $this->logement('Villa Plage', ['ville' => 'Ouidah', 'quartier' => 'Djègbadji']);
+        $this->logement('Loft 100% neuf', ['quartier' => 'Akpakpa']);
+
+        $noms = fn (string $q) => collect($this->getJson('/api/v1/logements?q='.urlencode($q))->assertOk()->json('data'))->pluck('titre')->sort()->values()->all();
+
+        $this->assertSame(['Studio Lagune'], $noms('lagune'));
+        $this->assertSame(['Villa Plage'], $noms('ouidah'));
+        $this->assertSame(['Loft 100% neuf'], $noms('akpakpa  loft'));    // chaque mot doit se trouver
+        $this->assertSame([], $noms('lagune ouidah'));
+        $this->assertSame(['Loft 100% neuf'], $noms('100%'));          // % cherché tel quel
+        $this->assertCount(3, $noms('   '));
+        $this->getJson('/api/v1/logements?q=Lagune')->assertJsonPath('criteres.q', 'Lagune');
+    }
+
     public function test_pres_de_moi_propose_les_logements_proches_du_plus_pres_au_plus_loin(): void
     {
         $this->logement('Studio Fidjrossè', ['latitude' => 6.3530, 'longitude' => 2.3790]);     // ~4,6 km

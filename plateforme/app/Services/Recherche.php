@@ -23,7 +23,7 @@ class Recherche
      * Critères reçus (paramètres de l'adresse), nettoyés : toute valeur incohérente est ignorée.
      *
      * @param  array<string, mixed>  $saisie
-     * @return array{ville: ?string, date: CarbonImmutable, voyageurs: int, formule: ?Formule, budget: int, categorie: ?string, types: list<string>, equipements: list<int>, services: list<int>, tri: string, position: ?array}
+     * @return array{q: ?string, ville: ?string, date: CarbonImmutable, voyageurs: int, formule: ?Formule, budget: int, categorie: ?string, types: list<string>, equipements: list<int>, services: list<int>, tri: string, position: ?array}
      */
     public function criteres(array $saisie): array
     {
@@ -31,6 +31,9 @@ class Recherche
         $aujourdhui = CarbonImmutable::today();
 
         $ville = in_array($saisie['ville'] ?? null, $villes, true) ? $saisie['ville'] : null;
+        // Mots libres : titre, quartier, ville ou adresse (« Fidjrossè », « salle Akpakpa »…)
+        $q = mb_substr(trim(preg_replace('/\s+/u', ' ', is_string($saisie['q'] ?? null) ? $saisie['q'] : '')), 0, 60);
+        $q = $q !== '' ? $q : null;
         $date = rescue(fn () => CarbonImmutable::createFromFormat('!Y-m-d', (string) ($saisie['date'] ?? '')), null, false);
         $date = $date && $date->gte($aujourdhui) ? $date : $aujourdhui;
         $voyageurs = min(max(1, (int) ($saisie['voyageurs'] ?? 1)), TypeLogement::CAPACITE_MAX_SALLE);
@@ -52,7 +55,7 @@ class Recherche
             $tri = 'pertinence';
         }
 
-        return compact('ville', 'date', 'voyageurs', 'formule', 'budget', 'categorie', 'types', 'equipements', 'services', 'tri', 'position');
+        return compact('q', 'ville', 'date', 'voyageurs', 'formule', 'budget', 'categorie', 'types', 'equipements', 'services', 'tri', 'position');
     }
 
     /**
@@ -66,12 +69,25 @@ class Recherche
         ['ville' => $ville, 'date' => $date, 'voyageurs' => $voyageurs, 'formule' => $formule, 'budget' => $budget,
             'types' => $types, 'equipements' => $equipements, 'services' => $services, 'tri' => $tri, 'position' => $position] = $c;
         $categorie = $c['categorie'] ?? null;
+        $mots = ($c['q'] ?? null) !== null ? explode(' ', $c['q']) : [];
 
         // ---------- Logements qui répondent aux critères fixes ----------
         $logements = Logement::query()->visibles()->avecNote()
             ->with(['tarifs', 'creneaux', 'services', 'equipements', 'photos' => fn ($q) => $q->orderBy('ordre')])
             ->where('capacite', '>=', $voyageurs)
             ->when($ville, fn (Builder $q) => $q->where('ville', $ville))
+            ->tap(function (Builder $q) use ($mots) {
+                // Chaque mot doit se trouver dans le titre, le quartier, la ville ou l'adresse
+                foreach ($mots as $mot) {
+                    // « ! » comme caractère d'échappement : même écriture pour MySQL et SQLite (tests)
+                    $motif = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $mot).'%';
+                    $q->where(function (Builder $w) use ($motif) {
+                        foreach (['titre', 'quartier', 'ville', 'adresse'] as $colonne) {
+                            $w->orWhereRaw("{$colonne} like ? escape '!'", [$motif]);
+                        }
+                    });
+                }
+            })
             ->when($categorie, fn (Builder $q) => $q->whereIn('type', array_map(fn (TypeLogement $t) => $t->value, TypeLogement::deCategorie($categorie))))
             ->when($types, fn (Builder $q) => $q->whereIn('type', $types))
             ->when($formule, fn (Builder $q) => $q->whereHas('tarifs', fn (Builder $t) => $t

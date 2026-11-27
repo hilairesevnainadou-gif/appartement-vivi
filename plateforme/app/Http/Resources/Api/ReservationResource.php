@@ -60,6 +60,14 @@ class ReservationResource extends JsonResource
                 'paye' => $this->montantPaye(),
                 'rembourse' => (int) $this->montant_rembourse,
             ],
+            // Suivi du remboursement après une annulation (null s'il n'y a rien à rembourser)
+            'remboursement' => (int) $this->montant_rembourse > 0 ? [
+                'montant' => (int) $this->montant_rembourse,
+                'statut' => $this->rembourse_le ? 'verse' : 'a_verser',
+                'verse_le' => Format::date($this->rembourse_le),
+                'mode' => $this->mode_remboursement,
+                'reference' => $this->reference_remboursement,
+            ] : null,
             'services' => $this->whenLoaded('services', fn () => $this->services->map(fn ($s) => [
                 'service_id' => $s->service_id, 'nom' => $s->nom, 'prix_unitaire' => (int) $s->prix_unitaire,
                 'quantite' => (int) $s->quantite, 'montant' => (int) $s->montant,

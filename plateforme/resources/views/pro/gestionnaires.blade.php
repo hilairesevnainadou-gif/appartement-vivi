@@ -13,7 +13,10 @@
         <div class="quota">
             <div style="min-width:0">
                 <strong class="text-ink">{{ $gestionnaires->count() }} gestionnaire{{ $gestionnaires->count() > 1 ? 's' : '' }} sur {{ $maximum >= 99 ? 'illimité' : $maximum }}</strong>
-                <div class="small text-soft">{{ $maximum === 0 ? 'Votre formule n’inclut pas de gestionnaire délégué.' : 'Inclus dans votre formule d’abonnement.' }}</div>
+                @php $surCommission = app(\App\Services\ModeleEconomique::class)->surCommission(auth()->user()); @endphp
+                <div class="small text-soft">{{ $surCommission
+                    ? ($maximum === 0 ? 'Vos conditions VIVI n’incluent pas de gestionnaire délégué.' : 'Inclus dans vos conditions VIVI (commission sur retrait).')
+                    : ($maximum === 0 ? 'Votre formule n’inclut pas de gestionnaire délégué.' : 'Inclus dans votre formule d’abonnement.') }}</div>
             </div>
             <div class="meter" aria-hidden="true"><i style="width:{{ $maximum ? min(100, $gestionnaires->count() / $maximum * 100) : 0 }}%"></i></div>
             <a class="btn btn-ghost btn-sm" href="{{ route('pro.abonnement') }}">Abonnement</a>

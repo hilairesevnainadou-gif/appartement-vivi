@@ -28,9 +28,13 @@ class RetraitTraite extends Notification
         $montant = Montant::fcfa((int) $r->montant);
         $message = (new MailMessage)->greeting('Bonjour '.$notifiable->name.',');
 
+        $verse = Montant::fcfa($r->aVerser());
+        $commission = (int) $r->montant_commission > 0;
+
         $message = $this->paye()
-            ? $message->subject('Retrait payé : '.$montant)
-                ->line('Votre retrait **'.$r->reference.'** de **'.$montant.'** est payé'.($r->mode_reglement ? ' par '.$r->mode_reglement : '').'.')
+            ? $message->subject('Retrait payé : '.$verse)
+                ->line('Votre retrait **'.$r->reference.'** est payé : **'.$verse.'** versés'.($r->mode_reglement ? ' par '.$r->mode_reglement : '').'.')
+                ->lineIf($commission, 'Retenu sur votre solde : '.$montant.', dont '.Montant::fcfa($r->montant_commission).' de commission VIVI ('.\App\Services\Caisse::taux((float) $r->taux_commission).').')
                 ->line($r->reference_reglement ? 'Référence du paiement : '.$r->reference_reglement.'.' : 'Vérifiez votre compte de réception.')
             : $message->subject('Retrait refusé : '.$r->reference)
                 ->line('Votre retrait **'.$r->reference.'** de **'.$montant.'** n’a pas pu être payé.')
@@ -44,7 +48,8 @@ class RetraitTraite extends Notification
         $r = $this->retrait;
 
         return $this->paye()
-            ? 'VIVI : retrait '.$r->reference.' de '.Montant::fcfa((int) $r->montant).' payé'.($r->mode_reglement ? ' par '.$r->mode_reglement : '').'.'
+            ? 'VIVI : retrait '.$r->reference.' payé, '.Montant::fcfa($r->aVerser()).' versés'.($r->mode_reglement ? ' par '.$r->mode_reglement : '')
+                .((int) $r->montant_commission > 0 ? ' (commission VIVI '.Montant::fcfa($r->montant_commission).' déduite)' : '').'.'
             : 'VIVI : retrait '.$r->reference.' refusé ('.($r->note ?: 'voir votre espace').'). Le montant est revenu sur votre solde.';
     }
 

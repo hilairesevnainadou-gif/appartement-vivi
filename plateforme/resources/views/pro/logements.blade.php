@@ -30,21 +30,21 @@
         <div class="quota">
             <div style="min-width:0">
                 @if ($quota['max'] !== null)
-                    <strong class="text-ink">{{ $quota['utilises'] }} {{ $quota['utilises'] > 1 ? 'logements publiés ou en vérification' : 'logement publié ou en vérification' }} sur {{ $quota['max'] }}</strong>
-                    <div class="small text-soft">Inclus dans votre formule {{ $quota['formule'] }}.</div>
+                    <strong class="text-ink">{{ $quota['utilises'] }} {{ $quota['utilises'] > 1 ? 'logements publiés ou en vérification' : 'logement publié ou en vérification' }} sur {{ $quota['max'] >= 999 ? 'illimité' : $quota['max'] }}</strong>
+                    <div class="small text-soft">{{ ($quota['commission'] ?? false) ? 'Sans abonnement : vous êtes sur commission sur retrait.' : 'Inclus dans votre formule '.$quota['formule'].'.' }}</div>
                 @else
                     <strong class="text-ink">Aucun abonnement actif</strong>
                     <div class="small text-soft">Un abonnement est nécessaire pour publier vos logements.</div>
                 @endif
             </div>
-            <div class="meter" aria-hidden="true"><i style="width:{{ $quota['max'] ? min(100, $quota['utilises'] / $quota['max'] * 100) : 0 }}%"></i></div>
-            <a class="btn btn-ghost btn-sm" href="{{ route('pro.abonnement') }}">Abonnement</a>
+            <div class="meter" aria-hidden="true"><i style="width:{{ $quota['max'] && $quota['max'] < 999 ? min(100, $quota['utilises'] / $quota['max'] * 100) : 0 }}%"></i></div>
+            <a class="btn btn-ghost btn-sm" href="{{ route('pro.abonnement') }}">{{ ($quota['commission'] ?? false) ? 'Conditions' : 'Abonnement' }}</a>
         </div>
         {{-- Quota séparé pour les salles (fêtes, conférences, plein air, espaces complets) --}}
         @if ($quota['salles']['max'] !== null)
             <div class="quota mt-2">
                 <div style="min-width:0">
-                    <strong class="text-ink">{{ $quota['salles']['utilises'] }} salle{{ $quota['salles']['utilises'] > 1 ? 's' : '' }} sur {{ $quota['salles']['max'] }}</strong>
+                    <strong class="text-ink">{{ $quota['salles']['utilises'] }} salle{{ $quota['salles']['utilises'] > 1 ? 's' : '' }} sur {{ $quota['salles']['max'] >= 999 ? 'illimité' : $quota['salles']['max'] }}</strong>
                     <div class="small text-soft">Salles de fête, de conférence ou espaces événementiels.</div>
                 </div>
                 <div class="meter" aria-hidden="true"><i style="width:{{ min(100, $quota['salles']['utilises'] / max(1, $quota['salles']['max']) * 100) }}%"></i></div>

@@ -15,8 +15,8 @@ class ListPublicites extends ListRecords
     public function getSubheading(): ?string
     {
         return Publicites::actives()
-            ? 'Affichées aux clients dans l’application, avec la mention « Publicité ».'
-            : 'La publicité est désactivée : activez-la dans Administration › Paramètres pour l’afficher dans l’application.';
+            ? 'Affichées dans l’application et sur le site web, avec la mention « Publicité ». Les annonceurs reçoivent leurs rapports automatiquement.'
+            : 'La publicité est désactivée : activez-la dans Administration › Paramètres pour l’afficher dans l’application et sur le site.';
     }
 
     protected function getHeaderWidgets(): array

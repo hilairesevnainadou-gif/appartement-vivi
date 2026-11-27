@@ -14,7 +14,8 @@ class ReservationAnnulee extends Notification
 {
     use CanauxSelonParametres, Queueable;
 
-    public function __construct(public readonly Reservation $reservation, public readonly bool $pourProprietaire) {}
+    /** $explication : raison de l'annulation quand ce n'est pas le client qui l'a demandée. */
+    public function __construct(public readonly Reservation $reservation, public readonly bool $pourProprietaire, public readonly ?string $explication = null) {}
 
     public function toMail(object $notifiable): MailMessage
     {
@@ -30,7 +31,12 @@ class ReservationAnnulee extends Notification
                 ->salutation('L’équipe VIVI');
         }
 
-        return $message->line('Votre réservation au **'.$r->logement->titre.'** du '.$r->debut->translatedFormat('l j F').' est annulée.')
+        $message->line('Votre réservation au **'.$r->logement->titre.'** du '.$r->debut->translatedFormat('l j F').' est annulée.');
+        if ($this->explication) {
+            $message->line($this->explication);
+        }
+
+        return $message
             ->line($r->montant_rembourse > 0
                 ? 'Vous serez remboursé de **'.Montant::fcfa($r->montant_rembourse).'** sur votre moyen de paiement, sous 24 h à 7 jours.'
                 : 'Aucun remboursement n’est dû pour cette annulation.')

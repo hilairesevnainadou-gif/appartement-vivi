@@ -39,6 +39,8 @@ class FinancesController extends Controller
                 'solde' => $p->solde(),
                 'ce_mois' => (int) $p->mouvementsSolde()->where('montant', '>', 0)->whereNotNull('reservation_id')->where('created_at', '>=', now()->startOfMonth())->sum('montant'),
                 'retrait_minimum' => 1000,
+                // Sur commission : % gardé par VIVI sur chaque retrait (0 sur abonnement). Net = montant − round(montant × taux / 100)
+                'commission_retrait_taux' => app(\App\Services\ModeleEconomique::class)->taux($p),
                 'mouvements' => $mouvements->getCollection()->map(fn ($m) => [
                     'id' => $m->id, 'type' => Format::enum($m->type), 'montant' => (int) $m->montant, 'libelle' => $m->libelle,
                     'reservation' => $m->reservation?->reference, 'le' => Format::date($m->created_at),
@@ -72,7 +74,9 @@ class FinancesController extends Controller
         }
 
         return response()->json([
-            'message' => 'Demande de retrait '.$retrait->reference.' de '.Montant::fcfa($retrait->montant).' envoyée. La caissière VIVI la paiera sur '.$p->retrait_moyen.' ('.$p->retrait_numero.').',
+            'message' => 'Demande de retrait '.$retrait->reference.' de '.Montant::fcfa($retrait->montant).' envoyée'
+                .((int) $retrait->montant_commission > 0 ? ' (commission VIVI '.Montant::fcfa($retrait->montant_commission).', vous recevrez '.Montant::fcfa($retrait->aVerser()).')' : '')
+                .'. La caissière VIVI la paiera sur '.$p->retrait_moyen.' ('.$p->retrait_numero.').',
             'data' => self::retrait($retrait),
         ], 201);
     }
@@ -81,6 +85,8 @@ class FinancesController extends Controller
     {
         return [
             'reference' => $r->reference, 'montant' => (int) $r->montant, 'statut' => Format::enum($r->statut),
+            // Retenu sur le solde = montant ; versé = montant_net (commission VIVI déduite sur le modèle « commission »)
+            'taux_commission' => (float) $r->taux_commission, 'montant_commission' => (int) $r->montant_commission, 'montant_net' => $r->aVerser(),
             'compte' => $r->compte_numero ? ['moyen' => $r->compte_moyen, 'numero' => $r->compte_numero, 'titulaire' => $r->compte_titulaire] : null,
             'mode_reglement' => $r->mode_reglement, 'reference_reglement' => $r->reference_reglement,
             'traite_le' => Format::date($r->traite_le), 'note' => $r->note, 'le' => Format::date($r->created_at),
@@ -101,7 +107,13 @@ class FinancesController extends Controller
             'prix_paye' => (int) $a->prix_paye, 'statut' => Format::enum($a->statut),
         ] : null;
 
+        $modele = app(\App\Services\ModeleEconomique::class);
+
         return response()->json(['data' => [
+            // « commission » : pas de formule à payer, VIVI garde commission_retrait_taux % de chaque retrait (formules vides)
+            'modele' => $modele->modele($p),
+            'commission_retrait_taux' => $modele->taux($p),
+            'quotas_commission' => $modele->quotas($p),
             'actif' => $abo($actif),
             'suivant' => $abo($suivant),
             'logements_utilises' => $p->logements()->whereIn('statut', [StatutLogement::Publie, StatutLogement::EnValidation])->count(),
@@ -111,7 +123,7 @@ class FinancesController extends Controller
                 'jours' => (int) Parametres::get('essai_jours'),
                 'formule_id' => (int) Parametres::get('essai_formule_id') ?: null,   // null : au choix
             ],
-            'formules' => FormuleAbonnement::where('actif', true)->orderBy('ordre')->orderBy('prix_mensuel')->get()->map(fn ($f) => [
+            'formules' => $modele->surCommission($p) ? [] : FormuleAbonnement::where('actif', true)->orderBy('ordre')->orderBy('prix_mensuel')->get()->map(fn ($f) => [
                 'id' => $f->id, 'nom' => $f->nom, 'logements_max' => (int) $f->logements_max, 'salles_max' => (int) $f->salles_max, 'gestionnaires_max' => (int) $f->gestionnaires_max,
                 'avantages' => $f->avantages, 'tarif' => $abonnements->tarif($p, $f),
             ]),

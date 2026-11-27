@@ -77,6 +77,7 @@ class Parametres extends Page
             ->components([
                 Group::make([
                     $this->sectionCommission(),
+                    $this->sectionModeleProprietaires(),
                     $this->sectionAbonnements(),
                     $this->sectionContact(),
                 ]),
@@ -130,6 +131,39 @@ class Parametres extends Page
                     ->addActionLabel('Ajouter une tranche')
                     ->addActionAlignment(Alignment::Start)
                     ->columnSpanFull(),
+            ]);
+    }
+
+    /** Abonnement (formules) ou commission sur retrait : règle générale, personnalisable sur la fiche du propriétaire. */
+    private function sectionModeleProprietaires(): Section
+    {
+        $commission = fn ($get) => $get('modele_defaut') === \App\Services\ModeleEconomique::COMMISSION;
+
+        return Section::make('Rémunération par les propriétaires')
+            ->description('Abonnement mensuel ou commission sur chaque retrait. Exception possible sur la fiche d’un propriétaire (Utilisateurs › modifier) : modèle imposé et taux personnalisé.')
+            ->columns(2)
+            ->schema([
+                Select::make('modele_defaut')
+                    ->label('Modèle par défaut')
+                    ->options(\App\Services\ModeleEconomique::options())
+                    ->selectablePlaceholder(false)
+                    ->live()
+                    ->helperText(fn ($get) => $commission($get)
+                        ? 'Les formules d’abonnement ne sont plus proposées : les logements sont visibles sans abonnement et VIVI garde le taux ci-dessous sur chaque retrait.'
+                        : 'Les propriétaires paient une formule mensuelle ; leurs retraits sont versés en entier.')
+                    ->required()
+                    ->columnSpanFull(),
+                TextInput::make('commission_retrait_taux')
+                    ->label('Commission prélevée sur chaque retrait')
+                    ->helperText('S’applique aussi aux propriétaires mis sur commission individuellement, sauf taux personnalisé.')
+                    ->numeric()->minValue(0)->maxValue(100)->step(0.5)->suffix('%')->required()
+                    ->columnSpanFull(),
+                TextInput::make('commission_logements_max')->label('Logements publiables sur commission')
+                    ->integer()->minValue(0)->maxValue(999)->helperText('999 = illimité.')->required(),
+                TextInput::make('commission_salles_max')->label('Salles publiables sur commission')
+                    ->integer()->minValue(0)->maxValue(999)->helperText('999 = illimité.')->required(),
+                TextInput::make('commission_gestionnaires_max')->label('Gestionnaires délégués sur commission')
+                    ->integer()->minValue(0)->maxValue(99)->helperText('99 = illimité.')->required(),
             ]);
     }
 

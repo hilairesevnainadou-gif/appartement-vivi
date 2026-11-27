@@ -154,7 +154,7 @@ class FicheLogementViewModel(etatNav: SavedStateHandle) : EcranViewModel<FicheLo
         viewModelScope.launch {
             appel {
                 rechercher(
-                    ville = if (z == null) l.ville.ifBlank { null } else null, date = Fmt.aujourdhui().toString(), voyageurs = 1,
+                    q = null, ville = if (z == null) l.ville.ifBlank { null } else null, date = Fmt.aujourdhui().toString(), voyageurs = 1,
                     formule = null, categorie = l.categorie, budget = null, tri = if (z != null) "distance" else "note", types = emptyList(), equipements = emptyList(),
                     lat = z?.latitude, lng = z?.longitude, page = 1,
                 )

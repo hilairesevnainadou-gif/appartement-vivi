@@ -4,6 +4,7 @@
     use App\Support\Montant;
 
     $nombre = fn (int $n) => number_format($n, 0, ',', "\u{00A0}");
+    $tauxTexte = \App\Services\Caisse::taux((float) $tauxRetrait);
 @endphp
 
 <x-layouts.pro titre="Revenus" page="revenus">
@@ -28,21 +29,74 @@
                 <p class="kpi__label">Solde disponible</p>
                 <p class="kpi__value mb-1">{{ $nombre($solde) }} <small>FCFA</small></p>
                 <p class="text-soft small mb-3">{{ Montant::fcfa($ceMois) }} gagnés ce mois-ci.</p>
+                @php
+                    $initial = (int) old('montant', $solde);
+                    $commissionInitiale = (int) round($initial * $tauxRetrait / 100);
+                @endphp
                 <form method="POST" action="{{ route('pro.retraits.demander') }}" class="d-grid gap-2"
-                      data-confirmer="{montant} FCFA seront retenus sur votre solde. La caisse VIVI valide le retrait et vous verse le montant." data-confirmer-titre="Demander un retrait ?" data-confirmer-bouton="Demander le retrait">
+                      data-confirmer="{{ $tauxRetrait > 0
+                          ? '{montant} FCFA seront retenus sur votre solde, dont '.$tauxTexte.' de commission VIVI. La caisse VIVI valide le retrait et vous verse le reste.'
+                          : '{montant} FCFA seront retenus sur votre solde. La caisse VIVI valide le retrait et vous verse le montant.' }}"
+                      data-confirmer-titre="Demander un retrait ?" data-confirmer-bouton="Demander le retrait">
                     @csrf
-                    <label class="form-label mb-0" for="montant">Montant à retirer</label>
+                    <label class="form-label mb-0" for="montant">Montant à retirer de votre solde</label>
                     <div class="input-suffix">
                         <input class="form-control" type="number" inputmode="numeric" id="montant" name="montant" min="1000" max="{{ $solde }}" step="500"
-                               value="{{ old('montant', $solde) }}" @disabled($solde < 1000)>
+                               value="{{ $initial }}" @disabled($solde < 1000) @if ($tauxRetrait > 0) data-taux-retrait="{{ $tauxRetrait }}" aria-describedby="decompte-retrait" @endif>
                         <span class="suffix">FCFA</span>
                     </div>
+
+                    @if ($tauxRetrait > 0)
+                        {{-- Décompte : ce qui sort du solde, la part réservée à VIVI, ce que vous recevez --}}
+                        <dl class="decompte-retrait" id="decompte-retrait" aria-live="polite">
+                            <div><dt>Retiré de votre solde</dt><dd class="tnum" data-decompte="montant">{{ Montant::fcfa($initial) }}</dd></div>
+                            <div class="decompte-retrait__vivi"><dt>Commission VIVI ({{ $tauxTexte }})</dt><dd class="tnum" data-decompte="commission">− {{ Montant::fcfa($commissionInitiale) }}</dd></div>
+                            <div class="decompte-retrait__net"><dt>Vous recevez</dt><dd class="tnum" data-decompte="net">{{ Montant::fcfa($initial - $commissionInitiale) }}</dd></div>
+                        </dl>
+                    @endif
+
                     <button class="btn btn-primary" type="submit" @disabled($solde < 1000)><i class="bi bi-cash-coin" aria-hidden="true"></i>Demander un retrait</button>
                 </form>
                 <div class="note-box mt-3">
                     <i class="bi bi-info-circle" aria-hidden="true"></i>
-                    <span>Le montant demandé est retenu sur votre solde. La caissière VIVI le valide et indique le mode de règlement ; un retrait refusé est recrédité.</span>
+                    @if ($tauxRetrait > 0)
+                        <span>Vous êtes sur <strong>commission</strong> : pas d’abonnement à payer, VIVI garde {{ $tauxTexte }} de chaque retrait. Le montant demandé est retenu sur votre solde ; la caissière VIVI vous verse le reste et indique le mode de règlement. Un retrait refusé est recrédité en entier.</span>
+                    @else
+                        <span>Le montant demandé est retenu sur votre solde. La caissière VIVI le valide et indique le mode de règlement ; un retrait refusé est recrédité.</span>
+                    @endif
                 </div>
+                @if ($tauxRetrait > 0)
+                    <style>
+                        .decompte-retrait { margin: 0; border: 1px solid var(--vivi-line); border-radius: 12px; overflow: hidden; }
+                        .decompte-retrait > div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; font-size: .95rem; }
+                        .decompte-retrait > div + div { border-top: 1px solid var(--vivi-line); }
+                        .decompte-retrait dt { font-weight: 400; color: var(--vivi-muted); }
+                        .decompte-retrait dd { margin: 0; font-weight: 600; color: var(--vivi-ink); white-space: nowrap; }
+                        .decompte-retrait__vivi dd { color: var(--vivi-orange-ink); }
+                        .decompte-retrait__net { background: var(--vivi-teal-50); }
+                        .decompte-retrait__net dt { color: var(--vivi-teal-900); font-weight: 600; }
+                        .decompte-retrait__net dd { color: var(--vivi-teal-900); font-size: 1.05rem; }
+                    </style>
+                    @push('scripts')
+                    <script>
+                        (() => {
+                            const champ = document.getElementById('montant');
+                            const taux = parseFloat(champ?.dataset.tauxRetrait || '0');
+                            if (!champ || !taux) return;
+                            const fcfa = n => new Intl.NumberFormat('fr-FR', {maximumFractionDigits: 0}).format(n).replace(/\s/g, ' ') + ' FCFA';
+                            const zone = document.getElementById('decompte-retrait');
+                            const maj = () => {
+                                const m = Math.max(0, parseInt(champ.value, 10) || 0);
+                                const c = Math.round(m * taux / 100);
+                                zone.querySelector('[data-decompte="montant"]').textContent = fcfa(m);
+                                zone.querySelector('[data-decompte="commission"]').textContent = '− ' + fcfa(c);
+                                zone.querySelector('[data-decompte="net"]').textContent = fcfa(m - c);
+                            };
+                            champ.addEventListener('input', maj);
+                        })();
+                    </script>
+                    @endpush
+                @endif
             </section>
         </div>
 
@@ -62,7 +116,12 @@
                             <div class="quand">{{ $v->created_at->translatedFormat('j M') }}</div>
                             <div class="qui"><strong class="tnum">{{ $v->reference }}</strong><span class="chip {{ $classe }}"><i class="bi {{ $icone }}" aria-hidden="true"></i>{{ $texte }}</span>
                                 @if ($v->statut === StatutRetrait::Refuse && $v->note)<span>{{ $v->note }}</span>@endif</div>
-                            <div class="action"><span class="montant">{{ Montant::fcfa($v->montant) }}</span></div>
+                            {{-- Refusé : tout le montant a été recrédité, aucune commission n'a été prise --}}
+                            <div class="action"><span class="montant">{{ Montant::fcfa($v->statut === StatutRetrait::Refuse ? (int) $v->montant : $v->aVerser()) }}</span>
+                                @if ((int) $v->montant_commission > 0 && $v->statut !== StatutRetrait::Refuse)
+                                    <span class="d-block small text-soft text-nowrap">sur {{ Montant::fcfa($v->montant) }} · commission {{ Montant::fcfa($v->montant_commission) }}</span>
+                                @endif
+                            </div>
                         </li>
                     @empty
                         <li style="display:block" class="text-soft">Aucun retrait pour le moment.</li>

@@ -20,21 +20,22 @@ class PublicitesController extends Controller
         return response()->json(['data' => Publicites::pourApplication(is_string($ville) && trim($ville) !== '' ? trim($ville) : null)]);
     }
 
-    public function vue(Publicite $publicite): Response
+    /** support=site : vue sur le site web (comptée à part pour le rapport de l'annonceur). */
+    public function vue(Request $request, Publicite $publicite): Response
     {
-        return $this->compter($publicite, 'vues');
+        return $this->compter($request, $publicite, 'vues');
     }
 
-    public function clic(Publicite $publicite): Response
+    public function clic(Request $request, Publicite $publicite): Response
     {
-        return $this->compter($publicite, 'clics');
+        return $this->compter($request, $publicite, 'clics');
     }
 
     /** Une publicité arrêtée entre-temps n'est plus comptée, sans erreur pour l'application. */
-    private function compter(Publicite $publicite, string $colonne): Response
+    private function compter(Request $request, Publicite $publicite, string $colonne): Response
     {
         if (Publicites::actives() && $publicite->estDiffusee()) {
-            $publicite->compter($colonne);
+            $publicite->compter($colonne, $request->input('support') === Publicite::SITE ? Publicite::SITE : Publicite::APPLICATION);
         }
 
         return response()->noContent();

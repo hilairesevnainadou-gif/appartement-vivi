@@ -9,8 +9,8 @@
 <x-layouts.pro titre="Abonnement" page="abonnement">
     <div class="pro-head">
         <div>
-            <h1>Abonnement</h1>
-            <p>Un abonnement actif est nécessaire pour publier vos logements.</p>
+            <h1>{{ $commission ? 'Conditions VIVI' : 'Abonnement' }}</h1>
+            <p>{{ $commission ? 'Vous travaillez sur commission : aucun abonnement à payer.' : 'Un abonnement actif est nécessaire pour publier vos logements.' }}</p>
         </div>
     </div>
 
@@ -20,6 +20,44 @@
     @error('abonnement')
         <div class="note-box note-box--orange mb-3" role="alert"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ $message }}</span></div>
     @enderror
+
+    @if ($commission)
+        {{-- ===== Commission sur retrait (pas de formule) ===== --}}
+        @php
+            $taux = \App\Services\Caisse::taux($commission['taux']);
+            $illimite = fn (int $n, int $plafond) => $n >= $plafond ? 'illimité' : $n;
+            $exemple = 100000;
+        @endphp
+        <section class="panel" aria-labelledby="t-commission">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-7">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h2 id="t-commission" class="mb-0">Commission sur retrait : {{ $taux }}</h2>
+                        <span class="chip chip--success"><i class="bi bi-check-circle" aria-hidden="true"></i>Actif</span>
+                    </div>
+                    <p class="mb-1">Vos logements sont publiés sans abonnement. À chaque retrait, VIVI garde <strong class="text-ink">{{ $taux }}</strong> du montant retiré de votre solde.</p>
+                    <p class="mb-0 text-soft">Exemple : pour {{ Montant::fcfa($exemple) }} retirés, commission VIVI {{ Montant::fcfa(round($exemple * $commission['taux'] / 100)) }}, vous recevez {{ Montant::fcfa($exemple - round($exemple * $commission['taux'] / 100)) }}.</p>
+                </div>
+                <div class="col-md-5">
+                    <div class="quota">
+                        <div><strong class="text-ink">{{ $utilises }} sur {{ $illimite($commission['logements'], 999) }}</strong><div class="small text-soft">logements publiés ou en vérification</div></div>
+                        <div class="meter" aria-hidden="true"><i style="width:{{ $commission['logements'] >= 999 ? 0 : min(100, $utilises / max(1, $commission['logements']) * 100) }}%"></i></div>
+                    </div>
+                    <div class="quota mt-2">
+                        <div><strong class="text-ink">{{ $sallesUtilisees }} sur {{ $illimite($commission['salles'], 999) }}</strong><div class="small text-soft">salles publiées ou en vérification</div></div>
+                        <div class="meter" aria-hidden="true"><i style="width:{{ $commission['salles'] >= 999 ? 0 : min(100, $sallesUtilisees / max(1, $commission['salles']) * 100) }}%"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a class="btn btn-primary btn-sm" href="{{ route('pro.revenus') }}"><i class="bi bi-cash-coin" aria-hidden="true"></i>Mon solde et mes retraits</a>
+            </div>
+            <div class="note-box mt-3">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                <span>Vous préférez un abonnement mensuel, sans commission sur vos retraits ? Contactez l’équipe VIVI : elle peut changer vos conditions.</span>
+            </div>
+        </section>
+    @else
 
     {{-- ===== Formule en cours ===== --}}
     <section class="panel" aria-labelledby="t-actuel">
@@ -131,6 +169,7 @@
             <span>Paiement par Mobile Money ou carte, sur la page sécurisée de FedaPay. Une nouvelle formule commence dès le paiement et remplace la précédente, sans remboursement des jours restants.</span>
         </div>
     </section>
+    @endif
 
     {{-- ===== Paiements ===== --}}
     <section class="panel mt-4" aria-labelledby="t-paiements">

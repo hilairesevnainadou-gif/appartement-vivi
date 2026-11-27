@@ -71,7 +71,7 @@ Limites : 120 requêtes par minute et par compte. Les envois de code sont plus l
 | GET | `/configuration` | Villes, formules, types, équipements, services, connexion email/SMS active, délais de report, parrainage, contact WhatsApp, version minimale de l'application |
 | GET | `/publicites` | Espaces publicitaires de l'application : voir « Publicité » plus bas |
 | POST | `/publicites/{id}/vue` · `/publicites/{id}/clic` | Compte une vue ou un clic (204) |
-| GET | `/logements` | Recherche : `ville, date, voyageurs, formule, budget, type[], equipement[], service[], tri (pertinence, prix, note, distance), lat, lng, page`. 20 résultats par page, `meta` et `links` de pagination, `criteres` |
+| GET | `/logements` | Recherche : `q` (mots libres : titre, quartier, ville ou adresse ; chaque mot doit se trouver), `ville, date, voyageurs, formule, budget, type[], equipement[], service[], tri (pertinence, prix, note, distance), lat, lng, page`. 20 résultats par page, `meta` et `links` de pagination, `criteres` |
 | GET | `/logements/{slug}` | Fiche : photos, équipements, services, tarifs, `zone` approximative (cercle de 400 m) |
 | GET | `/logements/{slug}/disponibilites` | Bloc « Réserver » : mêmes paramètres que la réservation. Renvoie les formules, les heures ou créneaux libres et le `devis`. Les choix incohérents sont corrigés ; il faut rappeler cette adresse à chaque changement |
 | GET | `/logements/{slug}/avis` | Avis publiés, paginés |
@@ -285,6 +285,8 @@ Tout ce qui est envoyé à la personne (par email, SMS ou push) arrive aussi dan
 | `RetraitTraite` | propriétaire ou agent | retrait payé ou refusé |
 | `CommissionAgent` | agent | client venu par son lien arrivé : commission créditée |
 | `GestionConfiee` · `AgentDesigne` · `Bienvenue` | compte | rôle confié, création de compte |
+
+Après une annulation remboursable, la réservation porte `remboursement` : `{montant, statut: "a_verser" | "verse", verse_le, mode, reference}` (null s'il n'y a rien à rembourser). L'écran du billet affiche « Remboursement de X en cours », puis « versé le … par … ».
 
 ### Push (Firebase Cloud Messaging)
 

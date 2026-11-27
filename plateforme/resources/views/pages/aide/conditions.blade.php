@@ -45,7 +45,15 @@
             <p>Les règles de remboursement et de report sont détaillées sur la page <a href="{{ route('aide.annulation') }}">Annulation et report</a>. La commission VIVI n’est jamais remboursée. Le report est possible une fois, jusqu’à {{ $delaiReport }} h avant l’arrivée.</p>
 
             <h2 id="proprietaires">7. Propriétaires</h2>
-            <p>Pour publier, le propriétaire souscrit un abonnement mensuel ; ses logements et ses salles ne sont visibles que tant que l’abonnement est en cours. Il garantit l’exactitude des annonces, la propreté et la sécurité des lieux. Il les gère lui-même ou en confie la gestion à VIVI, qui perçoit alors un pourcentage de la location ou un prix fixe par réservation, selon le contrat signé avec lui. Chaque réservation démarrée (QR Code scanné) crédite son solde ; ses retraits sont validés par la caisse VIVI.</p>
+            @php $tauxRetraitCgu = \App\Services\Caisse::taux((float) \App\Support\Parametres::get('commission_retrait_taux')); @endphp
+            <p>VIVI est rémunérée par le propriétaire de l’une des deux façons suivantes, précisées dans son espace (rubrique « Abonnement » ou « Conditions VIVI ») :
+                @if (\App\Services\ModeleEconomique::formulesProposees())
+                    en règle générale, un <strong>abonnement mensuel</strong> : ses logements et ses salles ne sont visibles que tant que l’abonnement est en cours ; ou, sur accord avec VIVI, une <strong>commission prélevée sur chaque retrait</strong> de son solde, sans abonnement.
+                @else
+                    en règle générale, une <strong>commission de {{ $tauxRetraitCgu }} prélevée sur chaque retrait</strong> de son solde, sans abonnement ; ou, sur accord avec VIVI, un <strong>abonnement mensuel</strong> ou un taux de commission particulier.
+                @endif
+                La commission sur retrait est calculée au moment de la demande, indiquée avant confirmation, et n’est pas prélevée sur un retrait refusé.
+                Le propriétaire garantit l’exactitude des annonces, la propreté et la sécurité des lieux. Il les gère lui-même ou en confie la gestion à VIVI, qui perçoit alors un pourcentage de la location ou un prix fixe par réservation, selon le contrat signé avec lui. Chaque réservation démarrée (QR Code scanné) crédite son solde ; ses retraits sont validés par la caisse VIVI.</p>
 
             <h2 id="donnees">8. Données personnelles</h2>
             <p>VIVI collecte le nom, le téléphone, l’email et l’historique des réservations, uniquement pour gérer les réservations, les paiements et le service client. Ces données ne sont ni vendues ni cédées. Vous pouvez demander leur consultation ou leur rectification au service client, et <a href="{{ route('aide.suppression') }}">supprimer votre compte</a>.@if (\App\Support\Parametres::get('confidentialite_publiee')) Voir la <a href="{{ route('aide.confidentialite') }}">politique de confidentialité</a>.@endif</p>

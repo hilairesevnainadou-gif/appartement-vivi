@@ -22,7 +22,7 @@ class LogementsController extends Controller
     private const PAR_PAGE = 20;
 
     /**
-     * GET /logements?ville=&date=AAAA-MM-JJ&voyageurs=&formule=heure|demi_journee|journee&budget=
+     * GET /logements?q=&ville=&date=AAAA-MM-JJ&voyageurs=&formule=heure|demi_journee|journee&budget=
      *   &categorie=logement|salle&type[]=&equipement[]=&service[]=&tri=pertinence|prix|note|distance&lat=&lng=&page=
      */
     public function index(Request $request, Recherche $recherche): AnonymousResourceCollection
@@ -36,6 +36,7 @@ class LogementsController extends Controller
         ]);
 
         return LogementResource::collection($resultats)->additional(['criteres' => [
+            'q' => $c['q'],
             'ville' => $c['ville'],
             'date' => Format::jour($c['date']),
             'voyageurs' => $c['voyageurs'],

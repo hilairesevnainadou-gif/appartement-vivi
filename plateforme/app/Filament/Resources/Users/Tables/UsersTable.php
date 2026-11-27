@@ -33,6 +33,27 @@ class UsersTable
                 TextColumn::make('roles.name')->label('Rôles')->badge()
                     ->formatStateUsing(fn (string $state) => $roles[$state] ?? $state)
                     ->color(fn (string $state) => in_array($state, Role::equipeVivi(), true) ? 'primary' : 'gray'),
+                // Rémunération personnalisée d'un propriétaire (sinon règle générale des Paramètres)
+                // Vide pour qui n'est pas propriétaire ; un taux personnalisé est affiché même sans modèle imposé
+                TextColumn::make('modele_economique')->label('Rémunération')->badge()->placeholder('—')
+                    ->state(function (User $record): ?string {
+                        if (! $record->hasRole(Role::Proprietaire->value)) {
+                            return null;
+                        }
+                        $taux = $record->commission_retrait_taux !== null ? ' '.\App\Services\Caisse::taux($record->commission_retrait_taux) : '';
+
+                        return match ($record->modele_economique) {
+                            \App\Services\ModeleEconomique::COMMISSION => 'Commission'.$taux,
+                            \App\Services\ModeleEconomique::ABONNEMENT => 'Abonnement',
+                            default => 'Règle générale'.($taux !== '' ? ' · taux'.$taux : ''),
+                        };
+                    })
+                    ->color(fn (User $record) => match ($record->modele_economique) {
+                        \App\Services\ModeleEconomique::COMMISSION => 'warning',
+                        \App\Services\ModeleEconomique::ABONNEMENT => 'info',
+                        default => 'gray',
+                    })
+                    ->toggleable()->visibleFrom('lg'),
                 ToggleColumn::make('actif')->label('Actif')
                     ->disabled(fn (User $record) => $record->getKey() === auth()->id() || ! UserResource::canCreate()),
                 TextColumn::make('created_at')->label('Inscrit le')->date('d/m/Y')->sortable()->visibleFrom('lg'),

@@ -36,6 +36,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -93,7 +96,7 @@ class AccueilViewModel : EcranViewModel<Selection>() {
 
     private suspend fun chercher(categorie: String, voyageurs: Int?): Result<List<Logement>> = appel {
         rechercher(
-            ville = null, date = Fmt.aujourdhui().toString(), voyageurs = voyageurs, formule = null, categorie = categorie, budget = null,
+            q = null, ville = null, date = Fmt.aujourdhui().toString(), voyageurs = voyageurs, formule = null, categorie = categorie, budget = null,
             tri = if (position != null) "distance" else "pertinence", types = emptyList(), equipements = emptyList(),
             lat = position?.lat, lng = position?.lng, page = 1,
         )
@@ -129,6 +132,16 @@ fun EcranAccueil(
                     Spacer(Modifier.height(4.dp))
                     Text("Que cherchez-vous ?", fontFamily = Outfit, fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 29.sp, color = Vivi.White)
                     Spacer(Modifier.height(16.dp))
+                    // Touche « Rechercher » du clavier : ouvre Logements filtré sur ces mots
+                    var mots by remember { mutableStateOf("") }
+                    bj.vivi.app.ui.composants.BarreRecherche(mots, { mots = it }, onValider = {
+                        if (mots.isNotBlank()) {
+                            bj.vivi.app.ui.composants.RechercheDemandee.envoyer(mots)
+                            mots = ""
+                            onLogements()
+                        }
+                    })
+                    Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Entree("Un logement", "Appartements meublés", Icons.Outlined.Apartment, Vivi.Teal50, Vivi.Teal700, Modifier.weight(1f), onLogements)
                         Entree("Une salle", "Fêtes, réunions, conférences", Icons.Outlined.Celebration, Vivi.Orange50, Vivi.OrangeInk, Modifier.weight(1f), onSalles)

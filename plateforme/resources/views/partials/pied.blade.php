@@ -39,7 +39,7 @@
                 <h2>Propriétaires</h2>
                 <ul>
                     <li><a href="{{ $inscriptionPro }}">Publier un logement ou une salle</a></li>
-                    <li><a href="{{ route('proprietaires') }}#formules">Formules d’abonnement</a></li>
+                    <li><a href="{{ route('proprietaires') }}#formules">{{ \App\Services\ModeleEconomique::formulesProposees() ? 'Formules d’abonnement' : 'Conditions propriétaires' }}</a></li>
                     <li><a href="{{ route('proprietaires') }}#gestion">Confier la gestion à VIVI</a></li>
                     <li><a href="{{ route('proprietaires') }}#agents">Agents marketing</a></li>
                 </ul>

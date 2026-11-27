@@ -16,11 +16,21 @@ class SurveillerRequetes
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Robot qui a insisté sur des chemins d'attaque : refusé pendant le blocage, sans rien exécuter
+        if (Surveillance::estBloquee((string) $request->ip())) {
+            $request->attributes->set('vivi_robot_bloque', true);
+
+            return response('Accès refusé.', 403);
+        }
+
         return $next($request);
     }
 
     public function terminate(Request $request, Response $response): void
     {
+        if ($request->attributes->get('vivi_robot_bloque')) {
+            return;
+        }
         $statut = $response->getStatusCode();
         if (! in_array($statut, [403, 404, 405, 429], true)) {
             return;

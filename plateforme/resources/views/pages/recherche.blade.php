@@ -199,6 +199,11 @@
                                 'l' => $l, 'ligne' => true, 'niveau' => 2, 'formule' => $f, 'suite' => $suite,
                                 'dispo' => 'Disponible '.$quand,
                             ])
+                            {{-- Publicité tous les N résultats (Administration › Paramètres) ; moins de N résultats : une seule, à la fin --}}
+                            @php $tous = max(1, (int) \App\Support\Parametres::get('pub_frequence_liste')); @endphp
+                            @if (($loop->iteration % $tous === 0 && ! $loop->last) || ($loop->last && $loop->count < $tous))
+                                <x-pub emplacement="recherche" :ville="$c['ville']" />
+                            @endif
                         @empty
                             <div class="empty-state">
                                 <i class="bi bi-search" aria-hidden="true"></i>

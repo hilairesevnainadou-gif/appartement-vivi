@@ -8,7 +8,7 @@ use App\Http\Resources\Api\Format;
 use App\Models\Publicite;
 
 /**
- * Espaces publicitaires de l'application Android : publicités de VIVI (Administration › Publicités) et
+ * Espaces publicitaires de l'application Android et du site web : publicités de VIVI (Administration › Publicités) et
  * annonces Google AdMob (« Monetize » dans Firebase). Réglages : Administration › Paramètres.
  */
 class Publicites
@@ -43,7 +43,7 @@ class Publicites
         $active = self::actives();
         $reglages = Parametres::get('pub_emplacements');
         $publicites = $active
-            ? Publicite::diffusees()->orderBy('ordre')->orderByDesc('id')->get()->filter(fn (Publicite $p) => $p->concerneVille($ville))->groupBy(fn (Publicite $p) => $p->emplacement->value)
+            ? Publicite::diffusees()->orderBy('ordre')->orderByDesc('id')->get()->filter(fn (Publicite $p) => $p->concerneVille($ville))
             : collect();
 
         return [
@@ -55,7 +55,7 @@ class Publicites
             'emplacements' => collect(EmplacementPub::cases())->mapWithKeys(function (EmplacementPub $e) use ($active, $reglages, $publicites) {
                 $source = SourcePub::from($reglages[$e->value]['source']);
                 $annonces = $active && $source->vivi()
-                    ? ($publicites[$e->value] ?? collect())->take(self::MAX_PAR_ESPACE)->map(fn (Publicite $p) => self::annonce($p))->values()->all()
+                    ? $publicites->filter(fn (Publicite $p) => $p->estDans($e))->take(self::MAX_PAR_ESPACE)->map(fn (Publicite $p) => self::annonce($p))->values()->all()
                     : [];
                 $bloc = $active && $source->admob() ? self::blocAdmob($e) : null;
                 [$largeur, $hauteur] = $e->taille();
@@ -70,6 +70,25 @@ class Publicites
                 ]];
             })->all(),
         ];
+    }
+
+    /**
+     * Publicités de VIVI à montrer sur le site web, dans cet espace (visiteurs connectés ou non).
+     * Les annonces AdMob ne concernent que l'application : sur le site, seules les publicités de VIVI s'affichent.
+     *
+     * @return \Illuminate\Support\Collection<int, Publicite>
+     */
+    public static function pourSite(EmplacementPub $e, ?string $ville = null): \Illuminate\Support\Collection
+    {
+        if (! self::actives() || ! SourcePub::from(Parametres::get('pub_emplacements')[$e->value]['source'])->vivi()) {
+            return collect();
+        }
+        // Une seule requête par page, même avec plusieurs espaces
+        $diffusees = once(fn () => Publicite::diffusees()->orderBy('ordre')->orderByDesc('id')->get());
+
+        return $diffusees
+            ->filter(fn (Publicite $p) => $p->estDans($e, Publicite::SITE) && $p->concerneVille($ville))
+            ->take(self::MAX_PAR_ESPACE)->values();
     }
 
     private static function annonce(Publicite $p): array

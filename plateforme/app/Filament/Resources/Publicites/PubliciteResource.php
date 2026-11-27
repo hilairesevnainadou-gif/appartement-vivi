@@ -16,6 +16,8 @@ use App\Support\Montant;
 use App\Support\Parametres;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use App\Models\User;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -25,6 +27,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
@@ -37,7 +40,7 @@ use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
-/** Publicités affichées dans l'application Android, par espace et par période, avec leurs vues et leurs clics. */
+/** Publicités de l'application Android et du site web : espaces, période, vues, clics et rapports envoyés à l'annonceur. */
 class PubliciteResource extends Resource
 {
     use AccesParRole;
@@ -51,9 +54,9 @@ class PubliciteResource extends Resource
 
     protected static ?string $modelLabel = 'publicité';
 
-    protected static ?string $pluralModelLabel = 'Publicités de l’application';
+    protected static ?string $pluralModelLabel = 'Publicités';
 
-    protected static ?string $navigationLabel = 'Publicités (application)';
+    protected static ?string $navigationLabel = 'Publicités (application et site)';
 
     protected static bool $hasTitleCaseModelLabel = false;
 
@@ -65,11 +68,34 @@ class PubliciteResource extends Resource
 
     protected static ?int $navigationSort = 21;
 
-    private static function emplacement(Get $get): ?EmplacementPub
-    {
-        $e = $get('emplacement');
+    private const FORMATS = ['banniere' => 'bannière', 'carte' => 'carte', 'plein_ecran' => 'plein écran'];
 
-        return $e instanceof EmplacementPub ? $e : EmplacementPub::tryFrom((string) $e);
+    /** Tailles d'image conseillées pour les espaces cochés (application et site). */
+    private static function tailles(Get $get): string
+    {
+        $formats = collect($get('espaces_application') ?? [])->merge($get('espaces_site') ?? [])
+            ->map(fn ($e) => EmplacementPub::tryFrom((string) $e))->filter()
+            ->mapWithKeys(fn (EmplacementPub $e) => [$e->format() => self::FORMATS[$e->format()].' '.$e->tailleEnClair()]);
+
+        return $formats->isEmpty()
+            ? 'JPEG, PNG ou WebP, 2 Mo au plus. Cochez les espaces pour voir la taille conseillée.'
+            : 'Taille conseillée : '.$formats->implode(' ; ').($formats->count() > 1 ? ' (l’image est recadrée au centre selon l’espace : gardez le message au milieu)' : '').'. JPEG, PNG ou WebP, 2 Mo au plus.';
+    }
+
+    /** Recherche d'un compte VIVI (nom, email ou téléphone) pour l'annonceur. */
+    private static function chercherComptes(string $texte): array
+    {
+        $texte = trim($texte);
+
+        return User::query()
+            ->where(fn ($q) => $q->where('name', 'like', "%{$texte}%")->orWhere('email', 'like', "%{$texte}%")->orWhere('telephone', 'like', "%{$texte}%"))
+            ->orderBy('name')->limit(20)->get()
+            ->mapWithKeys(fn (User $u) => [$u->id => self::libelleCompte($u)])->all();
+    }
+
+    private static function libelleCompte(User $u): string
+    {
+        return $u->name.' · '.collect([$u->email, $u->telephone])->filter()->implode(' · ');
     }
 
     public static function form(Schema $schema): Schema
@@ -82,13 +108,25 @@ class PubliciteResource extends Resource
                         ->columns(2)
                         ->schema([
                             TextInput::make('titre')->label('Titre')->required()->maxLength(80)->placeholder('Traiteur Saveurs : -10 % ce mois')->columnSpanFull(),
-                            TextInput::make('annonceur')->label('Annonceur')->maxLength(80)->placeholder('Vide : VIVI'),
-                            TextInput::make('bouton')->label('Texte du bouton')->maxLength(30)->placeholder('En savoir plus'),
-                            TextInput::make('annonceur_contact')->label('Contact de l’annonceur')->maxLength(120)->placeholder('Téléphone ou email')
-                                ->helperText('Jamais affiché dans l’application.')->columnSpanFull(),
+                            TextInput::make('bouton')->label('Texte du bouton')->maxLength(30)->placeholder('En savoir plus')->columnSpanFull(),
                             TextInput::make('texte')->label('Texte court')->maxLength(160)->columnSpanFull(),
                             TextInput::make('lien')->label('Lien')->url()->startsWith(['https://', url('/')])->maxLength(500)->placeholder('https://…')
                                 ->helperText('Site de l’annonceur (https), lien wa.me, ou page de VIVI. Vide : la publicité ne s’ouvre pas.')->columnSpanFull(),
+                        ]),
+                    Section::make('Où afficher la publicité')
+                        ->description('Cochez un ou plusieurs espaces, dans l’application et/ou sur le site web. Visible par tous, connectés ou non.')
+                        ->columns(['default' => 1, 'md' => 2])
+                        ->schema([
+                            CheckboxList::make('espaces_application')->label('Dans l’application Android')
+                                ->options(collect(EmplacementPub::cases())->mapWithKeys(fn (EmplacementPub $e) => [$e->value => $e->getLabel()])->all())
+                                ->descriptions(collect(EmplacementPub::cases())->mapWithKeys(fn (EmplacementPub $e) => [$e->value => ucfirst(self::FORMATS[$e->format()]).', '.$e->tailleEnClair()])->all())
+                                ->bulkToggleable()->live()->default([])
+                                ->required(fn (Get $get) => empty($get('espaces_site')))
+                                ->validationMessages(['required' => 'Cochez au moins un espace, dans l’application ou sur le site.']),
+                            CheckboxList::make('espaces_site')->label('Sur le site web')
+                                ->options(EmplacementPub::optionsSite())
+                                ->bulkToggleable()->live()->default([])
+                                ->helperText('Seules les publicités de VIVI s’affichent sur le site (pas d’annonces AdMob).'),
                         ]),
                     Section::make('Diffusion')
                         ->columns(2)
@@ -111,14 +149,42 @@ class PubliciteResource extends Resource
                                 ->validationMessages(['min' => 'Le prix ne peut pas être inférieur à ce qui est déjà encaissé.'])
                                 ->helperText('0 : publicité gratuite ou de VIVI.'),
                         ]),
-                    Section::make('Espace et image')
+                    Section::make('Annonceur et rapports')
+                        ->description('Choisissez le compte de l’annonceur sur VIVI ou saisissez son email : il reçoit automatiquement ses vues et ses clics.')
+                        ->columns(2)
                         ->schema([
-                            Select::make('emplacement')->label('Espace dans l’application')->options(EmplacementPub::class)->required()->live(),
+                            Select::make('annonceur_id')->label('Compte de l’annonceur sur VIVI')->searchable()->nullable()->columnSpanFull()
+                                ->getSearchResultsUsing(fn (string $search) => self::chercherComptes($search))
+                                ->getOptionLabelUsing(fn ($value) => ($u = User::find($value)) ? self::libelleCompte($u) : null)
+                                ->placeholder('Nom, email ou téléphone d’un client ou d’un utilisateur')
+                                ->helperText('Facultatif. Il reçoit ses rapports par email et dans son espace Notifications.')
+                                ->live()
+                                ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                    if ($state && ($u = User::find($state))) {
+                                        if (! $get('annonceur')) {
+                                            $set('annonceur', $u->name);
+                                        }
+                                        if (! $get('annonceur_contact')) {
+                                            $set('annonceur_contact', $u->telephone ?: $u->email);
+                                        }
+                                    }
+                                }),
+                            TextInput::make('annonceur')->label('Nom affiché')->maxLength(80)->placeholder('Vide : VIVI'),
+                            TextInput::make('annonceur_contact')->label('Contact de l’annonceur')->maxLength(120)->placeholder('Téléphone ou email')
+                                ->helperText('Jamais affiché aux clients.'),
+                            TextInput::make('rapport_email')->label('Email pour les rapports')->email()->maxLength(190)->columnSpanFull()
+                                ->placeholder(fn (Get $get) => ($u = User::find($get('annonceur_id'))) && $u->email ? 'Vide : '.$u->email : 'annonceur@exemple.com')
+                                ->helperText('Vide : l’email du compte choisi ci-dessus. Rempli : les rapports partent aussi à cette adresse.'),
+                            Select::make('rapport_frequence')->label('Envoi automatique des rapports')->options(Publicite::RAPPORTS)
+                                ->default('hebdomadaire')->required()->selectablePlaceholder(false)->columnSpanFull()
+                                ->helperText(fn (?Publicite $record) => 'Sauf « Jamais », un bilan final part aussi le lendemain de la date de fin.'
+                                    .($record?->rapport_envoye_le ? ' Dernier envoi : '.$record->rapport_envoye_le->format('d/m/Y à H:i').'.' : '')),
+                        ]),
+                    Section::make('Image')
+                        ->schema([
                             FileUpload::make('image')->label('Image')->image()->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                 ->disk('public')->directory('publicites')->maxSize(2048)->imageEditor()->required()
-                                ->helperText(fn (Get $get) => ($e = self::emplacement($get))
-                                    ? 'Taille conseillée : '.$e->tailleEnClair().'. JPEG, PNG ou WebP, 2 Mo au plus.'
-                                    : 'JPEG, PNG ou WebP, 2 Mo au plus. Choisissez l’espace pour voir la taille conseillée.'),
+                                ->helperText(fn (Get $get) => self::tailles($get)),
                         ]),
                 ]),
             ]);
@@ -127,21 +193,31 @@ class PubliciteResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->withSum('jours', 'vues')->withSum('jours', 'clics')->withSum('paiements', 'montant'))
+            ->modifyQueryUsing(fn ($query) => $query->withSum('jours', 'vues')->withSum('jours', 'clics')->withSum('jours', 'vues_site')->withSum('jours', 'clics_site')
+                ->withSum('paiements', 'montant'))
             ->defaultSort('id', 'desc')
             ->columns([
                 ImageColumn::make('image')->label('Image')->disk('public')->imageHeight(48),
                 TextColumn::make('titre')->label('Publicité')->searchable()->description(fn (Publicite $p) => $p->annonceur ?: 'VIVI')->wrap(),
-                TextColumn::make('emplacement')->label('Espace')->badge()->color('primary'),
+                TextColumn::make('espaces')->label('Espaces')->state(fn (Publicite $p) => $p->espacesEnClair())->wrap()
+                    ->description(fn (Publicite $p) => $p->rapport_frequence !== 'aucun' && $p->destinatairesRapport()
+                        ? 'Rapports : '.mb_strtolower(Publicite::RAPPORTS[$p->rapport_frequence] ?? '') : null),
                 TextColumn::make('etat')->label('État')->badge()->state(fn (Publicite $p) => $p->etatEnClair())
                     ->color(fn (Publicite $p) => ['en_ligne' => 'success', 'programmee' => 'info', 'terminee' => 'gray', 'pause' => 'warning'][$p->etat()])
                     ->description(fn (Publicite $p) => collect([
                         $p->debut ? 'du '.$p->debut->format('d/m/Y') : null,
                         $p->fin ? 'au '.$p->fin->format('d/m/Y') : null,
                     ])->filter()->implode(' ') ?: null),
-                TextColumn::make('jours_sum_vues')->label('Vues')->numeric()->default(0)->alignEnd(),
-                TextColumn::make('jours_sum_clics')->label('Clics')->numeric()->default(0)->alignEnd()
-                    ->description(fn (Publicite $p) => $p->jours_sum_vues ? number_format($p->jours_sum_clics * 100 / $p->jours_sum_vues, 1, ',', '').' %' : null),
+                TextColumn::make('vues')->label('Vues')->numeric()->alignEnd()
+                    ->state(fn (Publicite $p) => (int) $p->jours_sum_vues + (int) $p->jours_sum_vues_site)
+                    ->description(fn (Publicite $p) => $p->jours_sum_vues_site ? 'dont '.number_format((int) $p->jours_sum_vues_site, 0, ',', ' ').' site' : null),
+                TextColumn::make('clics')->label('Clics')->numeric()->alignEnd()
+                    ->state(fn (Publicite $p) => (int) $p->jours_sum_clics + (int) $p->jours_sum_clics_site)
+                    ->description(function (Publicite $p) {
+                        $vues = (int) $p->jours_sum_vues + (int) $p->jours_sum_vues_site;
+
+                        return $vues ? number_format(((int) $p->jours_sum_clics + (int) $p->jours_sum_clics_site) * 100 / $vues, 1, ',', '').' %' : null;
+                    }),
                 TextColumn::make('prix')->label('Prix')->formatStateUsing(fn (int $state) => $state ? Montant::fcfa($state) : '—')->alignEnd()
                     ->description(fn (Publicite $p) => $p->etatReglement() === 'partiel' ? 'reste '.Montant::fcfa($p->resteAPayer()) : null),
                 TextColumn::make('reglement')->label('Règlement')->badge()->state(fn (Publicite $p) => $p->etatReglementEnClair())
@@ -149,12 +225,15 @@ class PubliciteResource extends Resource
                 ToggleColumn::make('actif')->label('En ligne')->disabled(fn () => ! static::canCreate()),
             ])
             ->filters([
-                SelectFilter::make('emplacement')->label('Espace')->options(EmplacementPub::class),
+                SelectFilter::make('espace')->label('Espace')->options(EmplacementPub::class)
+                    ->query(fn ($query, array $data) => $data['value']
+                        ? $query->where(fn ($q) => $q->whereJsonContains('espaces_application', $data['value'])->orWhereJsonContains('espaces_site', $data['value']))
+                        : $query),
                 Filter::make('a_encaisser')->label('À encaisser')->query(fn ($query) => $query->aEncaisser()),
             ])
             ->recordActions([EncaisserPublicite::make(), EditAction::make()])
             ->emptyStateHeading('Aucune publicité')
-            ->emptyStateDescription('Les publicités créées ici s’affichent dans l’application. Sans publicité, l’espace peut montrer une annonce AdMob (Paramètres).');
+            ->emptyStateDescription('Les publicités créées ici s’affichent dans l’application et sur le site web. Sans publicité, un espace de l’application peut montrer une annonce AdMob (Paramètres).');
     }
 
     public static function getRelations(): array

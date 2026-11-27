@@ -25,7 +25,11 @@ class AbonnementController extends Controller
         $formules = FormuleAbonnement::where('actif', true)->orderBy('ordre')->orderBy('prix_mensuel')->get();
         $actif = $proprietaire->abonnementActif()->with('formule')->first();
 
+        $modele = app(\App\Services\ModeleEconomique::class);
+
         return view('pro.abonnement', [
+            // Sur commission : pas de formule, page des conditions (quotas des Paramètres et taux retenu sur les retraits)
+            'commission' => ($q = $modele->quotas($proprietaire)) ? $q + ['taux' => $modele->taux($proprietaire)] : null,
             'actif' => $actif,
             // Renouvellement déjà payé, qui commence après la période en cours
             'suivant' => $actif ? $proprietaire->abonnements()->with('formule')->where('statut', StatutAbonnement::Actif)

@@ -49,6 +49,8 @@ class RevenusController extends Controller
             'mouvements' => $p->mouvementsSolde()->with('reservation:id,reference')->latest('id')->paginate(15, ['*'], 'mouvements'),
             'retraits' => $p->retraits()->latest('id')->limit(20)->get(),
             'ceMois' => (int) $p->mouvementsSolde()->where('montant', '>', 0)->whereNotNull('reservation_id')->where('created_at', '>=', now()->startOfMonth())->sum('montant'),
+            // Sur commission : taux retenu par VIVI sur chaque retrait (0 sur abonnement)
+            'tauxRetrait' => app(\App\Services\ModeleEconomique::class)->taux($p),
         ]);
     }
 }

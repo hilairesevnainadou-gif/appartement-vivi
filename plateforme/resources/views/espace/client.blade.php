@@ -26,6 +26,9 @@
     <div class="container py-4 py-lg-5" style="max-width:980px">
         <h1 class="page-title mb-3">Mes réservations</h1>
 
+        {{-- Publicité (espace « Mes réservations ») --}}
+        <x-pub emplacement="reservations" class="mb-4" />
+
         <div class="segmented mb-4" role="radiogroup" aria-label="Filtrer les réservations" style="max-width:520px">
             @foreach ($onglets as $cle => $o)
                 <input type="radio" name="onglet" id="o-{{ $cle }}" value="{{ $cle }}" @checked($onglet === $cle)>
@@ -81,8 +84,10 @@
                                 @endif
                             @else
                                 <div class="note-box"><i class="bi bi-cash-coin" aria-hidden="true"></i><span>
-                                    @if ($r->montant_rembourse > 0)
-                                        Remboursement de <strong>{{ Montant::fcfa($r->montant_rembourse) }}</strong> sur votre moyen de paiement.
+                                    @if ($r->montant_rembourse > 0 && $r->rembourse_le)
+                                        Remboursement de <strong>{{ Montant::fcfa($r->montant_rembourse) }}</strong> versé le {{ $r->rembourse_le->translatedFormat('j F') }} par {{ $r->mode_remboursement }}{{ $r->reference_remboursement ? ' (réf. '.$r->reference_remboursement.')' : '' }}.
+                                    @elseif ($r->montant_rembourse > 0)
+                                        Remboursement de <strong>{{ Montant::fcfa($r->montant_rembourse) }}</strong> en cours : versé sous 24 h à 7 jours sur votre moyen de paiement.
                                     @else
                                         Annulation sans remboursement.
                                     @endif

@@ -341,6 +341,9 @@
                             </div>
                         @endif
                     </section>
+
+                    {{-- Publicité (espace « Bas d'une fiche ») --}}
+                    <x-pub emplacement="fiche" :ville="$l->ville" class="mt-4" />
                 </div>
 
             </div>

@@ -19,6 +19,9 @@ class Retrait extends Model
         'reference',
         'proprietaire_id',
         'montant',
+        'taux_commission',
+        'montant_commission',
+        'montant_net',
         'compte_moyen',
         'compte_numero',
         'compte_titulaire',
@@ -36,7 +39,16 @@ class Retrait extends Model
             'statut' => StatutRetrait::class,
             'traite_le' => 'datetime',
             'montant' => 'integer',
+            'taux_commission' => 'float',
+            'montant_commission' => 'integer',
+            'montant_net' => 'integer',
         ];
+    }
+
+    /** Montant à verser au bénéficiaire : montant demandé moins la commission VIVI (anciens retraits : tout le montant). */
+    public function aVerser(): int
+    {
+        return $this->montant_net ?? ((int) $this->montant - (int) $this->montant_commission);
     }
 
     public function proprietaire(): BelongsTo

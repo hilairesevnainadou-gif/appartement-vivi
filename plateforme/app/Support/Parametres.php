@@ -30,6 +30,12 @@ class Parametres
         'report_fenetre_jours' => ['vivi.report.fenetre_jours', 'int'],
         'blocage_creneau_minutes' => ['vivi.blocage_creneau_minutes', 'int'],
         'villes' => ['vivi.villes', 'array'],
+        // Abonnement ou commission sur retrait (App\Services\ModeleEconomique)
+        'modele_defaut' => ['vivi.modele_proprietaires.defaut', 'string'],
+        'commission_retrait_taux' => ['vivi.modele_proprietaires.commission_taux', 'float'],
+        'commission_logements_max' => ['vivi.modele_proprietaires.logements_max', 'int'],
+        'commission_salles_max' => ['vivi.modele_proprietaires.salles_max', 'int'],
+        'commission_gestionnaires_max' => ['vivi.modele_proprietaires.gestionnaires_max', 'int'],
         'modes_reglement' => ['vivi.retraits.modes_reglement', 'array'],
         'whatsapp_numero' => ['vivi.contact.whatsapp', 'string'],
         'whatsapp_message' => ['vivi.contact.whatsapp_message', 'string'],

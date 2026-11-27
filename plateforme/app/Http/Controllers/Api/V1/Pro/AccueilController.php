@@ -44,6 +44,8 @@ class AccueilController extends Controller
                 'fin' => Format::jour($d['abonnement']->fin),
                 'essai' => (bool) $d['abonnement']->essai,
             ] : null,
+            // Sur commission : pas d'abonnement, VIVI garde « taux » % de chaque retrait (null sur abonnement)
+            'commission' => $d['commission'] ?? null,
         ]]);
     }
 

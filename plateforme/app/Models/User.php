@@ -43,6 +43,8 @@ class User extends Authenticatable implements FilamentUser
         'actif',
         'recevoir_offres',
         'whatsapp',
+        'modele_economique',
+        'commission_retrait_taux',
     ];
 
     /**
@@ -66,6 +68,7 @@ class User extends Authenticatable implements FilamentUser
             'recevoir_offres' => 'boolean',
             'parrainage_recompense_le' => 'datetime',
             'retrait_modifie_le' => 'datetime',
+            'commission_retrait_taux' => 'float',   // taux personnalisé (App\Services\ModeleEconomique)
             'supprime_le' => 'datetime',   // compte supprimé par son titulaire (App\Services\SuppressionCompte)
         ];
     }

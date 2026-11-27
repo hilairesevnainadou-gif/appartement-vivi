@@ -55,13 +55,16 @@ class PublicitesTest extends TestCase
     public function test_l_administrateur_cree_et_supprime_une_publicite(): void
     {
         $this->actingAs($this->compte(Role::Administrateur));
-        $formulaire = ['titre' => 'Traiteur Saveurs', 'annonceur' => 'Saveurs SARL', 'emplacement' => 'accueil_haut', 'lien' => 'https://saveurs.example',
+        $formulaire = ['titre' => 'Traiteur Saveurs', 'annonceur' => 'Saveurs SARL', 'espaces_application' => ['accueil_haut'], 'espaces_site' => ['fiche'], 'lien' => 'https://saveurs.example',
             'image' => UploadedFile::fake()->image('pub.jpg', 1200, 400), 'actif' => true, 'ordre' => 0];
 
         Livewire::test(CreatePublicite::class)->fillForm(['lien' => 'http://saveurs.example'] + $formulaire)->call('create')->assertHasFormErrors(['lien']);
+        Livewire::test(CreatePublicite::class)->fillForm(['espaces_application' => [], 'espaces_site' => []] + $formulaire)->call('create')->assertHasFormErrors(['espaces_application']);
         Livewire::test(CreatePublicite::class)->fillForm($formulaire)->call('create')->assertHasNoFormErrors();
         $p = Publicite::sole();
         $this->assertSame(EmplacementPub::AccueilHaut, $p->emplacement);
+        $this->assertTrue($p->estDans(EmplacementPub::AccueilHaut) && $p->estDans(EmplacementPub::Fiche, Publicite::SITE));
+        $this->assertFalse($p->estDans(EmplacementPub::Fiche) || $p->estDans(EmplacementPub::AccueilHaut, Publicite::SITE));
         Storage::disk('public')->assertExists($p->image);
         $this->get('/admin/publicites')->assertOk()->assertSee('Saveurs SARL')->assertSee('En ligne');
 
@@ -215,5 +218,70 @@ class PublicitesTest extends TestCase
         Parametres::enregistrer(['villes' => array_map(fn ($i) => 'Ville '.$i.'x', range(1, 12))]);
         $this->get('/')->assertOk()->assertSee('et 9 autres villes')->assertSee('<option>Ville 12x</option>', false)
             ->assertSee('ville=Ville%208x', false)->assertDontSee('ville=Ville%209x', false)->assertSee('Toutes les villes</a>', false);
+    }
+
+    public function test_le_site_web_affiche_les_publicites_aux_visiteurs_connectes_ou_non(): void
+    {
+        $this->pub(['titre' => 'Traiteur Saveurs', 'lien' => 'https://traiteur.example', 'bouton' => 'Commander']);
+        $this->pub(['titre' => 'Pause hivernale', 'actif' => false]);
+
+        // Publicité coupée dans les paramètres : rien sur le site
+        $this->get('/')->assertOk()->assertDontSee('Traiteur Saveurs');
+
+        Parametres::enregistrer(['pub_active' => true]);
+        $this->get('/')->assertOk()->assertSee('Traiteur Saveurs')->assertSee('Commander')
+            ->assertSee('rel="sponsored noopener"', false)->assertDontSee('Pause hivernale');
+
+        // Connecté (client) : la publicité reste affichée
+        $this->actingAs($this->compte(Role::Client))->get('/')->assertOk()->assertSee('Traiteur Saveurs');
+
+        // Espace réglé sur « AdMob seulement » : AdMob ne concerne que l'application, rien sur le site
+        $reglages = Parametres::get('pub_emplacements');
+        $reglages['accueil_haut']['source'] = 'admob';
+        Parametres::enregistrer(['pub_emplacements' => $reglages]);
+        $this->get('/')->assertOk()->assertDontSee('Traiteur Saveurs');
+    }
+
+    public function test_rapports_envoyes_automatiquement_a_l_annonceur(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        Parametres::enregistrer(['pub_active' => true]);
+        $client = tap(User::factory()->create(['name' => 'Saveurs SARL', 'email' => 'gerant@saveurs.example', 'actif' => true]), fn (User $u) => $u->assignRole(Role::Client->value));
+        $p = $this->pub(['annonceur_id' => $client->id, 'rapport_email' => 'compta@saveurs.example', 'rapport_frequence' => 'hebdomadaire',
+            'espaces_application' => ['accueil_haut'], 'espaces_site' => ['accueil_haut', 'fiche'], 'debut' => '2026-11-01', 'fin' => '2026-11-30']);
+
+        // Vue et clic venus du site web, comptés à part
+        $this->postJson('/api/v1/publicites/'.$p->id.'/vue?support=site')->assertNoContent();
+        $this->postJson('/api/v1/publicites/'.$p->id.'/vue')->assertNoContent();
+        \Illuminate\Support\Facades\DB::table('publicite_jours')->where('publicite_id', $p->id)->update(['vues' => 100, 'clics' => 5, 'vues_site' => 50, 'clics_site' => 10]);
+        $this->assertSame(['vues' => 150, 'clics' => 15, 'taux' => 10.0], array_intersect_key($p->statistiques(), array_flip(['vues', 'clics', 'taux'])));
+
+        $rapports = app(\App\Services\RapportsPublicites::class);
+        $this->assertSame(0, $rapports->envoyerLesRapportsDus(CarbonImmutable::parse('2026-11-22')));   // dimanche
+        $this->travelTo(CarbonImmutable::parse('2026-11-23 07:00'));
+        $this->assertSame(1, $rapports->envoyerLesRapportsDus());                                        // lundi : semaine écoulée
+        \Illuminate\Support\Facades\Notification::assertSentTo($client, \App\Notifications\RapportPublicite::class,
+            fn ($n, $canaux) => ! $n->final && in_array('mail', $canaux, true) && in_array('database', $canaux, true));
+        \Illuminate\Support\Facades\Notification::assertSentOnDemand(\App\Notifications\RapportPublicite::class,
+            fn ($n, $canaux, $notifiable) => $notifiable->routes['mail'] === 'compta@saveurs.example');
+        $this->assertSame(0, $rapports->envoyerLesRapportsDus());                                        // pas deux fois le même jour
+
+        $mail = (new \App\Notifications\RapportPublicite($p->fresh(), CarbonImmutable::parse('2026-11-16'), CarbonImmutable::parse('2026-11-22')))->toMail($client);
+        $texte = implode(' ', $mail->introLines);
+        $this->assertStringContainsString('150 vues, 15 clics, taux de clic 10,0 %', $texte);
+        $this->assertStringContainsString('Site web : Accueil, sous la recherche, Bas d’une fiche (après les avis)', $texte);
+
+        // Fin de la diffusion : bilan final le lendemain, une seule fois
+        $this->travelTo(CarbonImmutable::parse('2026-12-01 07:00'));
+        $this->assertSame(1, $rapports->envoyerLesRapportsDus());
+        \Illuminate\Support\Facades\Notification::assertSentTo($client, \App\Notifications\RapportPublicite::class, fn ($n) => $n->final);
+        $this->travelTo(CarbonImmutable::parse('2026-12-07 07:00'));
+        $this->assertSame(0, $rapports->envoyerLesRapportsDus());
+
+        // Envoi à la demande depuis la page de la publicité
+        $this->actingAs($this->compte(Role::Administrateur));
+        Livewire::test(EditPublicite::class, ['record' => $p->getKey()])
+            ->callAction('envoyerRapport', ['du' => '2026-11-01', 'au' => '2026-11-30'])->assertHasNoActionErrors()->assertNotified('Rapport envoyé');
+        $this->get('/admin/publicites')->assertOk()->assertSee('Site web : Accueil, sous la recherche', false);
     }
 }

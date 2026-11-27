@@ -29,6 +29,10 @@ class Delegations
 
     public function maximum(User $proprietaire): int
     {
+        if ($quotas = app(ModeleEconomique::class)->quotas($proprietaire)) {
+            return $quotas['gestionnaires'];   // sur commission : quota des Paramètres
+        }
+
         return (int) ($proprietaire->abonnementActif()->with('formule')->first()?->formule->gestionnaires_max ?? 0);
     }
 
@@ -57,10 +61,12 @@ class Delegations
             throw new ReservationImpossible('Ce compte est celui d’un propriétaire ou de l’équipe VIVI : il ne peut pas être gestionnaire.');
         }
         $dejaGestionnaire = $existant && $this->gestionnairesDe($proprietaire)->contains('id', $existant->id);
-        if (! $dejaGestionnaire && $this->gestionnairesDe($proprietaire)->count() >= $this->maximum($proprietaire)) {
-            throw new ReservationImpossible($this->maximum($proprietaire) === 0
-                ? 'Votre formule n’inclut pas de gestionnaire délégué. Passez à une formule supérieure.'
-                : 'Votre formule inclut '.$this->maximum($proprietaire).' gestionnaire(s) au plus.');
+        if (! $dejaGestionnaire && $this->maximum($proprietaire) < ModeleEconomique::ILLIMITE_GESTIONNAIRES
+            && $this->gestionnairesDe($proprietaire)->count() >= $this->maximum($proprietaire)) {
+            $max = $this->maximum($proprietaire);
+            throw new ReservationImpossible(app(ModeleEconomique::class)->surCommission($proprietaire)
+                ? ($max === 0 ? 'Votre compte n’inclut pas de gestionnaire délégué.' : 'Votre compte inclut '.$max.' gestionnaire(s) au plus.')
+                : ($max === 0 ? 'Votre formule n’inclut pas de gestionnaire délégué. Passez à une formule supérieure.' : 'Votre formule inclut '.$max.' gestionnaire(s) au plus.'));
         }
 
         $gestionnaire = DB::transaction(function () use ($existant, $nom, $email, $telephone, $logements) {

@@ -3,9 +3,13 @@
     use App\Enums\StatutReservation;
     use App\Enums\StatutRetrait;
     use App\Models\Reservation;
+    use App\Services\Caisse;
     use App\Support\Montant;
 
     $nombre = fn (int $n) => number_format($n, 0, ',', "\u{00A0}");
+    $commission ??= null;
+    // Sur commission : part de VIVI si tout le solde est retiré
+    $commRetrait = $commission && $solde > 0 ? (int) round($solde * $commission['taux'] / 100) : 0;
     $prenom = \Illuminate\Support\Str::before($utilisateur->name, ' ') ?: $utilisateur->name;
 
     // Écart avec le mois précédent, comme dans la maquette (en % pour les revenus, en points pour l'occupation)
@@ -210,8 +214,14 @@
                     <p class="kpi__label">Solde disponible</p>
                     <p class="kpi__value mb-3">{{ $nombre($solde) }} <small>FCFA</small></p>
                     <form method="POST" action="{{ route('pro.retraits.demander') }}"
-                          data-confirmer="Tout votre solde ({{ $nombre($solde) }} FCFA) sera retenu jusqu’à la validation par la caisse VIVI, qui vous verse le montant." data-confirmer-titre="Demander un retrait ?" data-confirmer-bouton="Demander le retrait">
+                          data-confirmer="{{ $commission && $commission['taux'] > 0
+                              ? 'Tout votre solde ('.$nombre($solde).' FCFA) sera retenu jusqu’à la validation par la caisse VIVI. Commission VIVI '.Caisse::taux($commission['taux']).' : '.Montant::fcfa($commRetrait).'. Vous recevrez '.Montant::fcfa($solde - $commRetrait).'.'
+                              : 'Tout votre solde ('.$nombre($solde).' FCFA) sera retenu jusqu’à la validation par la caisse VIVI, qui vous verse le montant.' }}"
+                          data-confirmer-titre="Demander un retrait ?" data-confirmer-bouton="Demander le retrait">
                         @csrf
+                        @if ($commission && $commission['taux'] > 0 && $solde > 0)
+                            <p class="small text-soft mb-2">Commission VIVI {{ Caisse::taux($commission['taux']) }} : <strong>− {{ Montant::fcfa($commRetrait) }}</strong> · vous recevez <strong class="text-ink">{{ Montant::fcfa($solde - $commRetrait) }}</strong></p>
+                        @endif
                         <button class="btn btn-primary w-100" type="submit" @disabled($solde <= 0)><i class="bi bi-cash-coin" aria-hidden="true"></i>Demander un retrait</button>
                     </form>
                     @if ($retraits->isNotEmpty())
@@ -232,7 +242,7 @@
                                         <strong class="tnum">{{ $v->reference }}</strong>
                                         <span class="chip {{ $classe }}"><i class="bi {{ $icone }}" aria-hidden="true"></i>{{ $texte }}</span>
                                     </div>
-                                    <div class="action"><span class="montant">{{ Montant::fcfa($v->montant) }}</span></div>
+                                    <div class="action"><span class="montant">{{ Montant::fcfa($v->statut === StatutRetrait::Refuse ? (int) $v->montant : $v->aVerser()) }}</span></div>
                                 </li>
                             @endforeach
                         </ul>
@@ -251,7 +261,11 @@
         <section class="panel mt-3" aria-labelledby="t-abonnement">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
-                    @if ($abonnement)
+                    @if ($commission)
+                        @php $illimite = fn (int $n) => $n >= 999 ? 'illimité' : $n; @endphp
+                        <h2 id="t-abonnement" class="mb-1" style="font-size:1.2rem">Commission sur retrait : {{ Caisse::taux($commission['taux']) }}</h2>
+                        <p class="mb-0 text-soft">Pas d’abonnement à payer : VIVI garde {{ Caisse::taux($commission['taux']) }} de chaque retrait · {{ $nombrePublies }} logement{{ $nombrePublies > 1 ? 's' : '' }} sur {{ $illimite($commission['logements']) }} et {{ $sallesPubliees }} salle{{ $sallesPubliees > 1 ? 's' : '' }} sur {{ $illimite($commission['salles']) }} publiés.</p>
+                    @elseif ($abonnement)
                         <h2 id="t-abonnement" class="mb-1" style="font-size:1.2rem">Abonnement {{ $abonnement->formule->nom }}</h2>
                         <p class="mb-0 text-soft">Prochain renouvellement le {{ $abonnement->fin->translatedFormat('l j F Y') }} · {{ $nombrePublies }} logement{{ $nombrePublies > 1 ? 's' : '' }} sur {{ $abonnement->formule->logements_max }} et {{ $sallesPubliees }} salle{{ $sallesPubliees > 1 ? 's' : '' }} sur {{ $abonnement->formule->salles_max }} publiés.</p>
                     @else
@@ -259,7 +273,7 @@
                         <p class="mb-0 text-soft">Un abonnement est nécessaire pour publier vos logements sur VIVI.</p>
                     @endif
                 </div>
-                <a class="btn btn-ghost" href="{{ route('pro.abonnement') }}">{{ $abonnement ? 'Gérer mon abonnement' : 'Choisir un abonnement' }}</a>
+                <a class="btn btn-ghost" href="{{ route('pro.abonnement') }}">{{ $commission ? 'Voir les conditions' : ($abonnement ? 'Gérer mon abonnement' : 'Choisir un abonnement') }}</a>
             </div>
         </section>
     @endif

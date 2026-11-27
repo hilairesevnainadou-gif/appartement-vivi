@@ -34,11 +34,13 @@ class RetraitsAValider extends TableWidget
             ->query(Retrait::query()->with('proprietaire')->where('statut', StatutRetrait::EnAttente)->oldest())
             // Une seule colonne (montant en gras, puis qui et quand) : les boutons restent visibles dans la demi-largeur
             ->columns([
-                TextColumn::make('montant')->label('Demande')
-                    ->formatStateUsing(fn ($state) => \App\Support\Montant::fcfa($state))
+                // Montant à verser (net de la commission VIVI pour un propriétaire sur commission)
+                TextColumn::make('montant')->label('À verser')
+                    ->formatStateUsing(fn ($state, Retrait $record) => \App\Support\Montant::fcfa($record->aVerser()))
                     ->weight(\Filament\Support\Enums\FontWeight::Bold)
                     ->wrap()
-                    ->description(fn (Retrait $record) => $record->proprietaire->name.' · '.$record->reference.' · '.$record->created_at->diffForHumans()),
+                    ->description(fn (Retrait $record) => $record->proprietaire->name.' · '.$record->reference.' · '.$record->created_at->diffForHumans()
+                        .((int) $record->montant_commission > 0 ? ' · commission VIVI '.\App\Support\Montant::fcfa($record->montant_commission) : '')),
             ])
             // Boutons avec libellé (Valider, Refuser) : plus lisibles et plus faciles à toucher que des icônes
             ->recordActions(RetraitsTable::actionsTraitement())

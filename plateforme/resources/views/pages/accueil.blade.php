@@ -76,6 +76,9 @@
         </div>
     </section>
 
+    {{-- ===== Publicité (espace « Accueil, en haut ») ===== --}}
+    <x-pub emplacement="accueil_haut" conteneur />
+
     {{-- ===== Ce que propose VIVI ===== --}}
     <section class="section pb-0" id="offre" aria-labelledby="titre-offre">
         <div class="container">
@@ -120,6 +123,9 @@
             </div>
         </section>
     @endif
+
+    {{-- ===== Publicité (espace « Accueil, entre les blocs ») ===== --}}
+    <x-pub emplacement="accueil_milieu" conteneur />
 
     {{-- ===== Salles de fêtes et de conférence ===== --}}
     <section class="section bloc-salles" aria-labelledby="titre-salles">
@@ -220,7 +226,8 @@
                         <div class="owner-band__body">
                             <span class="eyebrow" style="color:var(--vivi-orange-400)">Propriétaires</span>
                             <h2 id="titre-proprietaires">Publiez votre appartement ou votre salle sur VIVI</h2>
-                            <p class="mb-0">Un abonnement, et vous gardez la main sur votre bien, ou vous nous en confiez la gestion.</p>
+                            @php $avecFormules = \App\Services\ModeleEconomique::formulesProposees(); @endphp
+                            <p class="mb-0">{{ $avecFormules ? 'Un abonnement' : 'Sans abonnement : VIVI garde '.\App\Services\Caisse::taux((float) \App\Support\Parametres::get('commission_retrait_taux')).' de vos retraits' }}, et vous gardez la main sur votre bien, ou vous nous en confiez la gestion.</p>
                             <ul>
                                 <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Vous fixez vos prix à l’heure, à la demi-journée et à la journée.</span></li>
                                 <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Vous définissez vos propres créneaux et bloquez les dates de votre choix.</span></li>
@@ -229,7 +236,7 @@
                             </ul>
                             <div class="d-flex flex-wrap gap-2">
                                 <a class="btn btn-cta btn-lg" href="{{ route('connexion', ['mode' => 'inscription', 'role' => 'proprietaire']) }}">Publier mon bien</a>
-                                <a class="btn btn-outline-light btn-lg" href="{{ route('proprietaires') }}#formules">Voir les formules</a>
+                                <a class="btn btn-outline-light btn-lg" href="{{ route('proprietaires') }}#formules">{{ $avecFormules ? 'Voir les formules' : 'Voir les conditions' }}</a>
                             </div>
                         </div>
                     </div>

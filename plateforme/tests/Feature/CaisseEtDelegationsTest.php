@@ -74,6 +74,7 @@ class CaisseEtDelegationsTest extends TestCase
     public function test_la_caissiere_verse_un_remboursement_une_seule_fois(): void
     {
         $annulee = $this->reservation(['statut' => StatutReservation::Annulee, 'annulee_le' => now(), 'montant_rembourse' => 15500]);
+        $admin = $this->utilisateur(Role::Administrateur, 'Admin VIVI');
         $this->actingAs($this->utilisateur(Role::Caissiere));
 
         Livewire::test(ListRemboursements::class)
@@ -85,6 +86,13 @@ class CaisseEtDelegationsTest extends TestCase
         $this->assertNotNull($annulee->rembourse_le);
         $this->assertSame('MTN Mobile Money', $annulee->mode_remboursement);
         Notification::assertSentTo($this->client, RemboursementVerse::class);
+        // L'administration est prévenue du versement
+        Notification::assertSentTo($admin, \App\Notifications\NotificationEquipe::class,
+            fn ($n) => str_contains($n->titre, 'Remboursement versé') && str_contains($n->texte, 'MTN-7788'));
+        // Le client (site et application) voit le remboursement versé
+        $suivi = (new \App\Http\Resources\Api\ReservationResource($annulee))->resolve()['remboursement'];
+        $this->assertSame(['montant' => 15500, 'statut' => 'verse', 'mode' => 'MTN Mobile Money', 'reference' => 'MTN-7788'],
+            \Illuminate\Support\Arr::except($suivi, 'verse_le'));
 
         // Une fois versé, il quitte la file « À verser »
         Livewire::test(ListRemboursements::class)->assertCanNotSeeTableRecords([$annulee]);

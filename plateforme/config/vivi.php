@@ -73,6 +73,9 @@ return [
         'codes_faux' => [10, 900],               // 10 codes de connexion faux depuis une même adresse en 15 min
         'pages_introuvables' => [40, 300],       // 40 pages inexistantes depuis une même adresse en 5 min : exploration
         'limites' => [20, 600],                  // 20 refus « trop de requêtes » depuis une même adresse en 10 min
+        // Robots (wp-admin, .env…) : simple information, sans message ; adresse bloquée après 5 essais en 10 min
+        'chemins_attaque' => [5, 600],
+        'blocage_robot_minutes' => 60,           // court : une adresse mobile peut être partagée par plusieurs clients
         'paiements_echoues' => [10, 3600],       // 10 paiements échoués en 1 h
         'renotifier_minutes' => 30,              // même alerte : pas plus d'un message toutes les 30 min
         'disque_minimum_pourcent' => 10,
@@ -160,6 +163,16 @@ return [
     // Retraits des propriétaires : modes de règlement proposés à la caissière lors de la validation
     'retraits' => [
         'modes_reglement' => ['MTN Mobile Money', 'Moov Money', 'Celtiis Cash', 'Virement bancaire', 'Espèces'],
+    ],
+
+    // Modèle économique des propriétaires (App\Services\ModeleEconomique) : « abonnement » (formules mensuelles)
+    // ou « commission » (aucune formule à payer : VIVI garde un pourcentage de chaque retrait). Personnalisable par propriétaire.
+    'modele_proprietaires' => [
+        'defaut' => 'abonnement',
+        'commission_taux' => 10,            // % retenu sur chaque retrait
+        'logements_max' => 999,             // quotas sur commission (999 = illimité)
+        'salles_max' => 999,
+        'gestionnaires_max' => 99,          // 99 = illimité
     ],
 
     // API de l'application mobile (client, propriétaire, gestionnaire) : /api/v1, jetons Sanctum

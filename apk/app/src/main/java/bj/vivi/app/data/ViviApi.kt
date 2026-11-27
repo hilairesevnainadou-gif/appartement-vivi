@@ -51,6 +51,7 @@ interface ViviApi {
 
     @GET("logements")
     suspend fun rechercher(
+        @Query("q") q: String?,
         @Query("ville") ville: String?,
         @Query("date") date: String?,
         @Query("voyageurs") voyageurs: Int?,

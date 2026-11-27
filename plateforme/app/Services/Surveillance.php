@@ -90,6 +90,27 @@ class Surveillance
         return $nombre === $seuil || ($nombre > $seuil && ($nombre & ($nombre - 1)) === 0);
     }
 
+    /** Seuil atteint ou dépassé sur la fenêtre (contrairement à compter(), vrai à chaque fois). */
+    private function atteint(string $regle, string $source): bool
+    {
+        [$seuil, $secondes] = config('vivi.surveillance.'.$regle, [PHP_INT_MAX, 60]);
+        $cle = 'surveillance:'.$regle.':'.sha1($source);
+        RateLimiter::hit($cle, $secondes);
+
+        return RateLimiter::attempts($cle) >= $seuil;
+    }
+
+    /** Adresse d'un robot bloquée pour un moment (SurveillerRequetes répond 403 sans rien exécuter). */
+    public static function estBloquee(string $ip): bool
+    {
+        return Cache::has(self::cleBlocage($ip));
+    }
+
+    private static function cleBlocage(string $ip): string
+    {
+        return 'surveillance:bloquee:'.sha1($ip);
+    }
+
     /* ---------------------------------------------------------------------
      | Détecteurs (appelés par l'application)
      * --------------------------------------------------------------------- */
@@ -109,8 +130,16 @@ class Surveillance
     public function requete(string $ip, string $chemin, int $statut): void
     {
         if (preg_match(self::CHEMINS_ATTAQUE, $chemin)) {
-            $this->signaler('chemin_attaque', AlerteSysteme::AVERTISSEMENT,
-                "Accès à « /{$chemin} » : ce fichier n’existe pas sur VIVI, mais les robots d’attaque le cherchent.", $ip, ['chemin' => '/'.$chemin]);
+            // Bruit d'internet sans danger (ces fichiers n'existent pas) : une seule alerte « information » regroupée,
+            // sans message à l'équipe. Une adresse qui insiste est bloquée un moment.
+            $bloquer = $this->atteint('chemins_attaque', $ip);
+            if ($bloquer) {
+                Cache::put(self::cleBlocage($ip), true, now()->addMinutes((int) config('vivi.surveillance.blocage_robot_minutes', 60)));
+            }
+            $this->signaler('chemin_attaque', AlerteSysteme::INFO,
+                'Des robots cherchent des fichiers qui n’existent pas sur VIVI (WordPress, .env…). Accès refusé, aucun risque.'
+                .($bloquer ? ' Dernière adresse bloquée '.(int) config('vivi.surveillance.blocage_robot_minutes', 60).' min : '.$ip.'.' : ''),
+                'robots', ['derniere_adresse' => $ip, 'dernier_chemin' => '/'.$chemin]);
 
             return;
         }

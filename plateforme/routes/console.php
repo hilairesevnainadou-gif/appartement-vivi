@@ -49,3 +49,9 @@ Artisan::command('vivi:surveiller', function (\App\Services\Surveillance $survei
     $this->info($problemes ? 'Problèmes : '.implode(', ', $problemes) : 'Tout va bien.');
 })->purpose('Contrôle de santé de la plateforme et alertes');
 Schedule::command('vivi:surveiller')->everyFiveMinutes()->withoutOverlapping();
+
+// Rapports de publicité (vues, clics) envoyés aux annonceurs : chaque semaine, chaque mois, et bilan à la fin de la diffusion
+Artisan::command('vivi:rapports-publicites', function (\App\Services\RapportsPublicites $rapports) {
+    $this->info($rapports->envoyerLesRapportsDus().' rapport(s) de publicité envoyé(s).');
+})->purpose('Envoie aux annonceurs le rapport de leur publicité (vues, clics, taux de clic)');
+Schedule::command('vivi:rapports-publicites')->dailyAt('07:00')->withoutOverlapping();

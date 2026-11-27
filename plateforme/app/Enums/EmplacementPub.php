@@ -5,7 +5,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasLabel;
 
 /**
- * Espaces publicitaires de l'application Android. Jamais sur le paiement, le billet (QR Code), le scanner,
+ * Espaces publicitaires de l'application Android et du site web. Jamais sur le paiement, le billet (QR Code), le scanner,
  * la connexion ni dans les espaces propriétaire, gestionnaire et agent.
  */
 enum EmplacementPub: string implements HasLabel
@@ -27,6 +27,31 @@ enum EmplacementPub: string implements HasLabel
             self::Fiche => 'Bas d’une fiche',
             self::Reservations => 'Mes réservations',
         };
+    }
+
+    /** L'espace existe aussi sur le site web (pas d'écran d'ouverture plein écran sur le site). */
+    public function surSite(): bool
+    {
+        return $this !== self::Demarrage;
+    }
+
+    /** Nom de l'espace sur le site web. */
+    public function libelleSite(): string
+    {
+        return match ($this) {
+            self::AccueilHaut => 'Accueil, sous la recherche',
+            self::AccueilMilieu => 'Accueil, avant les salles',
+            self::Recherche => 'Dans les résultats de recherche',
+            self::Fiche => 'Bas d’une fiche (après les avis)',
+            self::Reservations => 'Mes réservations (espace client)',
+            default => $this->getLabel(),
+        };
+    }
+
+    /** @return array<string, string> espaces proposés sur le site web */
+    public static function optionsSite(): array
+    {
+        return collect(self::cases())->filter->surSite()->mapWithKeys(fn (self $e) => [$e->value => $e->libelleSite()])->all();
     }
 
     /** Forme de l'espace dans l'application. */

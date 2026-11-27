@@ -254,6 +254,7 @@ class Reservations
                     'montant_rembourse' => $reservation->montantPaye(),
                     'bonus_rendu' => $bonusRendu,
                 ]);
+                DB::afterCommit(fn () => $this->prevenirRemboursementTardif($reservation));
 
                 return [$reservation, false];
             }
@@ -536,6 +537,29 @@ class Reservations
     }
 
     /** Messages au client et au propriétaire (et à ses gestionnaires), sans bloquer la confirmation. */
+    /**
+     * Paiement arrivé trop tard (créneau repris) : le client sait combien il va recevoir, et l'administration et
+     * la caisse ont le remboursement à verser. Le propriétaire n'est pas prévenu : la réservation n'a jamais été confirmée.
+     */
+    private function prevenirRemboursementTardif(Reservation $reservation): void
+    {
+        $montant = (int) $reservation->montant_rembourse;
+        if ($montant <= 0) {
+            return;
+        }
+        \App\Support\Equipe::prevenir('remboursements.gerer',
+            'Remboursement à verser : '.\App\Support\Montant::fcfa($montant),
+            'Réservation '.$reservation->reference.' : paiement reçu après l’expiration du créneau, repris entre-temps. Remboursement intégral à verser.',
+            \App\Filament\Resources\Remboursements\RemboursementResource::getUrl('index', panel: 'admin'),
+            'heroicon-o-arrow-uturn-left', 'warning', 'Voir les remboursements');
+        try {
+            $reservation->client->notify(new \App\Notifications\ReservationAnnulee($reservation->fresh('logement'), pourProprietaire: false,
+                explication: 'Votre paiement est arrivé après l’expiration du créneau, qui a été réservé entre-temps : vous êtes remboursé intégralement.'));
+        } catch (Throwable $e) {
+            report($e);
+        }
+    }
+
     private function prevenir(Reservation $reservation): void
     {
         try {

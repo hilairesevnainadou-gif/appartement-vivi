@@ -46,8 +46,12 @@ class ChiffresDuJour extends StatsOverviewWidget
             ->selectRaw('COALESCE(SUM(montant_commission), 0) as commission, COALESCE(SUM('.Reservation::SQL_MARKETING_VIVI.'), 0) as marketing, COALESCE(SUM('.Reservation::SQL_MARKETING_AGENTS.'), 0) as agents, COALESCE(SUM(montant_gestion), 0) as gestion')
             ->first();
 
+        // Commission gardée sur les retraits versés (propriétaires rémunérant VIVI sur commission)
+        $retraits = (int) Retrait::where('statut', StatutRetrait::Paye)->whereBetween('traite_le', [$de, $a])->sum('montant_commission');
+
         return ['commission' => (int) $ligne->commission, 'marketing' => (int) $ligne->marketing, 'agents' => (int) $ligne->agents, 'gestion' => (int) $ligne->gestion,
-            'total' => (int) $ligne->commission + (int) $ligne->marketing + (int) $ligne->gestion];
+            'retraits' => $retraits,
+            'total' => (int) $ligne->commission + (int) $ligne->marketing + (int) $ligne->gestion + $retraits];
     }
 
     protected function getColumns(): int|array
@@ -91,11 +95,11 @@ class ChiffresDuJour extends StatsOverviewWidget
                 ->chart($courbeCommissions)
                 ->color($ceMois >= $moisDernier ? 'success' : 'danger'),
             Stat::make('Part marketing du mois', Montant::fcfa($detailMois['marketing']))
-                ->description('Revient à VIVI (sans agent) · '.Montant::fcfa($detailMois['agents']).' pour les agents · commission '.Montant::fcfa($detailMois['commission']).' · gestion '.Montant::fcfa($detailMois['gestion']))
+                ->description('Revient à VIVI (sans agent) · '.Montant::fcfa($detailMois['agents']).' pour les agents · commission '.Montant::fcfa($detailMois['commission']).' · gestion '.Montant::fcfa($detailMois['gestion']).' · sur retraits '.Montant::fcfa($detailMois['retraits']))
                 ->descriptionIcon(Heroicon::OutlinedMegaphone)
                 ->color('primary'),
             Stat::make('Retraits à valider', $nbRetraits)
-                ->description($nbRetraits ? Montant::fcfa((int) $retraits->sum('montant')).' à payer aux propriétaires' : 'Rien en attente')
+                ->description($nbRetraits ? Montant::fcfa((int) (clone $retraits)->get()->sum(fn ($r) => $r->aVerser())).' à payer aux propriétaires' : 'Rien en attente')
                 ->descriptionIcon($nbRetraits ? Heroicon::OutlinedClock : Heroicon::OutlinedCheckCircle)
                 ->color($nbRetraits ? 'warning' : 'success')
                 ->url(RetraitResource::getUrl('index')),

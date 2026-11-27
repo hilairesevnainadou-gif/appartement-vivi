@@ -17,7 +17,13 @@ class ProprietairesController extends Controller
         $proprietaire = $utilisateur?->hasRole('proprietaire') ? $utilisateur : null;
         $formules = FormuleAbonnement::where('actif', true)->orderBy('ordre')->orderBy('prix_mensuel')->get();
 
+        // Commission sur retrait (règle générale, ou conditions de ce propriétaire) : pas de formule à présenter
+        $modele = app(\App\Services\ModeleEconomique::class);
+        $surCommission = $proprietaire ? $modele->surCommission($proprietaire) : ! \App\Services\ModeleEconomique::formulesProposees();
+
         return view('pages.proprietaires', [
+            'surCommission' => $surCommission,
+            'tauxRetrait' => $proprietaire && $surCommission ? $modele->taux($proprietaire) : (float) Parametres::get('commission_retrait_taux'),
             'formules' => $formules,
             'tarifs' => $formules->mapWithKeys(fn ($f) => [$f->id => $abonnements->tarif($proprietaire, $f)]),
             'promotion' => $abonnements->promotionEnCours(),

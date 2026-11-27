@@ -128,6 +128,8 @@ import java.time.ZoneOffset
 data class Criteres(
     /** « logement » ou « salle » (salles de fêtes et de conférence). */
     val categorie: String = "logement",
+    /** Mots libres : titre, quartier, ville ou adresse. */
+    val q: String? = null,
     val ville: String? = null,
     val date: LocalDate = Fmt.aujourdhui(),
     /** Voyageurs pour un logement ; places au moins pour une salle (null : toutes capacités). */
@@ -229,7 +231,7 @@ class ExplorerViewModel(categorie: String = "logement") : ViewModel() {
         val pos = position
         return appel {
             rechercher(
-                ville = c.ville, date = c.date.toString(), voyageurs = c.voyageurs, formule = c.formule, categorie = c.categorie, budget = null,
+                q = c.q, ville = c.ville, date = c.date.toString(), voyageurs = c.voyageurs, formule = c.formule, categorie = c.categorie, budget = null,
                 tri = if (pos != null && c.tri == "pertinence") "distance" else c.tri,
                 types = c.types.toList(), equipements = c.equipements.toList(), lat = pos?.lat, lng = pos?.lng, page = p,
             )
@@ -273,6 +275,22 @@ fun EcranExplorer(
         if (vm.position == null && Position.autorisee(context) && !localisationCoupee) portee.launch { vm.demarrer(Position.obtenir(context)) }
     }
     val presDeMoi = vm.position != null && c.ville == null
+    var motsSaisis by remember { mutableStateOf(c.q.orEmpty()) }
+    LaunchedEffect(motsSaisis) {
+        kotlinx.coroutines.delay(450)
+        val q = motsSaisis.trim().ifBlank { null }
+        if (q != vm.criteres.q) vm.modifier(vm.criteres.copy(q = q))
+    }
+    // Recherche lancée depuis la barre de l'accueil
+    if (categorie == "logement") LaunchedEffect(Unit) {
+        bj.vivi.app.ui.composants.RechercheDemandee.mots.collect { m ->
+            if (m != null) {
+                bj.vivi.app.ui.composants.RechercheDemandee.prendre()
+                motsSaisis = m
+                vm.modifier(vm.criteres.copy(q = m.ifBlank { null }))
+            }
+        }
+    }
     var filtres by remember { mutableStateOf(false) }
     var choixDate by remember { mutableStateOf(false) }
     var choixVoyageurs by remember { mutableStateOf(false) }
@@ -302,6 +320,13 @@ fun EcranExplorer(
                     color = Vivi.White.copy(alpha = .78f), fontSize = 14.sp,
                 )
                 Spacer(Modifier.height(16.dp))
+
+                // Mots libres : la liste suit la saisie (après une courte pause)
+                bj.vivi.app.ui.composants.BarreRecherche(
+                    texte = motsSaisis, onTexte = { motsSaisis = it },
+                    indication = if (c.salle) "Quartier, ville, nom de la salle…" else "Quartier, ville, nom du logement…",
+                )
+                Spacer(Modifier.height(12.dp))
 
                 // Logements ou salles (salles de fêtes et de conférence), si la plateforme les propose
                 if (basculable && vm.config?.categories?.any { it.valeur == "salle" } == true) {

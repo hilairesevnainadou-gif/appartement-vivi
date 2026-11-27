@@ -77,6 +77,9 @@ class TableauDeBord
             'solde' => $estProprietaire ? $utilisateur->solde() : null,
             'retraits' => $estProprietaire ? $utilisateur->retraits()->latest()->limit(3)->get() : collect(),
             'abonnement' => $estProprietaire ? $utilisateur->abonnementActif()->with('formule')->first() : null,
+            // Sur commission : pas d'abonnement, VIVI garde ce taux sur chaque retrait (null sinon)
+            'commission' => $estProprietaire && ($q = app(ModeleEconomique::class)->quotas($utilisateur))
+                ? $q + ['taux' => app(ModeleEconomique::class)->taux($utilisateur)] : null,
             // Publiés, séparés : logements et salles (quotas distincts de l'abonnement)
             'nombrePublies' => $logements->filter(fn (Logement $l) => $l->statut === StatutLogement::Publie && ! $l->estSalle())->count(),
             'sallesPubliees' => $logements->filter(fn (Logement $l) => $l->statut === StatutLogement::Publie && $l->estSalle())->count(),

@@ -46,7 +46,8 @@ class Abonnements
     /** Essai gratuit possible pour ce propriétaire (et cette formule, si l'administrateur en a fixé une). */
     public function essaiPossible(User $proprietaire, ?FormuleAbonnement $formule = null): bool
     {
-        if (! Parametres::get('essai_actif') || (int) Parametres::get('essai_jours') < 1 || ! $this->estNouveau($proprietaire)) {
+        if (! Parametres::get('essai_actif') || (int) Parametres::get('essai_jours') < 1 || ! $this->estNouveau($proprietaire)
+            || app(ModeleEconomique::class)->surCommission($proprietaire)) {   // sur commission : pas de formule, donc pas d'essai
             return false;
         }
         $imposee = (int) Parametres::get('essai_formule_id');
@@ -94,6 +95,7 @@ class Abonnements
     public function commencerEssai(User $proprietaire, FormuleAbonnement $formule): Abonnement
     {
         abort_unless($formule->actif, 404);
+        $this->refuserSiCommission($proprietaire);
 
         return DB::transaction(function () use ($proprietaire, $formule) {
             User::whereKey($proprietaire->getKey())->lockForUpdate()->first();
@@ -116,6 +118,7 @@ class Abonnements
     public function souscrire(User $proprietaire, FormuleAbonnement $formule, string $passerelle): Paiement
     {
         abort_unless($formule->actif, 404);
+        $this->refuserSiCommission($proprietaire);
         // Quotas séparés : logements d'un côté, salles de l'autre
         $q = app(GestionLogements::class)->quota($proprietaire);
         if ($q['utilises'] > $formule->logements_max) {
@@ -149,6 +152,14 @@ class Abonnements
                 'statut' => StatutPaiement::EnAttente,
             ]);
         });
+    }
+
+    /** Propriétaire sur commission : aucune formule à payer (il paierait deux fois). @throws ReservationImpossible */
+    private function refuserSiCommission(User $proprietaire): void
+    {
+        if (app(ModeleEconomique::class)->surCommission($proprietaire)) {
+            throw new ReservationImpossible('Vous travaillez sur commission : aucun abonnement n’est nécessaire pour publier vos logements.');
+        }
     }
 
     /** Paiement reçu : l'abonnement démarre (ou prolonge l'abonnement en cours). Sans effet si c'est déjà fait. */

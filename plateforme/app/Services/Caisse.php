@@ -21,7 +21,8 @@ use RuntimeException;
  *
  * - Un séjour démarré (QR Code scanné) crédite le solde (lot 4/5).
  * - Une demande de retrait débite le solde immédiatement : le montant ne peut
- *   pas être demandé deux fois.
+ *   pas être demandé deux fois. Propriétaire sur commission (ModeleEconomique) : VIVI garde
+ *   sa part du montant demandé, la caisse verse le net (retraits.montant_net).
  * - La caissière ou l'administrateur valide le retrait en indiquant le mode de
  *   règlement, ou le refuse : le montant est alors recrédité.
  */
@@ -104,6 +105,12 @@ class Caisse
         } catch (\Throwable $e) {
             report($e);
         }
+        // L'administration et la caisse voient qui a versé quoi (et que ce remboursement n'est plus à traiter)
+        \App\Support\Equipe::prevenir('remboursements.gerer',
+            'Remboursement versé : '.\App\Support\Montant::fcfa($r->montant_rembourse),
+            'Réservation '.$r->reference.' : versé par '.$agent->name.' ('.$mode.($reference ? ', réf. '.$reference : '').').',
+            \App\Filament\Resources\Remboursements\RemboursementResource::getUrl('index', panel: 'admin'),
+            'heroicon-o-check-circle', 'success', 'Voir les remboursements');
 
         return $r;
     }
@@ -121,10 +128,16 @@ class Caisse
                 throw new RuntimeException('Solde insuffisant : '.$solde.' FCFA disponibles.');
             }
 
+            // Propriétaire sur commission : la part de VIVI est figée à la demande (un changement de taux ne la modifie plus)
+            $decompte = app(ModeleEconomique::class)->decompte($proprietaire, $montant);
+
             $retrait = Retrait::create([
                 'reference' => $this->nouvelleReference(),
                 'proprietaire_id' => $proprietaire->id,
                 'montant' => $montant,
+                'taux_commission' => $decompte['taux'],
+                'montant_commission' => $decompte['commission'],
+                'montant_net' => $decompte['net'],
                 // Compte de retrait du demandeur, figé au moment de la demande
                 'compte_moyen' => $proprietaire->retrait_moyen,
                 'compte_numero' => $proprietaire->retrait_numero,
@@ -136,12 +149,15 @@ class Caisse
                 'type' => TypeMouvement::DebitRetrait,
                 'montant' => -$montant,
                 'retrait_id' => $retrait->id,
-                'libelle' => 'Retrait '.$retrait->reference,
+                'libelle' => 'Retrait '.$retrait->reference
+                    .($decompte['commission'] > 0 ? ' · versé '.\App\Support\Montant::fcfa($decompte['net']).', commission VIVI '.\App\Support\Montant::fcfa($decompte['commission']) : ''),
             ]);
 
             DB::afterCommit(fn () => \App\Support\Equipe::prevenir('retraits.gerer',
-                'Retrait demandé : '.\App\Support\Montant::fcfa($montant),
-                $proprietaire->name.' demande un retrait ('.$retrait->reference.'). À payer puis valider avec le mode de règlement.',
+                'Retrait demandé : '.\App\Support\Montant::fcfa($decompte['net']).' à verser',
+                $proprietaire->name.' demande un retrait ('.$retrait->reference.')'
+                    .($decompte['commission'] > 0 ? ' : '.\App\Support\Montant::fcfa($montant).' retenus sur son solde, dont '.\App\Support\Montant::fcfa($decompte['commission']).' de commission VIVI ('.self::taux($decompte['taux']).')' : '')
+                    .'. À payer puis valider avec le mode de règlement.',
                 \App\Filament\Resources\Retraits\RetraitResource::getUrl('index', panel: 'admin'),
                 'heroicon-o-banknotes', 'warning', 'Voir les retraits'));
 
@@ -206,6 +222,12 @@ class Caisse
         if ($retrait->statut !== StatutRetrait::EnAttente) {
             throw new RuntimeException('Ce retrait a déjà été traité.');
         }
+    }
+
+    /** 10.0 → « 10 % », 7.5 → « 7,5 % ». */
+    public static function taux(float $taux): string
+    {
+        return rtrim(rtrim(number_format($taux, 2, ',', ''), '0'), ',')."\u{00A0}%";
     }
 
     private function nouvelleReference(): string

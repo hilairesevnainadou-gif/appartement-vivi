@@ -13,6 +13,11 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
+    # VIVI n'est pas un WordPress : les chemins cherchés par les robots d'attaque sont refusés ici,
+    # sans passer par Laravel (pas de charge, pas d'alerte). /.well-known reste ouvert (certificat SSL).
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteRule (^|/)(wp-admin|wp-includes|wp-content|wp-login\.php|wp-config\.php|wp-json|wordpress|xmlrpc\.php|phpmyadmin|pma|adminer(\.php)?|cgi-bin|\.env(\..*)?|\.git|\.svn|\.aws|\.ssh|\.DS_Store|vendor/phpunit|shell\.php|eval-stdin\.php)(/|$) - [F,L,NC]
+
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$

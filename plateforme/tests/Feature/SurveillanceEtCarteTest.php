@@ -38,16 +38,24 @@ class SurveillanceEtCarteTest extends TestCase
             fn (User $u) => $u->assignRole(Role::Administrateur->value));
     }
 
-    public function test_un_robot_qui_cherche_un_fichier_sensible_declenche_une_alerte(): void
+    public function test_un_robot_qui_cherche_un_fichier_sensible_est_note_sans_deranger_l_equipe_puis_bloque(): void
     {
-        $this->get('/.env')->assertNotFound();
+        $this->get('/wp-admin/install.php')->assertNotFound();
         $this->get('/.env')->assertNotFound();
 
         $alerte = AlerteSysteme::where('type', 'chemin_attaque')->sole();   // regroupée : une seule alerte
-        $this->assertSame(AlerteSysteme::AVERTISSEMENT, $alerte->niveau);
+        $this->assertSame(AlerteSysteme::INFO, $alerte->niveau);
         $this->assertSame(2, $alerte->occurrences);
-        $this->assertSame('127.0.0.1', $alerte->source);
-        Notification::assertSentToTimes($this->admin, AlerteSystemeNotification::class, 1);   // pas de nouveau message dans les 30 min
+        $this->assertSame('robots', $alerte->source);
+        Notification::assertNothingSent();   // bruit d'internet : aucun message aux administrateurs
+
+        // Au 5e essai en 10 min, l'adresse est bloquée une heure : même les pages normales sont refusées
+        foreach (['/wp-login.php', '/xmlrpc.php', '/phpmyadmin'] as $chemin) {
+            $this->get($chemin);
+        }
+        $this->get('/')->assertForbidden();
+        $this->travel(61)->minutes();
+        $this->get('/')->assertOk();
     }
 
     public function test_mots_de_passe_faux_en_serie_sur_l_administration(): void

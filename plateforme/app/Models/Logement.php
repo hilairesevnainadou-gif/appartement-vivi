@@ -268,20 +268,22 @@ class Logement extends Model
         return $this->hasMany(Avis::class);
     }
 
-    /** Logements visibles par les clients : publiés et non mis en pause. */
-    /** Logements visibles par les clients : publiés, en ligne, et dont le propriétaire a un abonnement en cours. */
+    /**
+     * Logements visibles par les clients : publiés, en ligne, et dont le propriétaire a un abonnement en cours
+     * ou travaille sur commission (App\Services\ModeleEconomique).
+     */
     public function scopeVisibles(Builder $query): Builder
     {
         return $query->where('statut', StatutLogement::Publie)->where('en_ligne', true)
-            ->whereHas('proprietaire.abonnements', fn (Builder $a) => $a->where('statut', StatutAbonnement::Actif)
-                ->whereDate('debut', '<=', today())->whereDate('fin', '>=', today()));
+            ->whereHas('proprietaire', fn (Builder $u) => \App\Services\ModeleEconomique::filtrerPublication($u));
     }
 
     public function estVisible(): bool
     {
+        $proprietaire = $this->proprietaire()->first();
+
         return $this->statut === StatutLogement::Publie && $this->en_ligne && ! $this->trashed()
-            && $this->proprietaire()->first()?->abonnements()->where('statut', StatutAbonnement::Actif)
-                ->whereDate('debut', '<=', today())->whereDate('fin', '>=', today())->exists();
+            && $proprietaire && app(\App\Services\ModeleEconomique::class)->peutPublier($proprietaire);
     }
 
     public function tarif(Formule $formule): ?Tarif

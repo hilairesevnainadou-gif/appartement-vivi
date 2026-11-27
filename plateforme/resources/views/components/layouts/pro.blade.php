@@ -19,7 +19,8 @@
         ['id' => 'revenus', 'route' => 'pro.revenus', 'label' => 'Revenus', 'icone' => 'bi-cash-stack'],
         ['id' => 'gestionnaires', 'route' => 'pro.gestionnaires', 'label' => 'Gestionnaires', 'icone' => 'bi-person-gear'],
         ['id' => 'agents', 'route' => 'pro.agents', 'label' => 'Agents marketing', 'icone' => 'bi-megaphone'],
-        ['id' => 'abonnement', 'route' => 'pro.abonnement', 'label' => 'Abonnement', 'icone' => 'bi-credit-card-2-front'],
+        // Sur commission sur retrait : pas d'abonnement, la page présente les conditions
+        ['id' => 'abonnement', 'route' => 'pro.abonnement', 'label' => $estProprietaire && app(\App\Services\ModeleEconomique::class)->surCommission($utilisateur) ? 'Conditions VIVI' : 'Abonnement', 'icone' => 'bi-credit-card-2-front'],
     ];
     if (! $estProprietaire) {
         $menu = array_values(array_filter($menu, fn ($m) => ! in_array($m['id'], $reserveProprietaire, true)));
