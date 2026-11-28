@@ -80,6 +80,7 @@ class Parametres extends Page
                     $this->sectionModeleProprietaires(),
                     $this->sectionAbonnements(),
                     $this->sectionContact(),
+                    $this->sectionApplication(),
                 ]),
                 Group::make([
                     $this->sectionReservations(),
@@ -255,7 +256,7 @@ class Parametres extends Page
     private function sectionContact(): Section
     {
         return Section::make('Contact et pages légales')
-            ->description('Affiché dans le pied de page du site, les billets et les pages d’aide. Sans numéro, le lien WhatsApp est masqué.')
+            ->description('Affiché dans le pied de page du site, les billets et les pages d’aide. Champ vide : masqué sur le site (réseaux sociaux compris).')
             ->columns(2)
             ->schema([
                 TextInput::make('whatsapp_numero')
@@ -274,9 +275,53 @@ class Parametres extends Page
                     ->placeholder('Bonjour VIVI, j’ai une question :')
                     ->helperText('Déjà écrit quand le client ouvre WhatsApp ; il peut le modifier.')
                     ->columnSpanFull(),
+                TextInput::make('contact_telephone')
+                    ->label('Téléphone (appels)')
+                    ->tel()
+                    ->placeholder('+229 01 97 00 00 00')
+                    ->regex('/^[+0-9 .\-()]{8,20}$/'),
+                TextInput::make('contact_adresse')
+                    ->label('Adresse de VIVI')
+                    ->maxLength(160)
+                    ->placeholder('Quartier, rue, ville'),
+                Grid::make(['default' => 1, 'md' => 2])->columnSpanFull()
+                    ->schema(collect(ParametresVivi::RESEAUX)->map(fn ($r, $cle) => TextInput::make('reseau_'.$cle)
+                        ->label($r[0])->prefixIcon(Heroicon::OutlinedLink)->maxLength(300)
+                        ->placeholder('https://…')
+                        ->rule('nullable')->rule('regex:#^https?://\S+$#i')
+                        ->validationMessages(['regex' => 'Adresse complète attendue : https://…']))->values()->all()),
                 Toggle::make('confidentialite_publiee')->label('Publier la politique de confidentialité')
                     ->helperText(fn () => new \Illuminate\Support\HtmlString('À activer après relecture. <a href="'.e(route('aide.confidentialite')).'" target="_blank" style="text-decoration:underline">Lire la page</a>'))
                     ->columnSpanFull(),
+            ]);
+    }
+
+    /** Liens de téléchargement de l'application affichés sur le site (accueil et pied de page). */
+    private function sectionApplication(): Section
+    {
+        $lien = fn (string $cle, string $exemple) => TextInput::make($cle)->maxLength(500)->placeholder($exemple)
+            ->rule('regex:#^(https?://|/)\S+$#i')->validationMessages(['regex' => 'Adresse complète (https://…) ou chemin du site (/telechargements/…).']);
+        $apkDepose = is_file(public_path(\App\Support\ApplicationMobile::FICHIER_APK));
+
+        return Section::make('Application mobile')
+            ->description('Boutons « Télécharger » sur l’accueil et dans le pied de page. Lien vide : le bouton affiche « Bientôt disponible ».')
+            ->columns(2)
+            ->schema([
+                Toggle::make('app_afficher')->label('Afficher les boutons de téléchargement sur le site')->live()->columnSpanFull(),
+                $lien('app_apk_lien', 'https://…/vivi.apk')->label('Lien de l’APK Android')
+                    ->helperText($apkDepose
+                        ? 'Vide : le fichier déposé sur le serveur (public/'.\App\Support\ApplicationMobile::FICHIER_APK.') est proposé.'
+                        : 'Ou déposez le fichier sur le serveur dans public/'.\App\Support\ApplicationMobile::FICHIER_APK.' et laissez vide.')
+                    ->visible(fn ($get) => (bool) $get('app_afficher')),
+                TextInput::make('app_apk_version')->label('Version de l’APK')->maxLength(20)->placeholder('1.0.0')
+                    ->helperText('Facultatif, affichée sous les boutons.')
+                    ->visible(fn ($get) => (bool) $get('app_afficher')),
+                $lien('app_play_store', 'https://play.google.com/store/apps/details?id=bj.vivi.app')
+                    ->label('Lien Google Play')->helperText('Vide : « Bientôt disponible ».')
+                    ->visible(fn ($get) => (bool) $get('app_afficher')),
+                $lien('app_app_store', 'https://apps.apple.com/app/…')
+                    ->label('Lien App Store (iPhone)')->helperText('Vide : « Bientôt disponible ».')
+                    ->visible(fn ($get) => (bool) $get('app_afficher')),
             ]);
     }
 

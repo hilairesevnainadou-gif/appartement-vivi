@@ -86,9 +86,9 @@
                                 @endforeach
                             @endif
                         </div>
-                        <div class="d-flex flex-column-reverse flex-sm-row justify-content-between gap-2 mt-3">
-                            <a class="btn btn-ghost" href="{{ route('logement', ['slug' => $l->slug, 'date' => $r->debut->toDateString(), 'formule' => $r->formule->value]) }}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Modifier le créneau</a>
-                            <button class="btn btn-cta btn-lg" id="vers-paiement" type="button">Continuer vers le paiement<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                        <div class="btn-duo justify-content-between mt-3">
+                            <a class="btn btn-ghost" href="{{ route('logement', ['slug' => $l->slug, 'date' => $r->debut->toDateString(), 'formule' => $r->formule->value]) }}">Modifier le créneau</a>
+                            <button class="btn btn-cta btn-lg" id="vers-paiement" type="button">Continuer vers le paiement</button>
                         </div>
                     </section>
 
@@ -158,7 +158,7 @@
                             <button class="btn btn-cta btn-lg w-100 mt-3" type="submit" id="payer" data-chargement="Redirection vers le paiement sécurisé…"><i class="bi bi-lock-fill" aria-hidden="true"></i><span>Payer <span data-total-court>{{ $devis['texte']['a_payer'] }}</span></span></button>
                             <p class="form-text text-center mt-2 mb-0">Paiement traité par FedaPay. VIVI ne conserve aucune donnée bancaire.</p>
                         </div>
-                        <button class="btn btn-ghost mt-3" id="vers-services" type="button"><i class="bi bi-arrow-left" aria-hidden="true"></i>Retour aux services</button>
+                        <button class="btn btn-ghost mt-3" id="vers-services" type="button">Retour aux services</button>
                     </section>
 
                     {{-- Délai dépassé --}}

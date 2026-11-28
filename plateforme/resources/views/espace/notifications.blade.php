@@ -34,7 +34,7 @@
                             </div>
                             <p class="mb-2">{{ $n->data['texte'] ?? '' }}</p>
                             @if (! empty($n->data['lien']))
-                                <a class="btn btn-ghost btn-sm" href="{{ route('notifications.ouvrir', $n->id) }}">{{ $n->data['action'] ?? 'Voir' }}<i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a>
+                                <a class="btn btn-ghost btn-sm" href="{{ route('notifications.ouvrir', $n->id) }}">{{ $n->data['action'] ?? 'Voir' }}</a>
                             @endif
                         </div>
                         @unless ($n->read_at)<span class="liste-notifications__point" aria-label="Non lue"></span>@endunless

@@ -57,7 +57,7 @@
                 <div class="gallery-wrap mb-4">
                     <div class="gallery" data-count="{{ $photos->count() }}" aria-label="Photos {{ $l->mot('du') }}">
                         @foreach ($photos as $i => $photo)
-                            <div class="gallery__item">
+                            <div class="gallery__item" data-visionneuse="{{ $i }}" role="button" tabindex="0" aria-label="Agrandir la photo {{ $i + 1 }}">
                                 <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($photo->chemin) }}"
                                      alt="{{ $photo->legende ?: $l->titre.', photo '.($i + 1).' sur '.$photos->count() }}"
                                      width="{{ $i === 0 ? 1280 : 640 }}" height="{{ $i === 0 ? 960 : 480 }}"
@@ -66,9 +66,12 @@
                         @endforeach
                     </div>
                     @if ($l->photos->count() > 1)
-                        <a class="btn btn-ghost btn-sm gallery__more d-none d-md-inline-flex" href="#" data-bientot="Visionneuse de photos" style="background:#fff"><i class="bi bi-images" aria-hidden="true"></i>Voir toutes les photos</a>
+                        <button class="btn btn-ghost btn-sm gallery__more" type="button" data-visionneuse="0" style="background:#fff">
+                            <i class="bi bi-images" aria-hidden="true"></i><span class="d-none d-md-inline">Voir toutes les photos</span><span class="d-md-none">{{ $l->photos->count() }} photos</span>
+                        </button>
                     @endif
                 </div>
+                <x-visionneuse :photos="$l->photos" :titre="$l->titre" />
             @endif
 
             <ul class="facts mb-4">
@@ -291,7 +294,7 @@
                             <li><i class="bi bi-receipt" aria-hidden="true"></i><span><strong>Commission VIVI :</strong> elle n’est jamais remboursée.</span></li>
                             <li><i class="bi bi-arrow-repeat" aria-hidden="true"></i><span><strong>Un empêchement ?</strong> Vous pouvez reporter votre réservation jusqu’à {{ $delaiReport }} h avant l’arrivée, vers une date libre dans les {{ $fenetreReport }} jours. Passé ce délai, la réservation est considérée comme consommée.</span></li>
                         </ul>
-                        <a href="{{ route('aide.annulation') }}">Lire les conditions complètes</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ route('aide.annulation') }}">Lire les conditions complètes</a>
                     </section>
 
                     <section class="block" aria-labelledby="t-emplacement">

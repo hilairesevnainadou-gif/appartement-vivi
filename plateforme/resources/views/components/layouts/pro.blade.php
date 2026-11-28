@@ -43,6 +43,7 @@
     <link rel="icon" href="{{ asset('images/logo/favicon-32.png') }}" type="image/png" sizes="32x32">
     <link rel="apple-touch-icon" href="{{ asset('images/logo/apple-touch-icon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @include('partials.styles-communs')
     @stack('head')
 </head>
 <body class="pro" data-page="{{ $page }}">

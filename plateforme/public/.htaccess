@@ -1,3 +1,8 @@
+# APK de l’application VIVI (public/telechargements/vivi.apk) : téléchargé comme une application Android
+<IfModule mod_mime.c>
+    AddType application/vnd.android.package-archive .apk
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

@@ -40,6 +40,20 @@ class Parametres
         'whatsapp_numero' => ['vivi.contact.whatsapp', 'string'],
         'whatsapp_message' => ['vivi.contact.whatsapp_message', 'string'],
         'email_contact' => ['vivi.contact.email', 'string'],
+        'contact_adresse' => ['vivi.contact.adresse', 'string'],
+        'contact_telephone' => ['vivi.contact.telephone', 'string'],
+        'reseau_facebook' => ['vivi.contact.reseaux.facebook', 'string'],
+        'reseau_instagram' => ['vivi.contact.reseaux.instagram', 'string'],
+        'reseau_tiktok' => ['vivi.contact.reseaux.tiktok', 'string'],
+        'reseau_linkedin' => ['vivi.contact.reseaux.linkedin', 'string'],
+        'reseau_youtube' => ['vivi.contact.reseaux.youtube', 'string'],
+        'reseau_x' => ['vivi.contact.reseaux.x', 'string'],
+        // Liens de téléchargement de l'application (App\Support\ApplicationMobile)
+        'app_afficher' => ['vivi.application.afficher', 'bool'],
+        'app_apk_lien' => ['vivi.application.apk_lien', 'string'],
+        'app_apk_version' => ['vivi.application.apk_version', 'string'],
+        'app_play_store' => ['vivi.application.play_store', 'string'],
+        'app_app_store' => ['vivi.application.app_store', 'string'],
         'essai_actif' => ['vivi.abonnement_promo.essai_actif', 'bool'],
         'essai_jours' => ['vivi.abonnement_promo.essai_jours', 'int'],
         'essai_formule_id' => ['vivi.abonnement_promo.essai_formule_id', 'int'],
@@ -85,6 +99,26 @@ class Parametres
         $texte = $message ?? self::get('whatsapp_message');
 
         return 'https://wa.me/'.$chiffres.($texte !== '' ? '?text='.rawurlencode($texte) : '');
+    }
+
+    /** Réseaux sociaux renseignés (lien https), dans l'ordre d'affichage : [nom, icône, lien]. */
+    public const RESEAUX = [
+        'facebook' => ['Facebook', 'bi-facebook'], 'instagram' => ['Instagram', 'bi-instagram'], 'tiktok' => ['TikTok', 'bi-tiktok'],
+        'linkedin' => ['LinkedIn', 'bi-linkedin'], 'youtube' => ['YouTube', 'bi-youtube'], 'x' => ['X', 'bi-twitter-x'],
+    ];
+
+    /** @return list<array{nom: string, icone: string, lien: string}> */
+    public static function reseaux(): array
+    {
+        $liste = [];
+        foreach (self::RESEAUX as $cle => [$nom, $icone]) {
+            $lien = trim((string) self::get('reseau_'.$cle));
+            if (preg_match('#^https?://\S+$#i', $lien)) {
+                $liste[] = compact('nom', 'icone', 'lien');
+            }
+        }
+
+        return $liste;
     }
 
     /**

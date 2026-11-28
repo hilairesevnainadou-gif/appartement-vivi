@@ -14,6 +14,7 @@
     <meta name="robots" content="noindex">
     <title>Reçu {{ $r->reference }} · {{ config('app.name') }}</title>
     @vite(['resources/css/app.css'])
+    @include('partials.styles-communs')
     <style>
         body { background: var(--vivi-sand); }
         .recu { max-width: 760px; margin: 32px auto; background: #fff; border: 1px solid var(--vivi-line); border-radius: 16px; padding: 36px; }
@@ -82,7 +83,7 @@
             Montants en francs CFA (XOF).
         </p>
 
-        <div class="d-flex gap-2 no-print mt-4">
+        <div class="btn-duo no-print mt-4">
             <button class="btn btn-primary" type="button" onclick="window.print()"><i class="bi bi-printer" aria-hidden="true"></i>Imprimer ou enregistrer en PDF</button>
             <a class="btn btn-ghost" href="{{ route('reservation.voir', $r->reference) }}">Retour à ma réservation</a>
         </div>

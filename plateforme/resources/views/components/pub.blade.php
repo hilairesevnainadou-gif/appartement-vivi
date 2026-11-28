@@ -25,7 +25,7 @@
                 <span class="pub__mention">Publicité{{ $pub->annonceur ? ' · '.$pub->annonceur : '' }}</span>
                 <strong class="pub__titre">{{ $pub->titre }}</strong>
                 @if ($pub->texte)<span class="pub__description">{{ $pub->texte }}</span>@endif
-                @if ($pub->lien)<span class="pub__bouton btn btn-primary btn-sm">{{ $pub->bouton ?: 'En savoir plus' }}<i class="bi bi-arrow-right" aria-hidden="true"></i></span>@endif
+                @if ($pub->lien)<span class="pub__bouton btn btn-primary btn-sm">{{ $pub->bouton ?: 'En savoir plus' }}</span>@endif
             </span>
         </{{ $balise }}>
     </aside>

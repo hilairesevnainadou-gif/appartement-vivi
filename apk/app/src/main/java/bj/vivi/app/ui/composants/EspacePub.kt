@@ -204,7 +204,13 @@ private fun CarteAnnonce(a: Publicites.Annonce, e: Publicites.Emplacement) {
                 }
                 if (a.lien != null) {
                     Spacer(Modifier.width(12.dp))
-                    Text(a.bouton?.ifBlank { null } ?: "En savoir plus", color = Vivi.Teal700, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelLarge)
+                    // Même forme que les boutons de l’application (turquoise, coins arrondis), sans flèche ; toute la carte est cliquable
+                    Box(
+                        Modifier.background(Vivi.Teal700, androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
+                    ) {
+                        Text(a.bouton?.ifBlank { null } ?: "En savoir plus", color = Vivi.White, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                    }
                 }
             }
         }

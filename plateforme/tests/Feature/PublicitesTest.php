@@ -214,10 +214,10 @@ class PublicitesTest extends TestCase
         Parametres::enregistrer(['villes' => ['Cotonou', 'Ouidah', 'Porto-Novo', 'Parakou']]);
         $this->get('/')->assertOk()->assertSee('Cotonou · Ouidah · Porto-Novo et 1 autre ville</span>', false);
 
-        // Pied de page : huit villes au plus ; la liste « Où ? » garde toutes les villes
+        // Pied de page : cinq villes au plus, puis « Toutes les villes (12) » ; la liste « Où ? » garde toutes les villes
         Parametres::enregistrer(['villes' => array_map(fn ($i) => 'Ville '.$i.'x', range(1, 12))]);
         $this->get('/')->assertOk()->assertSee('et 9 autres villes')->assertSee('<option>Ville 12x</option>', false)
-            ->assertSee('ville=Ville%208x', false)->assertDontSee('ville=Ville%209x', false)->assertSee('Toutes les villes</a>', false);
+            ->assertSee('ville=Ville%205x', false)->assertDontSee('ville=Ville%206x', false)->assertSee('Toutes les villes (12)</a>', false);
     }
 
     public function test_le_site_web_affiche_les_publicites_aux_visiteurs_connectes_ou_non(): void

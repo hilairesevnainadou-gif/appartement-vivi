@@ -32,6 +32,6 @@
         @empty
             <p class="cloche__vide">Aucune notification pour le moment.</p>
         @endforelse
-        <a class="cloche__tout" href="{{ route('notifications') }}">Toutes les notifications<i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a>
+        <a class="cloche__tout" href="{{ route('notifications') }}">Toutes les notifications</a>
     </div>
 </div>

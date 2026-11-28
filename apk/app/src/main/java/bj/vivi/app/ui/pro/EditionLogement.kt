@@ -427,8 +427,8 @@ fun EcranEditionLogement(
                 when {
                     // Création : Précédent / Suivant, puis « Créer le logement » sur le récapitulatif
                     nouveau -> {
-                        if (vm.etape > 0) BoutonContour("Précédent", vm::precedent, icone = Icons.AutoMirrored.Outlined.ArrowBack)
-                        if (vm.etape < derniere) BoutonPrincipal("Suivant", { vm.suivant() }, Modifier.weight(1f), icone = Icons.AutoMirrored.Outlined.ArrowForward)
+                        if (vm.etape > 0) BoutonContour("Précédent", vm::precedent)
+                        if (vm.etape < derniere) BoutonPrincipal("Suivant", { vm.suivant() }, Modifier.weight(1f))
                         else BoutonPrincipal("Créer le logement", { vm.enregistrer(onCree) }, Modifier.weight(1f), enCours = vm.enCours, icone = Icons.Outlined.Check)
                     }
                     // Juste créé, étape photos : terminer

@@ -24,6 +24,20 @@ return [
         'whatsapp' => env('VIVI_WHATSAPP', ''),
         'whatsapp_message' => 'Bonjour VIVI, j’ai une question :',
         'email' => env('VIVI_EMAIL_CONTACT', ''),
+        // Pied de page : adresse, téléphone et réseaux sociaux (vides : masqués)
+        'adresse' => '',
+        'telephone' => '',
+        'reseaux' => ['facebook' => '', 'instagram' => '', 'tiktok' => '', 'linkedin' => '', 'youtube' => '', 'x' => ''],
+    ],
+
+    // Application mobile (paramétrable) : liens affichés sur le site. Lien vide : « Bientôt disponible ».
+    // APK : sans lien saisi, le fichier public/telechargements/vivi.apk est proposé s'il est présent.
+    'application' => [
+        'afficher' => true,
+        'apk_lien' => '',
+        'apk_version' => '',
+        'play_store' => '',
+        'app_store' => '',
     ],
 
     // Promotions sur les abonnements des propriétaires (paramétrables)

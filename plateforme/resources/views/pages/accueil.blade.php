@@ -94,9 +94,9 @@
                     ['bi-megaphone', 'Agents marketing', 'Un agent choisi par le propriétaire partage son lien et touche une commission sur les réservations.', 'En savoir plus', route('proprietaires').'#agents'],
                 ] as [$icone, $nom, $texte, $lien, $url])
                     <div class="col-12 col-md-6 col-xl-3">
-                        <a class="service-tile" href="{{ $url }}">
+                        <a class="service-tile h-100" href="{{ $url }}">
                             <span class="service-tile__icon"><i class="bi {{ $icone }}" aria-hidden="true"></i></span>
-                            <div><h3>{{ $nom }}</h3><p>{{ $texte }}</p><span class="lien">{{ $lien }}<i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></span></div>
+                            <div class="d-flex flex-column align-self-stretch"><h3>{{ $nom }}</h3><p class="mb-3">{{ $texte }}</p><span class="btn btn-primary btn-sm mt-auto align-self-start">{{ $lien }}</span></div>
                         </a>
                     </div>
                 @endforeach
@@ -113,7 +113,7 @@
                         <span class="eyebrow">À la une</span>
                         <h2 id="titre-une">Des logements prêts à vous accueillir</h2>
                     </div>
-                    <a class="btn btn-ghost" href="{{ route('recherche', ['categorie' => 'logement']) }}">Voir tous les logements<i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                    <a class="btn btn-ghost" href="{{ route('recherche', ['categorie' => 'logement']) }}">Voir tous les logements</a>
                 </div>
                 <div class="row g-3 g-lg-4">
                     @foreach ($aLaUne as $l)
@@ -136,7 +136,7 @@
                     <h2 id="titre-salles">Salles de fêtes et de conférence</h2>
                     <p class="text-soft mb-0">Anniversaire, mariage, séminaire, réunion : réservez une salle à l’heure, à la demi-journée ou à la journée.</p>
                 </div>
-                <a class="btn btn-ghost" href="{{ route('recherche', ['categorie' => 'salle']) }}">Voir les salles<i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                <a class="btn btn-ghost" href="{{ route('recherche', ['categorie' => 'salle']) }}">Voir les salles</a>
             </div>
             @if ($salles->isNotEmpty())
                 <div class="row g-3 g-lg-4">
@@ -217,6 +217,28 @@
         </section>
     @endif
 
+    {{-- ===== Application mobile (liens réglés dans les Paramètres) ===== --}}
+    @if (\App\Support\ApplicationMobile::affichee())
+        <section class="section pb-0" id="application" aria-labelledby="titre-application">
+            <div class="container">
+                <div class="app-band">
+                    <div>
+                        <span class="eyebrow">Application mobile</span>
+                        <h2 id="titre-application">VIVI dans votre poche</h2>
+                        <p class="lead-app">Réservez, payez et retrouvez votre QR Code d’entrée depuis votre téléphone, même au dernier moment.</p>
+                        <ul class="app-band__points">
+                            <li><i class="bi bi-bell" aria-hidden="true"></i>Rappels avant votre arrivée</li>
+                            <li><i class="bi bi-qr-code" aria-hidden="true"></i>QR Code d’entrée toujours à portée de main</li>
+                        </ul>
+                    </div>
+                    <div class="app-band__boutons">
+                        <x-application />
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- ===== Propriétaires ===== --}}
     <section class="section" id="proprietaires" aria-labelledby="titre-proprietaires">
         <div class="container">
@@ -234,7 +256,7 @@
                                 <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>La commission VIVI est payée par le client à la réservation, pas par vous.</span></li>
                                 <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Vous accueillez vous-même, avec votre gestionnaire, ou vous laissez VIVI gérer à votre place.</span></li>
                             </ul>
-                            <div class="d-flex flex-wrap gap-2">
+                            <div class="btn-duo">
                                 <a class="btn btn-cta btn-lg" href="{{ route('connexion', ['mode' => 'inscription', 'role' => 'proprietaire']) }}">Publier mon bien</a>
                                 <a class="btn btn-outline-light btn-lg" href="{{ route('proprietaires') }}#formules">{{ $avecFormules ? 'Voir les formules' : 'Voir les conditions' }}</a>
                             </div>

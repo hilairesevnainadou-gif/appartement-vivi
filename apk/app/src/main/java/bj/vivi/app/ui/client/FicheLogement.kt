@@ -216,15 +216,20 @@ private fun Contenu(f: FicheLogement, avis: List<Avis>, proches: List<Logement>,
     // Barre compacte (retour + titre) dès que la photo est passée : le texte ne glisse plus sous la barre d'état
     val seuil = with(LocalDensity.current) { (LocalConfiguration.current.screenWidthDp.dp * .75f - 72.dp).toPx() }
     val compacte by remember { derivedStateOf { defilement.value > seuil } }
+    // Visionneuse plein écran : index de la photo ouverte, null si fermée
+    val photos = l.photos.ifEmpty { listOf(bj.vivi.app.data.Photo(url = l.photo)) }
+    var photoOuverte by remember { mutableStateOf<Int?>(null) }
 
     Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize().verticalScroll(defilement)) {
         // ---------- Photos ----------
         Box {
-            val photos = l.photos.ifEmpty { listOf(bj.vivi.app.data.Photo(url = l.photo)) }
             val pages = rememberPagerState { photos.size }
             HorizontalPager(pages, Modifier.fillMaxWidth().aspectRatio(4f / 3f)) { i ->
-                PhotoLogement(photos[i].url, photos[i].legende ?: "Photo ${i + 1} de ${l.titre}", Modifier.fillMaxSize())
+                PhotoLogement(
+                    photos[i].url, photos[i].legende ?: "Photo ${i + 1} de ${l.titre}",
+                    Modifier.fillMaxSize().clickable(enabled = photos[i].url != null, onClickLabel = "Agrandir la photo") { photoOuverte = i },
+                )
             }
             // Dégradé discret pour garder lisibles l'heure et les icônes de la barre d'état
             Box(Modifier.fillMaxWidth().height(96.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = .35f), Color.Transparent))))
@@ -396,6 +401,11 @@ private fun Contenu(f: FicheLogement, avis: List<Avis>, proches: List<Logement>,
             }
         }
     }
+    }
+
+    // ---------- Visionneuse plein écran ----------
+    photoOuverte?.let { i ->
+        bj.vivi.app.ui.composants.Visionneuse(photos.filter { it.url != null }, i, l.titre) { photoOuverte = null }
     }
 }
 

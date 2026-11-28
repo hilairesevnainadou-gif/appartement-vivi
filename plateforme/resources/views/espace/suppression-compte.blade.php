@@ -50,7 +50,7 @@
                     <form method="POST" action="{{ route('profil.suppression.code') }}">
                         @csrf
                         <p>Un code sera envoyé {{ $destination['canal'] === 'sms' ? 'par SMS au' : 'à' }} <strong>{{ $destination['lisible'] }}</strong>.</p>
-                        <div class="d-flex flex-wrap gap-2">
+                        <div class="btn-duo">
                             <button class="btn btn-outline-danger" type="submit" data-chargement="Envoi du code…">Recevoir un code</button>
                             <a class="btn btn-ghost" href="{{ route('profil') }}">Garder mon compte</a>
                         </div>

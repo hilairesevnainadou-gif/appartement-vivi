@@ -195,13 +195,61 @@
     </section>
 
     {{-- ===== Questions ===== --}}
+    @push('head')
+        <style>
+            /* Questions fréquentes : intro et contact à gauche (fixes au défilement), questions à droite ; empilés sur téléphone */
+            .faq-intro p.lead-faq{color:var(--vivi-muted);font-size:1.0625rem;margin:.6rem 0 0}
+            .faq-aide{margin-top:24px;padding:20px;border:1px solid var(--vivi-line);border-radius:var(--vivi-radius);background:var(--vivi-teal-50)}
+            .faq-aide h3{font-size:1.0625rem;margin:0 0 .25rem}
+            .faq-aide p{margin:0 0 .9rem;color:var(--vivi-body);font-size:.95rem}
+            .faq-aide .btn{width:100%;justify-content:center}
+            .faq-aide .btn + .btn{margin-top:8px}
+            .faq-aide .btn-ghost{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            .faq-cta{margin-top:16px}
+            .faq-cta .btn{width:100%}
+            .faq--pro details{padding:0 20px}
+            .faq--pro details[open]{border-color:var(--vivi-teal-700);box-shadow:var(--vivi-shadow)}
+            .faq--pro summary{padding:18px 32px 18px 0}
+            .faq--pro details p{margin:0 0 18px}
+            /* Téléphone : titre, questions, puis contact. Ordinateur : titre et contact à gauche, questions à droite. */
+            .faq-grille{display:grid;gap:24px;grid-template-areas:"intro" "questions" "aide"}
+            .faq-grille .faq-intro{grid-area:intro}.faq-grille .faq{grid-area:questions}.faq-grille .faq-cote{grid-area:aide}
+            .faq-cote .faq-aide{margin-top:0}
+            @media (min-width:992px){
+                .faq-grille{grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:48px;row-gap:0;grid-template-areas:"intro questions" "aide questions";grid-template-rows:auto 1fr}
+                .faq-cote{padding-top:24px;align-self:start;position:sticky;top:calc(var(--vivi-header-h, 72px) + 24px)}
+            }
+        </style>
+    @endpush
     <section class="section" aria-labelledby="titre-questions">
-        <div class="container" style="max-width:860px">
-            <div class="section-head">
-                <span class="eyebrow">Questions fréquentes</span>
-                <h2 id="titre-questions">Bon à savoir</h2>
-            </div>
-            <div class="faq">
+        <div class="container">
+            <div class="faq-grille">
+                    <div class="faq-intro">
+                        <span class="eyebrow">Questions fréquentes</span>
+                        <h2 id="titre-questions">Bon à savoir</h2>
+                        <p class="lead-faq">Commission, retraits, formules et gestion : l’essentiel avant de publier votre bien.</p>
+                    </div>
+                    <div class="faq-cote">
+                        @if ($whatsapp || $emailContact)
+                            <div class="faq-aide">
+                                <h3>Une autre question ?</h3>
+                                <p>Le service client VIVI vous répond{{ $whatsapp ? ' sur WhatsApp' : '' }}{{ $whatsapp && $emailContact ? ' ou' : '' }}{{ $emailContact ? ' par email' : '' }}.</p>
+                                @if ($whatsapp)
+                                    <a class="btn btn-whatsapp" href="{{ $whatsapp }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp" aria-hidden="true"></i>Nous écrire sur WhatsApp</a>
+                                @endif
+                                @if ($emailContact)
+                                    <a class="btn btn-ghost" href="mailto:{{ $emailContact }}" title="{{ $emailContact }}"><i class="bi bi-envelope" aria-hidden="true"></i>Nous écrire par email</a>
+                                @endif
+                            </div>
+                        @endif
+
+                        @guest
+                            <div class="faq-cta">
+                                <a class="btn btn-cta btn-lg" href="{{ $inscription }}">Créer mon compte propriétaire</a>
+                            </div>
+                        @endguest
+                    </div>
+            <div class="faq faq--pro">
                 <details open>
                     <summary>Est-ce que VIVI prend une commission sur mes revenus ?</summary>
                     @if ($surCommission)
@@ -237,14 +285,7 @@
                     <p>{{ $surCommission ? 'Vous' : 'Selon votre formule, vous' }} confiez l’accueil à un gestionnaire : il voit les arrivées et le calendrier des logements et des salles confiés et scanne les QR Codes, sans accès à votre solde ni à vos tarifs. Vous pouvez aussi <a href="#gestion">confier la gestion à VIVI</a>.</p>
                 </details>
             </div>
-
-            @include('pages.aide._contact')
-
-            @guest
-                <div class="text-center mt-4">
-                    <a class="btn btn-cta btn-lg" href="{{ $inscription }}">Créer mon compte propriétaire</a>
-                </div>
-            @endguest
+            </div>
         </div>
     </section>
 </x-layouts.public>
